@@ -1,0 +1,14 @@
+___
+gpu
+
+	GreenWithEnvy Configuration
+
+Add to startup through gnome-tweaks
+To hide to topbar on boot, add to end of command: --hide-window
+
+	GPU Power Limit (substitute for undervolting)
+https://wiki.archlinux.org/title/NVIDIA/Tips_and_tricks#Custom_TDP_Limit
+https://wiki.archlinux.org/title/Systemd#Using_units
+
+Import nvidia-tdp services to /etc/systemd/system/
+and enable

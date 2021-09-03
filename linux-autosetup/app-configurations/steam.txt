@@ -1,0 +1,22 @@
+_____
+steam
+
+	Launch Options For Games
+https://youtu.be/xvrft9ULvho
+https://christitus.com/ultimate-linux-gaming-guide/
+
+Start Without Game Launcher (boot straight into game):
+	DO=(%command%); "${DO[@]/%FalloutNVLauncher.exe/FalloutNV.exe}"
+
+AMD GPU Optimizations:
+	mesa_glthread=true (mileage varies)
+	Enable ACO (command can be put in steam launch options):
+		sudo vim /etc/environment
+		RADV_PERFTEST=aco
+
+Run GameMode:
+	gamemoderun
+Enable AMD Fidelity Super Resolution:
+	WINE_FULLSCREEN_FSR=1
+
+Add to end of environment variables: %command%

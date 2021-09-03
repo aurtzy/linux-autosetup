@@ -1,0 +1,73 @@
+// Compiled list of useful software and libraries to choose from.
+
+********FIRST-STEP INSTALLATIONS
+clamtk
+ffmpeg
+gnome:
+ - gnome-extensions
+ - gnome-tweaks
+ - file-roller
+synaptic
+wayland display manager
+    - https://www.reddit.com/r/archlinux/comments/oq1cqg/how_to_get_nvidia_wayland_session_under_gnome/
+wine-stable
+	- https://www.winehq.org/
+winetricks
+xanmod kernel (debian-only)
+	- https://xanmod.org/
+
+________AUDIO & VIDEO
+carla - configuration/pipewire.txt -
+easyeffects (or pulseeffects)
+	- github wwmm/easyeffects
+ffmpeg
+jconvolver - configuration/pipewire.txt -
+pavucontrol
+pipewire - configuration/pipewire.txt -
+quodlibet (music player)
+____PLUGINS
+calf-plugins
+lsp-plugins
+
+________COMMUNICATION
+discord (flatpak)
+thunderbird - ../../thunderbird -
+
+________DEVVING
+eclipse
+github-desktop
+intellij
+openjdk-16-jdk
+
+________GAMING
+gamemode (by feral)
+lutris
+	- https://christitus.com/ultimate-linux-gaming-guide/
+steam - configuration/steam.txt -
+
+________HARDWARE
+g910 gkey support - configuration/g910-gkeys.txt -
+	- github JSubelj/g910-gkey-macro-support 
+	- may require: python3-setuptools
+greenwithenvy - configuration/gpu.txt -
+piper
+xbindkeys
+
+________MEDIA CREATION
+blender
+flowblade
+gifski
+	- https://gif.ski
+kdenlive
+krita
+losslesscut
+obs-studio
+
+________USEFUL UTILITIES
+youtube-dl-gui
+	- github jely2002/youtube-dl-gui
+
+
+
+________FIXES FOR SOFTWARE
+
