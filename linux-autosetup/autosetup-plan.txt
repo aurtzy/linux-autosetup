@@ -1,0 +1,17 @@
+Running with -h shows help stuff
+
+
+Require running with $1 parameter = 'backup' or 'install'
+
+backup:
+	choose between applications backup, recovery backup, or full backup
+		applications backup = /setup/applications backups
+			applications and their source file dirs are specified in script array
+		recovery backup = archive & compress important files
+			how to decide how many locations, naming scheme, etc?
+		full backup = do applications and recovery backup
+
+install:
+	choose between applications, recovery, or full install
+
+At end of script, depending on environment variables or something, display misc stuff (e.g. if user is on gnome, display txt with gnome extension reccs)
