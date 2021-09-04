@@ -1,0 +1,33 @@
+# Class named "app" for bash object
+
+# Default fields that used if not provided in config.
+# name field is automatically initialized.
+declare installCommand
+declare backupDirs
+
+# fields
+declare -Ag app_fields
+
+# Handles getting/setting fields.
+app.field() {
+    if [ "$2" == "=" ]
+    then
+        app_fields[$1]=$3
+    else
+        echo ${app_fields[$1]}
+    fi
+}
+
+# app class constructor
+# Params: $1 = 
+app.constructor() {
+    app.field name = app
+    
+    echo "app constructed"
+}
+
+app.name() {
+    app.field name $1 $2
+}
+
+

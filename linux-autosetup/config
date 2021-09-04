@@ -1,0 +1,6 @@
+# where application backups go
+APP_BACKUP_DIR=./app-backups
+
+# where recovery files go
+REC_BACKUP_DIR=./recovery
+
