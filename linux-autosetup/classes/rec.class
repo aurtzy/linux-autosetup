@@ -9,24 +9,24 @@ declare -Ag rec_fields
 
 # Handles getting/setting fields.
 rec.field() {
-    if [ "$2" == "=" ]
-    then
-        rec_fields[$1]=$3
-    else
-        echo ${rec_fields[$1]}
-    fi
+	if [ "$2" == "=" ]
+	then
+		rec_fields[$1]=$3
+	else
+		echo ${rec_fields[$1]}
+	fi
 }
 
 # rec class constructor
 # Params: $1 = 
 rec.constructor() {
-    rec.field name = rec
-    
-    echo "rec constructed"
+	rec.field name = rec
+	
+	echo "rec constructed"
 }
 
 rec.fileName() {
-    rec.field fileName $1 $2
+	rec.field fileName $1 $2
 }
 
 
