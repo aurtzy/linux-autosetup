@@ -4,3 +4,10 @@ APP_BACKUP_DIR=./app-backups
 # where recovery files go
 REC_BACKUP_DIR=./recovery
 
+# default install command used if one is not specified for app
+# "name" (including quotes) will be substituted with app name.
+# On the off-chance '"name"' is actually needed in the command,
+# you'll have to use a custom command for that.
+defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
+
+

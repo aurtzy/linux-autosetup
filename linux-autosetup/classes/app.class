@@ -2,7 +2,6 @@
 
 # fields
 declare -Ag app_fields
-declare -A app_backupFileDirs=()
 
 # Handles getting/setting fields.
 app.field() {
@@ -15,13 +14,26 @@ app.field() {
 }
 
 # app class constructor
-# Params: $1 = 
+# Params: $1 = installCommand $2 = backupSources
 app.constructor() {
 	app.field name = app
 	
-	echo "app constructed"
+	# Command that is used to install app
+	if [[ $(isEmptyString $1) ]]; then
+		app.field installCommand = "${defaultInstallCommand//'"name"'/app}"
+	else
+		app.field installCommand = "$1"
+	fi
+
+	# Directories to files that user wants to back up.
+	# Structured as the following:
+	# 'dir/to/file/sourcefile... dir/to/other/file/sourcefile'
+	app.field backupSources = ''
+	
+	echo "app: constructed."
 }
 
+# Getter/setter methods
 app.name() {
 	app.field name $1 $2
 }
@@ -30,8 +42,14 @@ app.installCommand() {
 	app.field installCommand $1 $2
 }
 
-app.backupFileDirs() {
-	app.field backupFileDirs $1 $2
+app.backupSources() {
+	app.field backupSources $1 $2
+}
+
+# Install app on call
+app.install() {
+	echo "app: Installing..."
+	$(app.field installCommand)
 }
 
 
