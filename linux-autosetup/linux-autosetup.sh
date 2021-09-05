@@ -2,8 +2,8 @@
 
 # Default variable fallbacks
 
-# Working directory that script resets to after every install script
-# in case installCommand uses cd
+# Script working directory
+# If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR=$(pwd)
 # Where application backups go
 declare APP_BACKUP_DIR=./app-backups
