@@ -20,11 +20,11 @@ app.field() {
 # app class constructor
 # Params: $1 = installCommand $2 = backupSources
 app.constructor() {
-	app.field name = app
+	app.field name = "$(convertToHyphen "app")"
 	
 	# Command that is used to install app
 	if [[ $(isEmptyString $1) ]]; then
-		app.field installCommand = "${defaultInstallCommand//'"name"'/app}"
+		app.field installCommand = "${defaultInstallCommand//'"name"'/$(app.field name)}"
 	else
 		app.field installCommand = "$1"
 	fi
@@ -34,7 +34,7 @@ app.constructor() {
 	# 'dir/to/file/sourcefile... dir/to/other/file/sourcefile'
 	app.field backupSources = ''
 	
-	echo "app: constructed."
+	echo "$(app.field name): constructed."
 }
 
 # Getter/setter methods
@@ -53,9 +53,13 @@ app.backupSources() {
 # Install app on call
 # Also reset to original dir in case command used cd
 app.install() {
-	echo "app: Installing..."
+	echo "$(app.field name): Installing..."
 	$(app.field installCommand)
 	cd $SCRIPT_WORKING_DIR
 }
 
+# Back up sources
+app.backup() {
+	echo
+}
 

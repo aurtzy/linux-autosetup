@@ -40,7 +40,15 @@ apps_shouldSkipLine() {
 		echo ''
 	fi
 }
+# String converter methods to allow functionality with Bash
+# Convert from/to '-' & '1_1'
+convertFromHyphen() {
+	echo ${1//-/1_1}
+}
 
+convertToHyphen() {
+	echo ${1//1_1/-}
+}
 # Declare apps associative array
 # Stores applications as keys
 # Stores any params "app strings" as data
@@ -68,7 +76,8 @@ while IFS= read -r line; do
 	fi
 	
 	if [ $section = 'APPLICATIONS' ]; then
-		apps[$(cut -d ' ' -f 1 <<< "$line ")]=$(cut -d ' ' -f 2- <<< "$line ")
+		echo $line
+		apps[$(convertFromHyphen "$(cut -d ' ' -f 1 <<< "$line ")")]=$(cut -d ' ' -f 2- <<< "$line ")
 	elif [ $section = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup=${line:6}
@@ -78,10 +87,13 @@ while IFS= read -r line; do
 			continue
 		fi
 	fi
-	 
+	
 done < "apps.conf"
 
+# Initialize app objects from apps array
+for app in "${!apps[@]}"; do
+	app $app
+	$app.constructor
+done
 
-app java
-java.constructor
 
