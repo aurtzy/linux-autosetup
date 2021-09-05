@@ -12,8 +12,9 @@ declare REC_BACKUP_DIR=./recovery
 # Default install command used if one is not specified for app
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
 
-# Global functions
 
+# Used in classes to determine
+# if a function argument is "empty"
 isEmptyString() {
 	if [[ $1 == ' ' || $1 == '|' || $1 == '-' ]]; then
 		echo 'true'
@@ -22,13 +23,63 @@ isEmptyString() {
 	fi
 }
 
-# source app and rec class files
+# Source app and rec class files
 . classes/app.h
 . classes/rec.h
 
-# Import and source config files
-# . applist
-. config
+# Import options.conf
+. options.conf
+
+
+# Used to determine if lines
+# in apps files should be skipped.
+apps_shouldSkipLine() {
+	if [[ $1 = '' || ${1:0:1} = '#' ]]; then
+		echo 'true'
+	else
+		echo ''
+	fi
+}
+
+# Declare apps associative array
+# Stores applications as keys
+# Stores any params "app strings" as data
+declare -Ag apps
+# Declare appGroups associative array
+# Stores app groups as keys
+# Stores apps as data separated by spaces
+declare -Ag appGroups
+# Import apps.conf
+# Skips lines that do not need to be parsed
+# Detects and assigns apps to groups
+while IFS= read -r line; do
+	if [ $(apps_shouldSkipLine "$line") ]; then
+		continue
+	fi
+	
+	if [ "$line" = 'APPLICATIONS' ]; then
+		echo "$line is APPLICATIONS."
+		section='APPLICATIONS'
+		continue
+	elif [ "$line" = 'APPLICATION_GROUPS' ]; then
+		echo "$line is APPLICATION_GROUPS."
+		section='APPLICATION_GROUPS'
+		continue
+	fi
+	
+	if [ $section = 'APPLICATIONS' ]; then
+		apps[$(cut -d ' ' -f 1 <<< "$line ")]=$(cut -d ' ' -f 2- <<< "$line ")
+	elif [ $section = 'APPLICATION_GROUPS' ]; then
+		if [ ${line:0:6} = 'group=' ]; then
+			appGroup=${line:6}
+			continue
+		else
+			appGroups[$appGroup]+="$line "
+			continue
+		fi
+	fi
+	 
+done < "apps.conf"
 
 
 app java
