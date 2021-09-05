@@ -23,18 +23,17 @@ app.constructor() {
 	app.field name = "$(convertToHyphen "app")"
 	
 	# Command that is used to install app
-	if [[ $(isEmptyString $1) ]]; then
-		app.field installCommand = "${defaultInstallCommand//'"name"'/$(app.field name)}"
+	if [ ! "$1" ]; then
+		app.installCommand = "${defaultInstallCommand//'"name"'/$(app.name)}"
 	else
-		app.field installCommand = "$1"
+		app.installCommand = "$1"
 	fi
 
 	# Directories to files that user wants to back up.
 	# Structured as the following:
-	# 'dir/to/file/sourcefile... dir/to/other/file/sourcefile'
-	app.field backupSources = ''
-	
-	echo "$(app.field name): constructed."
+	# 'dir/to/file/sourcefile|-|...|-|dir/to/other/file/sourcefile'
+	app.backupSources = $2
+	echo "$(app.name): Built successfully."
 }
 
 # Getter/setter methods
@@ -46,15 +45,49 @@ app.installCommand() {
 	app.field installCommand $1 $2
 }
 
+# Echo extracted string from backup source string.
+# Takes $1 = string, $2 = index
+extractBackupSource() {
+	declare delim='|-|'
+	declare substring=$1
+	declare -i int=$2
+	for (( i=1; i<$int; i++ ))
+	do
+		oldString=$substring
+		substring=${substring##*"$delim"}
+		if [[ $oldString = $substring ]]; then
+			substring=''
+			return
+		fi
+	done
+	
+	substring=${substring%"$delim"*}
+	echo $substring
+}
 app.backupSources() {
+#	while
+#	declare -i i+=1
+#	do
+#		backupSource=$(extractBackupSource "$2" $i)
+#		if [ $backupSource ]; then
+#			if [[ -d $backupSource || -f $backupSource ]]; then 
+#				echo "$(app.name): $backupSource found!"
+#			else
+#				echo "$(app.name): $backupSource was not found! Exiting script..."
+#				exit
+#			fi
+#		else
+#			break
+#		fi
+#	done
 	app.field backupSources $1 $2
 }
 
 # Install app on call
 # Also reset to original dir in case command used cd
 app.install() {
-	echo "$(app.field name): Installing..."
-	$(app.field installCommand)
+	echo "$(app.name): Installing..."
+	$(app.installCommand)
 	cd $SCRIPT_WORKING_DIR
 }
 

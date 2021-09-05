@@ -12,17 +12,6 @@ declare REC_BACKUP_DIR=./recovery
 # Default install command used if one is not specified for app
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
 
-
-# Used in classes to determine
-# if a function argument is "empty"
-isEmptyString() {
-	if [[ $1 == ' ' || $1 == '|' || $1 == '-' ]]; then
-		echo 'true'
-	else
-		echo ''
-	fi
-}
-
 # Source app and rec class files
 . classes/app.h
 . classes/rec.h
@@ -49,11 +38,10 @@ convertFromHyphen() {
 convertToHyphen() {
 	echo ${1//1_1/-}
 }
-# Declare apps associative array
+
 # Stores applications as keys
 # Stores any params "app strings" as data
 declare -Ag apps
-# Declare appGroups associative array
 # Stores app groups as keys
 # Stores apps as data separated by spaces
 declare -Ag appGroups
@@ -66,17 +54,14 @@ while IFS= read -r line; do
 	fi
 	
 	if [ "$line" = 'APPLICATIONS' ]; then
-		echo "$line is APPLICATIONS."
 		section='APPLICATIONS'
 		continue
 	elif [ "$line" = 'APPLICATION_GROUPS' ]; then
-		echo "$line is APPLICATION_GROUPS."
 		section='APPLICATION_GROUPS'
 		continue
 	fi
 	
 	if [ $section = 'APPLICATIONS' ]; then
-		echo $line
 		apps[$(convertFromHyphen "$(cut -d ' ' -f 1 <<< "$line ")")]=$(cut -d ' ' -f 2- <<< "$line ")
 	elif [ $section = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
@@ -90,10 +75,37 @@ while IFS= read -r line; do
 	
 done < "apps.conf"
 
+# Split app string into parameters for constructor
+# $1 = app string, $2 = field
+splitAppString() {
+	declare appString=$1
+	if [ "$appString" = '' ]; then
+		return
+	fi
+	declare -i appStringField=$2
+	if [ $2 -eq 1 ]; then
+		appString=${appString#*'"'}
+		appString=${appString%%'"'*}
+	elif [ $2 -eq 2 ]; then
+		appString=${appString%'"'*}
+		appString=${appString##*'"'}
+	else
+		echo "Error: splitAppString() took an invalid field #. Exiting..."
+		exit
+	fi
+	echo $appString
+}
+
 # Initialize app objects from apps array
 for app in "${!apps[@]}"; do
 	app $app
-	$app.constructor
+	appInstallCommand="$(splitAppString "${apps[$app]}" 1)"
+	appBackupSources="$(splitAppString "${apps[$app]}" 2)"
+	if [ "$appInstallCommand" = "$appBackupSources" ]; then
+		appBackupSources=''
+	fi
+	$app.constructor "$appInstallCommand" "$appBackupSources"
 done
+
 
 
