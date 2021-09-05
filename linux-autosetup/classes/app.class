@@ -51,9 +51,11 @@ app.backupSources() {
 }
 
 # Install app on call
+# Also reset to original dir in case command used cd
 app.install() {
 	echo "app: Installing..."
 	$(app.field installCommand)
+	cd $SCRIPT_WORKING_DIR
 }
 
 

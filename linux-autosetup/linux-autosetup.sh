@@ -1,17 +1,21 @@
 #!/bin/bash
 
-# Default fallback variables if config goes wrong somehow
+# Default variable fallbacks
 
-# where application backups go
+# Working directory that script resets to after every install script
+# in case installCommand uses cd
+declare SCRIPT_WORKING_DIR=$(pwd)
+# Where application backups go
 declare APP_BACKUP_DIR=./app-backups
-# where recovery files go
+# Where recovery files go
 declare REC_BACKUP_DIR=./recovery
-# default install command used if one is not specified for app
+# Default install command used if one is not specified for app
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
 
-# Initial functions
+# Global functions
+
 isEmptyString() {
-	if [[ $1 == '' || $1 == '|' || $1 == '-' ]]; then
+	if [[ $1 == ' ' || $1 == '|' || $1 == '-' ]]; then
 		echo 'true'
 	else
 		echo ''
