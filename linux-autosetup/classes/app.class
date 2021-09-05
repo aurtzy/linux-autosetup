@@ -65,6 +65,8 @@ extractBackupSource() {
 	echo $substring
 }
 app.backupSources() {
+	# This code is not helpful here. Implement this where backing-up code
+	# will be in main sh
 #	while
 #	declare -i i+=1
 #	do
