@@ -1,0 +1,58 @@
+# Credit to Maxim Norin https://github.com/mnorin
+# for OOP-based code from https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
+# Modified by Aurtzy
+
+# Class named "appGroup" for bash object
+
+# fields
+declare -Ag appGroup_fields
+
+# Handles getting/setting fields.
+appGroup.field() {
+	if [ "$2" == "=" ]
+	then
+		appGroup_fields[$1]=$3
+	else
+		echo ${appGroup_fields[$1]}
+	fi
+}
+
+# appGroup class constructor
+# Params: none
+appGroup.constructor() {
+	appGroup.name = "$(convertToHyphens "appGroup")"
+	appGroup.apps = ''
+}
+
+# Getter/setter methods
+appGroup.name() {
+	appGroup.field name "$1" "$2"
+}
+appGroup.apps() {
+	appGroup.field apps "$1" "$2"
+}
+
+# Add app to apps field
+appGroup.add() {
+	if [ "$appGroup.apps" = '' ]; then
+		appGroup.apps = "$1"
+	else
+		appGroup.apps = "$(appGroup.apps) $1"
+	fi
+}
+
+# Install appGroup on call
+# Also reset to original dir in case command used cd
+appGroup.install() {
+	echo "$(appGroup.name): Installing from app group..."
+	for app in $(convertHyphens "$(appGroup.apps)")
+	do
+		$app.install
+	done
+}
+
+# Back up sources
+appGroup.backup() {
+	echo
+}
+

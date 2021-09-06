@@ -16,6 +16,7 @@ declare hyphenConversion='1_1'
 # Source app and rec class files
 . classes/app.h
 . classes/rec.h
+. classes/appGroup.h
 
 # Import options.conf
 . options.conf
@@ -85,20 +86,21 @@ while IFS= read -r line; do
 	
 	if [ $section = 'APPLICATIONS' ]; then
 		app=$(convertHyphens "$(cut -d ' ' -f 1 <<< "$line ")")
-		apps[$app]=$(cut -d ' ' -f 2- <<< "$line ")
-		appInstallCommand="$(splitAppString "${apps[$app]}" 1)"
-		appBackupSources="$(splitAppString "${apps[$app]}" 2)"
+		apps+=($app)
+		appstring=$(cut -d ' ' -f 2- <<< "$line ")
+		appInstallCommand="$(splitAppString "$appstring" 1)"
+		appBackupSources="$(splitAppString "$appstring" 2)"
 		if [ "$appInstallCommand" = "$appBackupSources" ]; then
-		appBackupSources=''
+			appBackupSources=''
 		fi
 		app $app "$appInstallCommand" "$appBackupSources"
 	elif [ $section = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
-			appGroup=${line:6}
-			continue
+			appGroup=$(convertHyphens "${line:6}")
+			appGroups+=("$appGroup")
+			appGroup $appGroup
 		else
-			appGroups[$appGroup]+="$line "
-			continue
+			$appGroup.add "$line"
 		fi
 	fi
 	
