@@ -59,6 +59,25 @@ isValidDir() {
 	return
 }
 
+# Make sure directory is valid; otherwise exit script
+requireExistingDir() {
+	
+	if [ ! $(isValidDir "$1") ]; then
+		echo "Error. $1 does not exist."
+		echo "Do you want this directory to be created for you?" 
+		echo "Type 'yes' to confirm, otherwise, script will exit."
+		
+		echo -n ": "
+		read userIn
+		if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
+			echo "#implement Creating directory to: $1"
+		else
+			echo "Exiting..."
+			exit
+		fi
+	fi
+}
+
 # Functions used to construct new objects
 # Param $1 = name, additional params come after
 app() {
@@ -127,7 +146,9 @@ appGroups() {
 
 # Import options.conf
 . options.conf
+requireExistingDir $APP_BACKUP_DIR
 echo "App backup directory set to: $APP_BACKUP_DIR"
+requireExistingDir $REC_BACKUP_DIR
 echo "Recovery backup directory set to: $REC_BACKUP_DIR"
 
 # Import apps.conf
