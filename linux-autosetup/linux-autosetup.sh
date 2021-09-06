@@ -22,15 +22,29 @@ declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
 declare stringSeparator='|-|'
 
-# Source app and rec class files
-. classes/app.h
-. classes/rec.h
-. classes/appGroup.h
-
 # Import options.conf
 . options.conf
 echo "App backup directory set to: $APP_BACKUP_DIR"
 echo "Recovery backup directory set to: $REC_BACKUP_DIR"
+
+####################
+# GLOBAL FUNCTIONS #
+####################
+
+# Functions used to construct new objects
+# Param $1 = name, additional params come after
+app() {
+	. <(sed "s/app/$1/g" classes/app.class)
+	$1.constructor "$2" "$3"
+}
+appGroup() {
+	. <(sed "s/appGroup/$1/g" classes/appGroup.class)
+	$1.constructor
+}
+rec() {
+	. <(sed "s/rec/$1/g" classes/rec.class)
+	$1.constructor "$2" "$3"
+}
 
 # Used to determine if lines
 # in apps files should be skipped.
