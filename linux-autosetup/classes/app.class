@@ -71,7 +71,7 @@ extractBackupSource() {
 app.install() {
 	echo "$(app.name): Installing..."
 	$(app.installCommand)
-	cd $SCRIPT_WORKING_DIR
+	cd "$SCRIPT_WORKING_DIR"
 }
 
 # Back up sources
