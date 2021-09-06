@@ -29,6 +29,8 @@ declare DUMP_DIR="./old/backups"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
+# Apps config file
+declare APPS_CONFIG_FILE="./apps.conf"
 
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
@@ -165,7 +167,7 @@ while IFS= read -r line; do
 		fi
 	fi
 	
-done < "apps.conf"
+done < "$APPS_CONFIG_FILE"
 
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
