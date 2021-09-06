@@ -20,11 +20,6 @@ declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" 
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
-
-# Import options.conf
-. options.conf
-echo "App backup directory set to: $APP_BACKUP_DIR"
-echo "Recovery backup directory set to: $REC_BACKUP_DIR"
 declare stringSeparator=';;'
 
 ####################
@@ -104,8 +99,19 @@ appGroups() {
 	done
 	echo
 }
+
+#####################
+# END OF FUNCTIONS  #
+# SCRIPT BODY BELOW #
+#####################
+
+# Import options.conf
+. options.conf
+echo "App backup directory set to: $APP_BACKUP_DIR"
+echo "Recovery backup directory set to: $REC_BACKUP_DIR"
+
 # Import apps.conf
-# Skips lines that do not need to be parsed
+# Skip lines that do not need to be parsed
 # Detects and assigns apps to groups
 while IFS= read -r line; do
 	if [ $(apps_shouldSkipLine "$line") ]; then
