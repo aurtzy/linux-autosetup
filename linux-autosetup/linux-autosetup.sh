@@ -23,7 +23,7 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
 # Where recovery files go
-declare REC_BACKUP_DIR="./recovery"
+declare RECOVERY_BACKUP_DIR="./recovery"
 # Where old backups are dumped
 declare DUMP_DIR="./dump/old"
 # Where classes are stored
@@ -88,8 +88,8 @@ appGroup() {
 	. <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class)
 	$1.constructor
 }
-rec() {
-	. <(sed "s/rec/$1/g" "$CLASSES_DIR"/rec.class)
+recovery() {
+	. <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class)
 	$1.constructor "$2" "$3"
 }
 
@@ -146,10 +146,10 @@ appGroups() {
 
 # Import options.conf
 . options.conf
-requireExistingDir $APP_BACKUP_DIR
+requireExistingDir "$APP_BACKUP_DIR"
 echo "App backup directory set to: $APP_BACKUP_DIR"
-requireExistingDir $REC_BACKUP_DIR
-echo "Recovery backup directory set to: $REC_BACKUP_DIR"
+requireExistingDir "$RECOVERY_BACKUP_DIR"
+echo "Recovery backup directory set to: $RECOVERY_BACKUP_DIR"
 
 # Import apps.conf
 # Skip lines that do not need to be parsed
