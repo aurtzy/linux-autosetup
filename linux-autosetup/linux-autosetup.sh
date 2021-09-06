@@ -6,61 +6,79 @@
 #	exit 1
 #fi
 
-# Default variable fallbacks
+#########################
+# VARIABLE DECLARATIONS #
+#########################
 
 # Script working directory
 # If a command call uses cd, this will allow remaining in proper dir
-declare SCRIPT_WORKING_DIR=$(pwd)
+declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
-declare APP_BACKUP_DIR=./app-backups
+declare APP_BACKUP_DIR="./app-backups"
 # Where recovery files go
-declare REC_BACKUP_DIR=./recovery
+declare REC_BACKUP_DIR="./recovery"
+# Where old files are dumped
+declare DUMP_DIR="./old/backups"
+# Where classes are stored
+declare CLASSES_DIR="./classes"
+
 # Default install command used if one is not specified for app
+# '"name"' is substituted for app name
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
+
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
 declare stringSeparator=';;'
 
+
+# Stores applications as keys
+# Stores "app strings" as data
+declare -ag apps
+
+# Stores app groups as keys
+# Stores apps separated by spaces as data
+declare -ag appGroups
+
 ####################
 # GLOBAL FUNCTIONS #
 ####################
 
-# Functions used to construct new objects
-# Param $1 = name, additional params come after
-declare classesDir="./classes"
-app() {
-	. <(sed "s/app/$1/g" "$classesDir"/app.class)
-	$1.constructor "$2" "$3"
-}
-appGroup() {
-	. <(sed "s/appGroup/$1/g" "$classesDir"/appGroup.class)
-	$1.constructor
-}
-rec() {
-	. <(sed "s/rec/$1/g" "$classesDir"/rec.class)
-	$1.constructor "$2" "$3"
-}
-
-# Used to determine if lines
-# in apps files should be skipped.
-apps_shouldSkipLine() {
-	if [[ $1 = '' || ${1:0:1} = '#' ]]; then
+# Check if parameter directory is valid
+# Echoes 'true' if yes, '' if no
+isValidDir() {
+	if [ -d "$1" ]; then
 		echo 'true'
 	else
 		echo ''
 	fi
+	return
 }
+
+# Functions used to construct new objects
+# Param $1 = name, additional params come after
+app() {
+	. <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class)
+	$1.constructor "$2" "$3"
+}
+appGroup() {
+	. <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class)
+	$1.constructor
+}
+rec() {
+	. <(sed "s/rec/$1/g" "$CLASSES_DIR"/rec.class)
+	$1.constructor "$2" "$3"
+}
+
 # String converter methods to allow functionality with Bash
 # Convert '-' and $hyphenConversion from and to each other
 convertHyphens() {
 	echo ${1//-/"$hyphenConversion"}
 }
-
 convertToHyphens() {
 	echo ${1//"$hyphenConversion"/-}
 }
-# Split app string into parameters for constructor
+# Split app string into parameters for app constructor
 # $1 = app string, $2 = field
 splitAppString() {
 	declare appString=$1
@@ -81,18 +99,15 @@ splitAppString() {
 	echo $appString
 }
 
-# Stores applications as keys
-# Stores any params "app strings" as data
-declare -ag apps
+# Return all apps separated by spaces
 apps() {
 	for app in "${apps[@]}"; do
 		echo -n " $(convertToHyphens $app)"
 	done
 	echo
 }
-# Stores app groups as keys
-# Stores apps as data separated by spaces
-declare -ag appGroups
+
+# Return all appGroups separated by spaces
 appGroups() {
 	for appGroup in "${appGroups[@]}"; do
 		echo -n " $(convertToHyphens $appGroup)"
@@ -102,6 +117,7 @@ appGroups() {
 
 #####################
 # END OF FUNCTIONS  #
+#                   #
 # SCRIPT BODY BELOW #
 #####################
 
@@ -114,7 +130,8 @@ echo "Recovery backup directory set to: $REC_BACKUP_DIR"
 # Skip lines that do not need to be parsed
 # Detects and assigns apps to groups
 while IFS= read -r line; do
-	if [ $(apps_shouldSkipLine "$line") ]; then
+	# If line is empty or a comment
+	if [[ "$line" = '' || ${line:0:1} = '#' ]]; then
 		continue
 	fi
 	
@@ -126,7 +143,7 @@ while IFS= read -r line; do
 		continue
 	fi
 	
-	if [ $section = 'APPLICATIONS' ]; then
+	if [ "$section" = 'APPLICATIONS' ]; then
 		app=$(convertHyphens "$(cut -d ' ' -f 1 <<< "$line ")")
 		apps+=($app)
 		appstring=$(cut -d ' ' -f 2- <<< "$line ")
@@ -136,7 +153,7 @@ while IFS= read -r line; do
 			appBackupSources=''
 		fi
 		app $app "$appInstallCommand" "$appBackupSources"
-	elif [ $section = 'APPLICATION_GROUPS' ]; then
+	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup=$(convertHyphens "${line:6}")
 			appGroups+=("$appGroup")
@@ -164,7 +181,7 @@ while
 echo -n ": "
 read userIn
 do
-	userIn=$(convertHyphens $userIn)
+	userIn=$(convertHyphens "$userIn")
 	
 	if [ "$userIn" = 'help' ]; then
 		echo "Help function should be called..."
