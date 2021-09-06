@@ -11,7 +11,10 @@ declare APP_BACKUP_DIR=./app-backups
 declare REC_BACKUP_DIR=./recovery
 # Default install command used if one is not specified for app
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
+# String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
+# String to detect in appstrings as indication of separate dirs
+declare stringSeparator='|-|'
 
 # Source app and rec class files
 . classes/app.h

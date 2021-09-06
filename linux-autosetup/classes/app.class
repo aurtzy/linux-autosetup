@@ -50,20 +50,19 @@ app.backupSources() {
 # Echo extracted string from backup source string.
 # Takes $1 = string, $2 = index
 extractBackupSource() {
-	declare delim='|-|'
 	declare substring=$1
 	declare -i int=$2
 	for (( i=1; i<$int; i++ ))
 	do
 		oldString=$substring
-		substring=${substring##*"$delim"}
+		substring=${substring##*"$stringSeparator"}
 		if [[ $oldString = $substring ]]; then
 			substring=''
 			return
 		fi
 	done
 	
-	substring=${substring%"$delim"*}
+	substring=${substring%"$stringSeparator"*}
 	echo $substring
 }
 
