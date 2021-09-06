@@ -193,7 +193,11 @@ done < "$APPS_CONFIG_FILE"
 # manual/automatic install/backup here
 # If automatic: Ask user to choose from 'apps', 'recovery', or 'both'
 
-# END OF SCRIPT
+###################
+#  END OF SCRIPT  #
+# USER INPUT HERE #
+###################
+
 # User can remain in script & 
 # input extra commands or exit script here.
 echo
