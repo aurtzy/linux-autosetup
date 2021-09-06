@@ -76,7 +76,8 @@ app.install() {
 
 # Back up sources
 app.backup() {
-	if [ "$backupSources" = '' ]; then
+	if [ "$(app.backupSources)" = '' ]; then
+		echo "$(app.name): Backup not found."
 		return
 	else
 		echo "$(app.name): Checking if backups exist..."
