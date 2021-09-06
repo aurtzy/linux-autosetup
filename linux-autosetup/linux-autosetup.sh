@@ -10,6 +10,13 @@
 # VARIABLE DECLARATIONS #
 #########################
 
+# String used to substitute hyphens in creating custom functions
+declare hyphenConversion='1_1'
+# String to detect in appstrings as indication of separate dirs
+declare stringSeparator=';;'
+# String used to substitute for app names
+declare name='/name/'
+
 # Script working directory
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
@@ -22,15 +29,10 @@ declare DUMP_DIR="./old/backups"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
+
 # Default install command used if one is not specified for app
-# '"name"' is substituted for app name
-declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
-
-# String used to substitute hyphens in creating custom functions
-declare hyphenConversion='1_1'
-# String to detect in appstrings as indication of separate dirs
-declare stringSeparator=';;'
-
+# $nameSubstitution is substituted for app name
+declare defaultInstallCommand="echo User must set defaultInstallCommand. $name will not be installed until this is done."
 
 # Stores applications as keys
 # Stores "app strings" as data
