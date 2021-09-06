@@ -64,10 +64,22 @@ splitAppString() {
 
 # Stores applications as keys
 # Stores any params "app strings" as data
-declare -Ag apps
+declare -ag apps
+apps() {
+	for app in "${apps[@]}"; do
+		echo -n " $(convertToHyphens $app)"
+	done
+	echo
+}
 # Stores app groups as keys
 # Stores apps as data separated by spaces
-declare -Ag appGroups
+declare -ag appGroups
+appGroups() {
+	for appGroup in "${appGroups[@]}"; do
+		echo -n " $(convertToHyphens $appGroup)"
+	done
+	echo
+}
 # Import apps.conf
 # Skips lines that do not need to be parsed
 # Detects and assigns apps to groups
