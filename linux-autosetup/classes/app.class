@@ -20,7 +20,7 @@ app.field() {
 # app class constructor
 # Params: $1 = installCommand $2 = backupSources
 app.constructor() {
-	app.field name = "$(convertToHyphen "app")"
+	app.field name = "$(convertToHyphens "app")"
 	
 	# Command that is used to install app
 	if [ ! "$1" ]; then

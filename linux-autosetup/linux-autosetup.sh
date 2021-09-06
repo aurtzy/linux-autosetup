@@ -11,6 +11,7 @@ declare APP_BACKUP_DIR=./app-backups
 declare REC_BACKUP_DIR=./recovery
 # Default install command used if one is not specified for app
 declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" will not be installed until this is done.'
+declare hyphenConversion='1_1'
 
 # Source app and rec class files
 . classes/app.h
@@ -30,13 +31,14 @@ apps_shouldSkipLine() {
 	fi
 }
 # String converter methods to allow functionality with Bash
-# Convert from/to '-' & '1_1'
-convertFromHyphen() {
-	echo ${1//-/1_1}
+# Convert '-' and $hyphenConversion from and to each other
+convertHyphens() {
+	echo ${1//-/"$hyphenConversion"}
 }
 
-convertToHyphen() {
-	echo ${1//1_1/-}
+convertToHyphens() {
+	echo ${1//"$hyphenConversion"/-}
+}
 }
 
 # Stores applications as keys
@@ -62,7 +64,7 @@ while IFS= read -r line; do
 	fi
 	
 	if [ $section = 'APPLICATIONS' ]; then
-		apps[$(convertFromHyphen "$(cut -d ' ' -f 1 <<< "$line ")")]=$(cut -d ' ' -f 2- <<< "$line ")
+		app=$(convertHyphens "$(cut -d ' ' -f 1 <<< "$line ")")
 	elif [ $section = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup=${line:6}
