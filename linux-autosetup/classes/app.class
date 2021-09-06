@@ -20,7 +20,7 @@ app.field() {
 # app class constructor
 # Params: $1 = installCommand $2 = backupSources
 app.constructor() {
-	app.field name = "$(convertToHyphens "app")"
+	app.name = "$(convertToHyphens "app")"
 	
 	# Command that is used to install app
 	if [ ! "$1" ]; then
@@ -38,11 +38,13 @@ app.constructor() {
 
 # Getter/setter methods
 app.name() {
-	app.field name $1 $2
+	app.field name "$1" "$2"
 }
-
 app.installCommand() {
-	app.field installCommand $1 $2
+	app.field installCommand "$1" "$2"
+}
+app.backupSources() {
+	app.field backupSources "$1" "$2"
 }
 
 # Echo extracted string from backup source string.
@@ -63,9 +65,6 @@ extractBackupSource() {
 	
 	substring=${substring%"$delim"*}
 	echo $substring
-}
-app.backupSources() {
-	app.field backupSources $1 $2
 }
 
 # Install app on call
