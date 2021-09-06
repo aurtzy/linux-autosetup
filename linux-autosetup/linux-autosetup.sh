@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Require run as root
+#if [ $(id -u) -ne 0 ]; then
+#	echo "Please run script as root! Exiting..."
+#	exit 1
+#fi
+
 # Default variable fallbacks
 
 # Script working directory
