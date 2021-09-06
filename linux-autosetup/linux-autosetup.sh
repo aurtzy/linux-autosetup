@@ -19,7 +19,8 @@ declare hyphenConversion='1_1'
 
 # Import options.conf
 . options.conf
-
+echo "App backup directory set to: $APP_BACKUP_DIR"
+echo "Recovery backup directory set to: $REC_BACKUP_DIR"
 
 # Used to determine if lines
 # in apps files should be skipped.
@@ -104,8 +105,24 @@ while IFS= read -r line; do
 done < "apps.conf"
 
 
+# END OF SCRIPT
+# User can remain in script & 
+# input extra commands or exit script here.
+echo
+echo "Script has finished!"
+echo "You can run extra commands within the script or type 'exit' to quit."
+echo "TO BE IMPLEMENTED: Type 'help' to get help on commands the script uses."
+declare userIn=''
+while
+echo -n ": "
+read userIn
+do
+	userIn=$(convertHyphens $userIn)
+	
+	if [ "$userIn" = 'help' ]; then
+		echo "Help function should be called..."
+	else
+		$userIn
 	fi
 done
-
-
 
