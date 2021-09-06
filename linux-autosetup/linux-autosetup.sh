@@ -33,16 +33,17 @@ echo "Recovery backup directory set to: $REC_BACKUP_DIR"
 
 # Functions used to construct new objects
 # Param $1 = name, additional params come after
+declare classesDir="./classes"
 app() {
-	. <(sed "s/app/$1/g" classes/app.class)
+	. <(sed "s/app/$1/g" "$classesDir"/app.class)
 	$1.constructor "$2" "$3"
 }
 appGroup() {
-	. <(sed "s/appGroup/$1/g" classes/appGroup.class)
+	. <(sed "s/appGroup/$1/g" "$classesDir"/appGroup.class)
 	$1.constructor
 }
 rec() {
-	. <(sed "s/rec/$1/g" classes/rec.class)
+	. <(sed "s/rec/$1/g" "$classesDir"/rec.class)
 	$1.constructor "$2" "$3"
 }
 
