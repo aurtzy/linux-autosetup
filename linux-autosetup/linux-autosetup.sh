@@ -127,6 +127,9 @@ while IFS= read -r line; do
 	
 done < "apps.conf"
 
+# Implementation: Let user choose from:
+# manual/automatic install/backup here
+# If automatic: Ask user to choose from 'apps', 'recovery', or 'both'
 
 # END OF SCRIPT
 # User can remain in script & 
