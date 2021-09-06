@@ -56,14 +56,13 @@ isValidDir() {
 	else
 		echo ''
 	fi
-	return
 }
 
 # Make sure directory is valid; otherwise exit script
 requireExistingDir() {
 	
 	if [ ! $(isValidDir "$1") ]; then
-		echo "Error. $1 does not exist."
+		echo "Error: $1 does not exist."
 		echo "Do you want this directory to be created for you?" 
 		echo "Type 'yes' to confirm, otherwise, script will exit."
 		
