@@ -124,7 +124,7 @@ splitAppString() {
 # Return all apps separated by spaces
 apps() {
 	for app in "${apps[@]}"; do
-		echo -n " $(convertToHyphens $app)"
+		echo -n " $app"
 	done
 	echo
 }
@@ -132,7 +132,7 @@ apps() {
 # Return all appGroups separated by spaces
 appGroups() {
 	for appGroup in "${appGroups[@]}"; do
-		echo -n " $(convertToHyphens $appGroup)"
+		echo -n " $appGroup"
 	done
 	echo
 }
@@ -168,7 +168,7 @@ while IFS= read -r line; do
 	fi
 	
 	if [ "$section" = 'APPLICATIONS' ]; then
-		app=$(convertHyphens "$(cut -d ' ' -f 1 <<< "$line ")")
+		app="$(cut -d ' ' -f 1 <<< "$line ")"
 		apps+=($app)
 		appstring=$(cut -d ' ' -f 2- <<< "$line ")
 		appInstallCommand="$(splitAppString "$appstring" 1)"
@@ -176,12 +176,12 @@ while IFS= read -r line; do
 		if [ "$appInstallCommand" = "$appBackupSources" ]; then
 			appBackupSources=''
 		fi
-		app $app "$appInstallCommand" "$appBackupSources"
+		app "$(convertHyphens "$app")" "$appInstallCommand" "$appBackupSources"
 	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
-			appGroup=$(convertHyphens "${line:6}")
+			appGroup="${line:6}"
 			appGroups+=("$appGroup")
-			appGroup $appGroup
+			appGroup $(convertHyphens "$appGroup")
 		else
 			$appGroup.add "$line"
 		fi

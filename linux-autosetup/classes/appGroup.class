@@ -37,7 +37,7 @@ appGroup.add() {
 	if [ "$appGroup.apps" = '' ]; then
 		appGroup.apps = "$1"
 	else
-		appGroup.apps = "$(convertToHyphens "$(appGroup.apps) $1")"
+		appGroup.apps = "$(appGroup.apps) $1"
 	fi
 }
 
