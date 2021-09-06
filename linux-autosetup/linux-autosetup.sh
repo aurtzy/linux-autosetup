@@ -39,6 +39,25 @@ convertHyphens() {
 convertToHyphens() {
 	echo ${1//"$hyphenConversion"/-}
 }
+# Split app string into parameters for constructor
+# $1 = app string, $2 = field
+splitAppString() {
+	declare appString=$1
+	if [ "$appString" = '' ]; then
+		return
+	fi
+	declare -i appStringField=$2
+	if [ $2 -eq 1 ]; then
+		appString=${appString#*'"'}
+		appString=${appString%%'"'*}
+	elif [ $2 -eq 2 ]; then
+		appString=${appString%'"'*}
+		appString=${appString##*'"'}
+	else
+		echo "Error: splitAppString() took an invalid field #. Exiting..."
+		exit
+	fi
+	echo $appString
 }
 
 # Stores applications as keys
@@ -65,6 +84,13 @@ while IFS= read -r line; do
 	
 	if [ $section = 'APPLICATIONS' ]; then
 		app=$(convertHyphens "$(cut -d ' ' -f 1 <<< "$line ")")
+		apps[$app]=$(cut -d ' ' -f 2- <<< "$line ")
+		appInstallCommand="$(splitAppString "${apps[$app]}" 1)"
+		appBackupSources="$(splitAppString "${apps[$app]}" 2)"
+		if [ "$appInstallCommand" = "$appBackupSources" ]; then
+		appBackupSources=''
+		fi
+		app $app "$appInstallCommand" "$appBackupSources"
 	elif [ $section = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup=${line:6}
@@ -77,36 +103,8 @@ while IFS= read -r line; do
 	
 done < "apps.conf"
 
-# Split app string into parameters for constructor
-# $1 = app string, $2 = field
-splitAppString() {
-	declare appString=$1
-	if [ "$appString" = '' ]; then
-		return
-	fi
-	declare -i appStringField=$2
-	if [ $2 -eq 1 ]; then
-		appString=${appString#*'"'}
-		appString=${appString%%'"'*}
-	elif [ $2 -eq 2 ]; then
-		appString=${appString%'"'*}
-		appString=${appString##*'"'}
-	else
-		echo "Error: splitAppString() took an invalid field #. Exiting..."
-		exit
-	fi
-	echo $appString
-}
 
-# Initialize app objects from apps array
-for app in "${!apps[@]}"; do
-	app $app
-	appInstallCommand="$(splitAppString "${apps[$app]}" 1)"
-	appBackupSources="$(splitAppString "${apps[$app]}" 2)"
-	if [ "$appInstallCommand" = "$appBackupSources" ]; then
-		appBackupSources=''
 	fi
-	$app.constructor "$appInstallCommand" "$appBackupSources"
 done
 
 
