@@ -125,7 +125,7 @@ done < "apps.conf"
 echo
 echo "Script has finished!"
 echo "You can manually run extra commands within the script or type 'exit' to quit."
-echo "TO BE IMPLEMENTED: Type 'help' to get help on commands the script uses."
+echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 declare userIn=''
 while
 echo -n ": "
