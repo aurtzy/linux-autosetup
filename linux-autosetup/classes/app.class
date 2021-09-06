@@ -84,7 +84,10 @@ app.backup() {
 		declare -i i+=1
 		do
 			backupSource=$(extractBackupSource "$2" $i)
-			if [[ -d $backupSource || -f $backupSource ]]; then 
+			echo "$backupSource"
+			if [ "$backupSource" = '' ]; then
+				break
+			elif [[ -d "$backupSource" || -f "$backupSource" ]]; then 
 				echo "$(app.name): $backupSource found! Backing up..."
 				# Implement back-up code here
 			else
