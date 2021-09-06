@@ -150,6 +150,8 @@ echo "App backup directory set to: $APP_BACKUP_DIR"
 requireExistingDir "$RECOVERY_BACKUP_DIR"
 echo "Recovery backup directory set to: $RECOVERY_BACKUP_DIR"
 
+# Create APP appGroup
+appGroup ALL
 # Import apps.conf
 # Skip lines that do not need to be parsed
 # Detects and assigns apps to groups
@@ -170,6 +172,7 @@ while IFS= read -r line; do
 	if [ "$section" = 'APPLICATIONS' ]; then
 		app="$(cut -d ' ' -f 1 <<< "$line ")"
 		apps+=($app)
+		ALL.add "$app"
 		appstring=$(cut -d ' ' -f 2- <<< "$line ")
 		appInstallCommand="$(splitAppString "$appstring" 1)"
 		appBackupSources="$(splitAppString "$appstring" 2)"
