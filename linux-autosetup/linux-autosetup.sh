@@ -24,8 +24,8 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 declare APP_BACKUP_DIR="./app-backups"
 # Where recovery files go
 declare REC_BACKUP_DIR="./recovery"
-# Where old files are dumped
-declare DUMP_DIR="./old/backups"
+# Where old backups are dumped
+declare DUMP_DIR="./dump/old"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
