@@ -20,12 +20,12 @@ declare defaultInstallCommand='echo User must set defaultInstallCommand. "name" 
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
-declare stringSeparator='|-|'
 
 # Import options.conf
 . options.conf
 echo "App backup directory set to: $APP_BACKUP_DIR"
 echo "Recovery backup directory set to: $REC_BACKUP_DIR"
+declare stringSeparator=';;'
 
 ####################
 # GLOBAL FUNCTIONS #
