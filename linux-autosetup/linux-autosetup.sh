@@ -33,7 +33,7 @@ declare CONFIG_FILE="./autosetup_default.conf"
 
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
-declare defaultInstallCommand="echo User must set defaultInstallCommand. $name will not be installed until this is done."
+declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
 
 # Stores applications as keys
 # Stores "app strings" as data
