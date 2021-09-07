@@ -15,7 +15,7 @@ declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
 declare stringSeparator=';;'
 # String used to substitute for app names
-declare name='_name'
+declare name='_name_'
 
 # Script working directory
 # If a command call uses cd, this will allow remaining in proper dir
