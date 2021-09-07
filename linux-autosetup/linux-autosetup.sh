@@ -199,7 +199,7 @@ done < "$APPS_CONFIG_FILE"
 # User can remain in script & 
 # input extra commands or exit script here.
 echo
-echo "Script has finished!"
+echo "End of script!"
 echo "You can manually run extra commands within the script or type 'exit' to quit."
 echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 while
