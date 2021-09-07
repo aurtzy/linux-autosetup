@@ -28,9 +28,8 @@ declare RECOVERY_BACKUP_DIR="./recovery"
 declare DUMP_DIR="./dump"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
-
-# Apps config file
-declare APPS_CONFIG_FILE="./apps.conf"
+# Default configiguration file
+declare CONFIG_FILE="./autosetup_default.conf"
 
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
@@ -153,8 +152,8 @@ appGroups() {
 # SCRIPT BODY #
 ###############
 
-# Import options.conf
-. options.conf
+# Import config autosetup.conf
+. autosetup.conf
 
 # Create APP appGroup
 appGroup ALL
@@ -193,7 +192,7 @@ while IFS= read -r line; do
 		eval $line
 	fi
 	
-done < "$APPS_CONFIG_FILE"
+done < "$CONFIG_FILE"
 
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
