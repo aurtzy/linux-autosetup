@@ -69,6 +69,25 @@ requireExistingDir() {
 	fi
 }
 
+# Return extracted string from backup source string.
+# Takes $1 = string, $2 = field
+extractBackupSource() {
+	declare substring="$1"
+	declare -i int=$2
+	for (( j=1; j<$int; j++ ))
+	do
+		oldString=$substring
+		substring=${substring##*"$stringSeparator"}
+		if [[ $oldString = $substring ]]; then
+			substring=''
+			return
+		fi
+	done
+	
+	substring=${substring%"$stringSeparator"*}
+	echo $substring
+}
+
 # Move $1 = directory/file to $DUMP_DIR
 dump() {
 	if [[ -d "$1" || -f "$1" ]]; then

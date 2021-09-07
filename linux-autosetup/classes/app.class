@@ -47,25 +47,6 @@ app.backupSources() {
 	app.field backupSources "$1" "$2"
 }
 
-# Echo extracted string from backup source string.
-# Takes $1 = string, $2 = index
-extractBackupSource() {
-	declare substring=$1
-	declare -i int=$2
-	for (( i=1; i<$int; i++ ))
-	do
-		oldString=$substring
-		substring=${substring##*"$stringSeparator"}
-		if [[ $oldString = $substring ]]; then
-			substring=''
-			return
-		fi
-	done
-	
-	substring=${substring%"$stringSeparator"*}
-	echo $substring
-}
-
 # Install app on call
 # Also reset to original dir in case command used cd
 app.install() {
@@ -80,21 +61,39 @@ app.backup() {
 	if [ "$(app.backupSources)" = '' ]; then
 		return
 	else
+		backupDir="$APP_BACKUP_DIR/app"
+		#mkdir "$backupDir"
 		while
 		declare -i i+=1
 		do
-			backupSource=$(extractBackupSource "$2" $i)
-			echo "$backupSource"
+			backupSource="$(extractBackupSource "$(app.backupSources)" $i)"
 			if [ "$backupSource" = '' ]; then
 				break
 			else
-				echo "$(app.name): Backing up $backupSource"
-				if [ $(sourceExists "$backupSource") ]; then
+				if [ ${backupSource: -1} = '/' ]; then
+					backupSource=${backupSource::-1}
+				fi
+				source="${backupSource%'/'}"
+				
+				# Check if source exists
+				if [[ -f "$backupSource" || -d "$backupSource" ]]; then
+					echo "$(app.name): Found: $source"
+					echo $
+				else
+					echo "$(app.name): Error: Could not find $backupSource"
+					#return
+				fi
+				
+				# Dump any old backup
+				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
 					echo "$(app.name): Old backup found. Dumping..."
-					dump "$backupSource"
+					dump "$backupDir/$source"
 					echo "$(app.name): Dumped old $backupSource"
 				fi
-				# Implement backup
+				
+				# IMPLEMENT HARD LINK HERE
+				echo "$(app.name): # implement: hard link or archive source"
+				
 				echo "$(app.name): Backed up $backupSource"
 			fi
 		done
