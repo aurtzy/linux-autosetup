@@ -118,26 +118,6 @@ convertHyphens() {
 convertToHyphens() {
 	echo ${1//"$hyphenConversion"/-}
 }
-# Split app string into parameters for app constructor
-# $1 = app string, $2 = field
-splitAppString() {
-	declare appString=$1
-	if [ "$appString" = '' ]; then
-		return
-	fi
-	declare -i appStringField=$2
-	if [ $2 -eq 1 ]; then
-		appString=${appString#*'"'}
-		appString=${appString%%'"'*}
-	elif [ $2 -eq 2 ]; then
-		appString=${appString%'"'*}
-		appString=${appString##*'"'}
-	else
-		echo "Error: splitAppString() took an invalid field #. Exiting..."
-		exit
-	fi
-	echo $appString
-}
 
 # Return all apps separated by spaces
 apps() {
@@ -191,16 +171,7 @@ while IFS= read -r line; do
 		app="$(cut -d ' ' -f 1 <<< "$line ")"
 		apps+=($app)
 		ALL.add "$app"
-		appstring=$(cut -d ' ' -f 2- <<< "$line ")
-		appInstallCommand="$(splitAppString "$appstring" 1)"
-		appBackupSources="$(splitAppString "$appstring" 2)"
-		echo $appInstallCommand
-		echo $appBackupSources
-		if [ "$appInstallCommand" = "$appBackupSources" ]; then
-			appBackupSources=''
-		fi
-		#app "$(convertHyphens "$app")" "$appInstallCommand" "$appBackupSources"
-		app "$app" "$appInstallCommand"
+		eval app $line
 	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup="${line:6}"
@@ -210,6 +181,8 @@ while IFS= read -r line; do
 		else
 			$appGroup.add "$line"
 		fi
+	else
+		eval $line
 	fi
 	
 done < "$APPS_CONFIG_FILE"
