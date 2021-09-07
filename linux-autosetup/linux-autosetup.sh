@@ -135,11 +135,9 @@ appGroups() {
 	echo
 }
 
-#####################
-# END OF FUNCTIONS  #
-#                   #
-# SCRIPT BODY BELOW #
-#####################
+###############
+# SCRIPT BODY #
+###############
 
 # Import options.conf
 . options.conf
