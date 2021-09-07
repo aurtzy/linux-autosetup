@@ -113,7 +113,7 @@ dump() {
 app() {
 	noHyphens=$(convertHyphens "$1")
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
-	$1.constructor "$2" "$3"
+	$1.constructor "$2" "$3" "$4"
 }
 appGroup() {
 	noHyphens=$(convertHyphens "$1")

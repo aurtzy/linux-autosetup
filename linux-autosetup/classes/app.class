@@ -102,9 +102,15 @@ app.backup() {
 					
 					# PERFORM BACKUP
 					echo "app: Performing backup..."
-					cp -a "$source" "$backupDir/$sourceName"
-					
-					echo "app: Backed up $source"
+					if [ "$(app.backupType)" = "ARCHIVE" ]; then
+						cp -a "$source" "$backupDir/$sourceName"
+						echo "app: Archived $source"
+					elif [ "$(app.backupType)" = "HARDLINK" ]; then
+						cp -al "$source" "$backupDir/$sourceName"
+						echo "app: Hard-linked $source"
+					else
+						echo "app: Error: Backup type $(app.backupType) not recognized."
+					fi
 				else
 					echo "app: Error: Could not find $source"
 					continue
