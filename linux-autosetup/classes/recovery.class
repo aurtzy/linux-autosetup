@@ -26,9 +26,9 @@ recovery.constructor() {
 }
 
 recovery.install() {
-	echo
+	echo "#implement recovery.install"
 }
 
 recovery.backup() {
-	echo
+	echo "#implement recovery.backup"
 }
