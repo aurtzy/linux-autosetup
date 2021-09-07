@@ -76,6 +76,22 @@ requireExistingDir() {
 	fi
 }
 
+# Move $1 = directory/file to $DUMP_DIR
+dump() {
+	if [[ -d "$1" || -f "$1" ]]; then
+		declare -i i=1
+		while [ -d "$DUMP_DIR$i" ]
+		do
+			echo "$DUMP_DIR$i already exists."
+			i+=1
+			echo "Trying $DUMP_DIR$i..."
+		done
+		mv "$1" "$DUMP_DIR$i"
+	else
+		echo "Error: $1 was not found"
+	fi
+}
+
 # Functions used to construct new objects
 # Param $1 = name, additional params come after
 app() {
