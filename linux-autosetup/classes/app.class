@@ -62,7 +62,10 @@ app.backup() {
 		return
 	else
 		backupDir="$APP_BACKUP_DIR/app"
-		#mkdir "$backupDir"
+		if [ ! -d "$backupDir" ]; then
+			echo "$(app.name): Backup directory not found. Making one for you..."
+			mkdir "$backupDir"
+		fi
 		while
 		declare -i i+=1
 		do
@@ -80,25 +83,25 @@ app.backup() {
 				if [[ -f "$source" || -d "$source" ]]; then
 					echo "$(app.name): Found: $source"
 					
+					# Dump any old backup
+					if [[ -f "$backupDir/$sourceName" || -d "$backupDir/$sourceName" ]]; then
+						echo "$(app.name): Old backup found. Dumping..."
+						dump "backup" "$backupDir/$source"
+						echo "$(app.name): Dumped old $source"
+					fi
+					
+					# PERFORM BACKUP
+					echo "$(app.name): Performing backup..."
+					cp -a "$source" "$backupDir/$sourceName"
+					
+					echo "$(app.name): Backed up $source"
 				else
 					echo "$(app.name): Error: Could not find $source"
 					continue
 				fi
-				
-				# Dump any old backup
-				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
-					echo "$(app.name): Old backup found. Dumping..."
-					dump "$backupDir/$source"
-					echo "$(app.name): Dumped old $backupSource"
-				fi
-				
-				# IMPLEMENT HARD LINK HERE
-				echo "$(app.name): # implement: hard link or archive source"
-				
-				echo "$(app.name): Backed up $backupSource"
 			fi
 		done
-		echo "$(app.name): Backup completed!"
+		echo "$(app.name): Backup completed."
 	fi
 }
 
