@@ -15,7 +15,7 @@ declare hyphenConversion='1_1'
 # String to detect in appstrings as indication of separate dirs
 declare stringSeparator=';;'
 # String used to substitute for app names
-declare name='/name/'
+declare name='_name'
 
 # Script working directory
 # If a command call uses cd, this will allow remaining in proper dir
@@ -48,9 +48,9 @@ declare -ag appGroups
 # GLOBAL FUNCTIONS #
 ####################
 
-# Check if parameter directory is valid
+# Check if parameter source is valid
 # Echoes 'true' if yes, '' if no
-isValidDir() {
+sourceExists() {
 	if [ -d "$1" ]; then
 		echo 'true'
 	else
@@ -60,8 +60,7 @@ isValidDir() {
 
 # Make sure directory is valid; otherwise exit script
 requireExistingDir() {
-	
-	if [ ! $(isValidDir "$1") ]; then
+	if [ ! $(sourceExists "$1") ]; then
 		echo "Error: $1 does not exist."
 		echo "Do you want this directory to be created for you?" 
 		echo "Type 'yes' to confirm, otherwise, script will exit."
