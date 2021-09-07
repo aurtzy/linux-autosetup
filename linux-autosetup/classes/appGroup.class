@@ -44,10 +44,16 @@ appGroup.add() {
 # Also reset to original dir in case command used cd
 appGroup.install() {
 	echo "appGroup: Installing from app group..."
-	for app in $(appGroup.apps)
-	do
+	for app in $(appGroup.apps); do
 		$app.install
 	done
+	echo
+	echo "If any apps failed to install, they will be listed below:"
+	for app in $(appGroup.apps); do
+		echo a
+		# Implement checking if app failed to install
+	done
+	echo "appGroup: Installation completed!"
 }
 
 # Back up sources
@@ -57,5 +63,6 @@ appGroup.backup() {
 	do
 		$app.backup
 	done
+	echo "appGroup: Backup completed!"
 }
 
