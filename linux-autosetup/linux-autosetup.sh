@@ -24,8 +24,8 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 declare APP_BACKUP_DIR="./app-backups"
 # Where recovery files go
 declare RECOVERY_BACKUP_DIR="./recovery"
-# Where old backups are dumped
-declare DUMP_DIR="./dump/old"
+# Where to dump files
+declare DUMP_DIR="./dump"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
@@ -88,19 +88,21 @@ extractSource() {
 	echo $substring
 }
 
-# Move $1 = directory/file to $DUMP_DIR
+# Move $2 = directory/file to $DUMP_DIR/$1
+# $1 = type of files to dump
 dump() {
-	if [[ -d "$1" || -f "$1" ]]; then
+	requireExistingDir "$DUMP_DIR"
+	if [[ -d "$2" || -f "$2" ]]; then
 		declare -i i=1
-		while [ -d "$DUMP_DIR$i" ]
+		while [ -d "$DUMP_DIR/$1$i" ]
 		do
-			echo "$DUMP_DIR$i already exists."
+			echo "$DUMP_DIR/$1$i already exists."
 			i+=1
-			echo "Trying $DUMP_DIR$i..."
+			echo "Trying $DUMP_DIR/$1$i..."
 		done
-		mv "$1" "$DUMP_DIR$i"
+		mv "$2" "$DUMP_DIR/$1$i"
 	else
-		echo "Error: $1 was not found"
+		echo "Error: $2 was not found"
 	fi
 }
 
