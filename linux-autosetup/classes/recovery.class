@@ -4,10 +4,6 @@
 
 # Class named "recovery" for bash object
 
-# Default fields that used if not provided in config.
-# name field is automatically initialized.
-
-
 # fields
 declare -Ag recovery_fields
 
@@ -24,13 +20,15 @@ recovery.field() {
 # recovery class constructor
 # Params: $1 = 
 recovery.constructor() {
-	recovery.field name = recovery
+	recovery.field name = "recovery"
 	
-	echo "recovery constructed"
+	echo "$(recovery.name): Built successfully."
 }
 
-recovery.fileName() {
-	recovery.field fileName $1 $2
+recovery.install() {
+	echo
 }
 
-
+recovery.backup() {
+	echo
+}
