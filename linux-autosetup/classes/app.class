@@ -18,7 +18,7 @@ app.field() {
 }
 
 # app class constructor
-# Params: $1 = installCommand $2 = backupSources
+# Params: $1 = installCommand $2 = sources
 app.constructor() {
 	app.name = "app"
 	
@@ -32,7 +32,7 @@ app.constructor() {
 	# Directories to files that user wants to back up.
 	# Structured as the following:
 	# 'dir/to/file/sourcefile|-|...|-|dir/to/other/file/sourcefile'
-	app.backupSources = $2
+	app.sources = $2
 	echo "$(app.name): Built."
 }
 
@@ -43,8 +43,8 @@ app.name() {
 app.installCommand() {
 	app.field installCommand "$1" "$2"
 }
-app.backupSources() {
-	app.field backupSources "$1" "$2"
+app.sources() {
+	app.field sources "$1" "$2"
 }
 
 # Install app on call
@@ -58,7 +58,7 @@ app.install() {
 # Back up sources
 app.backup() {
 	requireExistingDir "$APP_BACKUP_DIR"
-	if [ "$(app.backupSources)" = '' ]; then
+	if [ "$(app.sources)" = '' ]; then
 		return
 	else
 		backupDir="$APP_BACKUP_DIR/app"
@@ -66,22 +66,23 @@ app.backup() {
 		while
 		declare -i i+=1
 		do
-			backupSource="$(extractBackupSource "$(app.backupSources)" $i)"
-			if [ "$backupSource" = '' ]; then
+			source="$(extractSource "$(app.sources)" $i)"
+			if [ "$source" = '' ]; then
 				break
 			else
-				if [ ${backupSource: -1} = '/' ]; then
-					backupSource=${backupSource::-1}
+				if [ ${source: -1} = '/' ]; then
+					source=${source::-1}
 				fi
-				source="${backupSource%'/'}"
+				sourceName="${source##*"/"}"
+				sourceDir="${source%"/"*}"
 				
 				# Check if source exists
-				if [[ -f "$backupSource" || -d "$backupSource" ]]; then
+				if [[ -f "$source" || -d "$source" ]]; then
 					echo "$(app.name): Found: $source"
-					echo $
+					
 				else
-					echo "$(app.name): Error: Could not find $backupSource"
-					#return
+					echo "$(app.name): Error: Could not find $source"
+					continue
 				fi
 				
 				# Dump any old backup
