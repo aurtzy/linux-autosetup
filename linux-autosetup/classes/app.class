@@ -31,7 +31,15 @@ app.constructor() {
 	# Directories/files that will be backed up
 	# Single string with dirs/files separated by $stringSeparator
 	app.sources = $2
-	echo "$(app.name): Built."
+	
+	# Backup type
+	if [ ! "$3" ]; then
+		app.backupType = $DEFAULT_APP_BACKUP_TYPE
+	else
+		app.backupType = $3
+	fi
+	
+	echo "app: Built."
 }
 
 # Getter/setter methods
@@ -43,6 +51,9 @@ app.installCommand() {
 }
 app.sources() {
 	app.field sources "$1" "$2"
+}
+app.backupType() {
+	app.field backupType "$1" "$2"
 }
 
 # Install app on call
