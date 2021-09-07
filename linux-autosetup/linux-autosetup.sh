@@ -48,27 +48,20 @@ declare -ag appGroups
 # GLOBAL FUNCTIONS #
 ####################
 
-# Check if parameter source is valid
-# Echoes 'true' if yes, '' if no
-sourceExists() {
-	if [ -d "$1" ]; then
-		echo 'true'
-	else
-		echo ''
-	fi
-}
-
 # Make sure directory is valid; otherwise exit script
 requireExistingDir() {
-	if [ ! $(sourceExists "$1") ]; then
-		echo "Error: $1 does not exist."
-		echo "Do you want this directory to be created for you?" 
+	if [ ! -d "$1" ]; then
+		echo
+		echo "Error: directory was not found."
+		echo "Do you want the following directory to be created for you?" 
+		echo "$1"
 		echo "Type 'yes' to confirm, otherwise, script will exit."
 		
 		echo -n ": "
 		read userIn
 		if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
-			echo "#implement Creating directory to: $1"
+			echo "Creating directory to: $1"
+			mkdir -p "$1"
 		else
 			echo "Exiting..."
 			exit
@@ -142,10 +135,6 @@ appGroups() {
 # Import options.conf
 . options.conf
 
-echo "App backup directory set to: $APP_BACKUP_DIR"
-requireExistingDir "$RECOVERY_BACKUP_DIR"
-echo "Recovery backup directory set to: $RECOVERY_BACKUP_DIR"
-
 # Create APP appGroup
 appGroup ALL
 # Import apps.conf
@@ -198,6 +187,7 @@ done < "$APPS_CONFIG_FILE"
 # input extra commands or exit script here.
 echo
 echo "End of script!"
+echo
 echo "You can manually run extra commands within the script or type 'exit' to quit."
 echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 while
