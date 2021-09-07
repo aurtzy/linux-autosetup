@@ -145,7 +145,7 @@ appGroups() {
 
 # Import options.conf
 . options.conf
-requireExistingDir "$APP_BACKUP_DIR"
+
 echo "App backup directory set to: $APP_BACKUP_DIR"
 requireExistingDir "$RECOVERY_BACKUP_DIR"
 echo "Recovery backup directory set to: $RECOVERY_BACKUP_DIR"

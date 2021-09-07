@@ -33,7 +33,7 @@ app.constructor() {
 	# Structured as the following:
 	# 'dir/to/file/sourcefile|-|...|-|dir/to/other/file/sourcefile'
 	app.backupSources = $2
-	echo "$(app.name): Built successfully."
+	echo "$(app.name): Built."
 }
 
 # Getter/setter methods
@@ -76,11 +76,10 @@ app.install() {
 
 # Back up sources
 app.backup() {
+	requireExistingDir "$APP_BACKUP_DIR"
 	if [ "$(app.backupSources)" = '' ]; then
-		echo "$(app.name): Backup not found."
 		return
 	else
-		echo "$(app.name): Checking if backups exist..."
 		while
 		declare -i i+=1
 		do
@@ -88,13 +87,18 @@ app.backup() {
 			echo "$backupSource"
 			if [ "$backupSource" = '' ]; then
 				break
-			elif [[ -d "$backupSource" || -f "$backupSource" ]]; then 
-				echo "$(app.name): $backupSource found! Backing up..."
-				# Implement back-up code here
 			else
-				echo "$(app.name): $backupSource does not exist. Continuing..."
+				echo "$(app.name): Backing up $backupSource"
+				if [ $(sourceExists "$backupSource") ]; then
+					echo "$(app.name): Old backup found. Dumping..."
+					dump "$backupSource"
+					echo "$(app.name): Dumped old $backupSource"
+				fi
+				# Implement backup
+				echo "$(app.name): Backed up $backupSource"
 			fi
 		done
+		echo "$(app.name): Backup completed!"
 	fi
 }
 
