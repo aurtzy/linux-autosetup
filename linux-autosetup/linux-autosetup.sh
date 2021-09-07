@@ -128,9 +128,6 @@ recovery() {
 convertHyphens() {
 	echo ${1//-/"$hyphenConversion"}
 }
-convertToHyphens() {
-	echo ${1//"$hyphenConversion"/-}
-}
 
 # Return all apps separated by spaces
 apps() {

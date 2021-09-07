@@ -5,7 +5,6 @@
 # Class named "app" for bash object
 
 # fields
-fields="app_fields"
 declare -Ag fields
 
 # Handles getting/setting fields.
@@ -24,7 +23,7 @@ app.constructor() {
 	
 	# Command that is used to install app
 	if [ ! "$1" ]; then
-		app.installCommand = "${defaultInstallCommand//"$name"/$(app.name)}"
+		app.installCommand = "${defaultInstallCommand//"$name"/app}"
 	else
 		app.installCommand = "$1"
 	fi
@@ -49,7 +48,7 @@ app.sources() {
 # Install app on call
 # Also reset to original dir in case command used cd
 app.install() {
-	echo "$(app.name): Installing..."
+	echo "app: Installing..."
 	eval $(app.installCommand)
 	cd "$SCRIPT_WORKING_DIR"
 }
@@ -58,11 +57,12 @@ app.install() {
 app.backup() {
 	requireExistingDir "$APP_BACKUP_DIR"
 	if [ "$(app.sources)" = '' ]; then
+		echo "app: No sources specified for app."
 		return
 	else
 		backupDir="$APP_BACKUP_DIR/app"
 		if [ ! -d "$backupDir" ]; then
-			echo "$(app.name): Backup directory not found. Making one for you..."
+			echo "app: Backup directory not found. Making one for you..."
 			mkdir "$backupDir"
 		fi
 		while
@@ -80,27 +80,27 @@ app.backup() {
 				
 				# Check if source exists
 				if [[ -f "$source" || -d "$source" ]]; then
-					echo "$(app.name): Found: $source"
+					echo "app: Found: $source"
 					
 					# Dump any old backup
 					if [[ -f "$backupDir/$sourceName" || -d "$backupDir/$sourceName" ]]; then
-						echo "$(app.name): Old backup found. Dumping..."
+						echo "app: Old backup found. Dumping..."
 						dump "backup" "$backupDir/$source"
-						echo "$(app.name): Dumped old $source"
+						echo "app: Dumped old $source"
 					fi
 					
 					# PERFORM BACKUP
-					echo "$(app.name): Performing backup..."
+					echo "app: Performing backup..."
 					cp -a "$source" "$backupDir/$sourceName"
 					
-					echo "$(app.name): Backed up $source"
+					echo "app: Backed up $source"
 				else
-					echo "$(app.name): Error: Could not find $source"
+					echo "app: Error: Could not find $source"
 					continue
 				fi
 			fi
 		done
-		echo "$(app.name): Backup completed."
+		echo "app: Backup completed."
 	fi
 }
 

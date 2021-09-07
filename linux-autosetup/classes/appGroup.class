@@ -5,22 +5,21 @@
 # Class named "appGroup" for bash object
 
 # fields
-declare -Ag appGroup_fields
+declare -Ag fields
 
 # Handles getting/setting fields.
 appGroup.field() {
-	if [ "$2" == "=" ]
-	then
-		appGroup_fields[$1]=$3
+	if [ "$2" == "=" ]; then
+		fields[$1]=$3
 	else
-		echo ${appGroup_fields[$1]}
+		echo ${fields[$1]}
 	fi
 }
 
 # appGroup class constructor
 # Params: none
 appGroup.constructor() {
-	appGroup.name = "$(convertToHyphens "appGroup")"
+	appGroup.name = appGroup
 	appGroup.apps = ''
 }
 
@@ -44,8 +43,8 @@ appGroup.add() {
 # Install appGroup on call
 # Also reset to original dir in case command used cd
 appGroup.install() {
-	echo "$(appGroup.name): Installing from app group..."
-	for app in $(convertHyphens "$(appGroup.apps)")
+	echo "appGroup: Installing from app group..."
+	for app in $(appGroup.apps)
 	do
 		$app.install
 	done
@@ -53,8 +52,8 @@ appGroup.install() {
 
 # Back up sources
 appGroup.backup() {
-	echo "$(appGroup.name): Backing up from app group..."
-	for app in $(convertHyphens "$(appGroup.apps)")
+	echo "appGroup: Backing up from app group..."
+	for app in $(appGroup.apps)
 	do
 		$app.backup
 	done
