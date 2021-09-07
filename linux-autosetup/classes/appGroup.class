@@ -53,6 +53,10 @@ appGroup.install() {
 
 # Back up sources
 appGroup.backup() {
-	echo
+	echo "$(appGroup.name): Backing up from app group..."
+	for app in $(convertHyphens "$(appGroup.apps)")
+	do
+		$app.backup
+	done
 }
 
