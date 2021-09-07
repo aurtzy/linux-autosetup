@@ -95,15 +95,18 @@ dump() {
 # Functions used to construct new objects
 # Param $1 = name, additional params come after
 app() {
-	. <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class)
+	noHyphens=$(convertHyphens "$1")
+	. <(sed "s/fields/$noHyphens/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
 	$1.constructor "$2" "$3"
 }
 appGroup() {
-	. <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class)
+	noHyphens=$(convertHyphens "$1")
+	. <(sed "s/fields/$noHyphens/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
 	$1.constructor
 }
 recovery() {
-	. <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class)
+	noHyphens=$(convertHyphens "$1")
+	. <(sed "s/fields/$noHyphens/g" <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class))
 	$1.constructor "$2" "$3"
 }
 
@@ -191,15 +194,19 @@ while IFS= read -r line; do
 		appstring=$(cut -d ' ' -f 2- <<< "$line ")
 		appInstallCommand="$(splitAppString "$appstring" 1)"
 		appBackupSources="$(splitAppString "$appstring" 2)"
+		echo $appInstallCommand
+		echo $appBackupSources
 		if [ "$appInstallCommand" = "$appBackupSources" ]; then
 			appBackupSources=''
 		fi
-		app "$(convertHyphens "$app")" "$appInstallCommand" "$appBackupSources"
+		#app "$(convertHyphens "$app")" "$appInstallCommand" "$appBackupSources"
+		app "$app" "$appInstallCommand"
 	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup="${line:6}"
 			appGroups+=("$appGroup")
-			appGroup $(convertHyphens "$appGroup")
+			#appGroup $(convertHyphens "$appGroup")
+			appGroup "$appGroup"
 		else
 			$appGroup.add "$line"
 		fi
@@ -227,12 +234,10 @@ while
 echo -n ": "
 read userIn
 do
-	userIn=$(convertHyphens "$userIn")
-	
 	if [ "$userIn" = 'help' ]; then
 		echo "Help function should be called..."
 	else
-		$userIn
+		eval $userIn
 	fi
 done
 

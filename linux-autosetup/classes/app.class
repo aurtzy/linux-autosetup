@@ -5,22 +5,22 @@
 # Class named "app" for bash object
 
 # fields
-declare -Ag app_fields
+fields="app_fields"
+declare -Ag fields
 
 # Handles getting/setting fields.
 app.field() {
-	if [ "$2" == "=" ]
-	then
-		app_fields[$1]=$3
+	if [ "$2" == "=" ]; then
+		fields[$1]=$3
 	else
-		echo ${app_fields[$1]}
+		echo ${fields[$1]}
 	fi
 }
 
 # app class constructor
 # Params: $1 = installCommand $2 = backupSources
 app.constructor() {
-	app.name = "$(convertToHyphens "app")"
+	app.name = "app"
 	
 	# Command that is used to install app
 	if [ ! "$1" ]; then
@@ -70,7 +70,7 @@ extractBackupSource() {
 # Also reset to original dir in case command used cd
 app.install() {
 	echo "$(app.name): Installing..."
-	$(app.installCommand)
+	eval $(app.installCommand)
 	cd "$SCRIPT_WORKING_DIR"
 }
 
