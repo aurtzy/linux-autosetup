@@ -54,7 +54,7 @@ declare -ag appGroups
 requireExistingDir() {
 	if [ ! -d "$1" ]; then
 		echo
-		echo "Error: directory was not found."
+		echo "Error: $1 was not found."
 		echo "Do you want the following directory to be created for you?" 
 		echo "$1"
 		echo "Type 'yes' to confirm, otherwise, script will exit."
