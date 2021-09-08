@@ -28,7 +28,7 @@ declare APP_BACKUP_TYPE="ARCHIVE"
 # Where recovery files go
 declare RECOVERY_BACKUP_DIR="./recovery"
 # Where to dump files
-declare DUMP_DIR="./dumps/dump"
+declare DUMP_DIR="./dump"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 # Default configiguration file
