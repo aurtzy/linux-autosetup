@@ -58,12 +58,17 @@ requireExistingDir() {
 		echo "Do you want the following directory to be created for you?" 
 		echo "$1"
 		echo "Type 'yes' to confirm, otherwise, script will exit."
+		echo "You can type 'no' to continue, but this may cause errors"
+		echo "if you attempt to call anything that uses this directory."
 		
 		echo -n ": "
 		read userIn
 		if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
 			echo "Creating directory to: $1"
 			mkdir -p "$1"
+		elif [[ "$userIn" = 'n' || "$userIn" = 'no' ]]; then
+			echo "Continuing..."
+			return
 		else
 			echo "Exiting..."
 			exit
