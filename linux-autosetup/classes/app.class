@@ -71,6 +71,8 @@ app.backup() {
 		echo "app: No sourcePaths specified for app."
 		return
 	else
+		requireExistingDir "$APP_BACKUP_DIR"
+		dump "INITIALIZE" "app"
 		backupDir="$APP_BACKUP_DIR/app"
 		if [ ! -d "$backupDir" ]; then
 			echo "app: Backup directory not found. Making one for you..."
@@ -98,7 +100,7 @@ app.backup() {
 					echo "$backupDir/$source"
 					if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
 						echo "app: Old backup found. Dumping..."
-						dump "backups" "$backupDir/$source"
+						dump "$backupDir/$source" "app"
 						echo "app: Dumped old $source"
 					fi
 					
