@@ -50,32 +50,6 @@ declare -ag appGroups
 # GLOBAL FUNCTIONS #
 ####################
 
-# Make sure directory is valid; otherwise exit script
-requireExistingDir() {
-	if [ ! -d "$1" ]; then
-		echo
-		echo "Error: $1 was not found."
-		echo "Do you want the following directory to be created for you?" 
-		echo "$1"
-		echo "Type 'yes' to confirm, otherwise, script will exit."
-		echo "You can type 'no' to continue, but this may cause errors"
-		echo "if you attempt to call anything that uses this directory."
-		
-		echo -n ": "
-		read userIn
-		if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
-			echo "Creating directory to: $1"
-			mkdir -p "$1"
-		elif [[ "$userIn" = 'n' || "$userIn" = 'no' ]]; then
-			echo "Continuing..."
-			return
-		else
-			echo "Exiting..."
-			exit
-		fi
-	fi
-}
-
 # Return extracted string from backup sourcePaths string.
 # Takes $1 = string, $2 = field
 extractSourcePath() {
@@ -177,6 +151,7 @@ appGroups() {
 
 # Create APP appGroup
 appGroup ALL
+
 # Import apps.conf
 # Skip lines that do not need to be parsed
 # Detects and assigns apps to groups
@@ -203,7 +178,6 @@ while IFS= read -r line; do
 		if [ ${line:0:6} = 'group=' ]; then
 			appGroup="${line:6}"
 			appGroups+=("$appGroup")
-			#appGroup $(convertHyphens "$appGroup")
 			appGroup "$appGroup"
 		else
 			$appGroup.add "$line"

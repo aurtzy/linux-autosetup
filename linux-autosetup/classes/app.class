@@ -70,12 +70,12 @@ app.backup() {
 		echo "app: No sourcePaths specified for app."
 		return
 	else
-		requireExistingDir "$APP_BACKUP_DIR"
 		dump "INITIALIZE" "app"
 		backupDir="$APP_BACKUP_DIR/app"
 		if [ ! -d "$backupDir" ]; then
+			echo
 			echo "app: Backup directory not found. Making one for you..."
-			mkdir "$backupDir"
+			mkdir -p "$backupDir"
 		fi
 		while
 		declare -i i+=1
