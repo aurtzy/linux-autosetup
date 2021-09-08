@@ -28,7 +28,7 @@ declare APP_BACKUP_TYPE="ARCHIVE"
 # Where recovery files go
 declare RECOVERY_BACKUP_DIR="./recovery"
 # Where to dump files
-declare DUMP_DIR="./dump"
+declare DUMP_DIR="./dumps/dump"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 # Default configiguration file
@@ -94,6 +94,9 @@ extractSourcePath() {
 # $1 = type of files to dump
 dump() {
 	requireExistingDir "$DUMP_DIR"
+	# Idea to implement here: if $1 is "initialize,"
+	# then create a new dump directory
+	# Otherwise, $1 should be the sourcePath to dump.
 	if [[ -d "$2" || -f "$2" ]]; then
 		declare -i i=1
 		while [ -d "$DUMP_DIR/$1$i" ]
@@ -102,6 +105,7 @@ dump() {
 			i+=1
 			echo "Trying $DUMP_DIR/$1$i..."
 		done
+		mkdir "$DUMP_DIR/$1$i"
 		mv "$2" "$DUMP_DIR/$1$i"
 	else
 		echo "Error: $2 was not found"
