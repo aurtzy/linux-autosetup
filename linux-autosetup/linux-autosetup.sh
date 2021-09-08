@@ -214,6 +214,27 @@ while IFS= read -r line; do
 	
 done < "$CONFIG_FILE"
 
+# Before starting script, ask user if the variables
+# that have been set are okay with them. Then, proceed.
+echo
+echo "Please double-check the variables that have been set."
+echo
+echo "App backup directory: $APP_BACKUP_DIR"
+echo "Recovery backup directory: $RECOVERY_BACKUP_DIR"
+echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
+echo "Default app backup type: $DEFAULT_APP_BACKUP_TYPE"
+echo "Dump directory: $DUMP_DIR"
+echo
+echo "If you are okay with these settings, type 'yes' to continue."
+echo "Otherwise, type anything else to exit."
+echo -n ": "
+read userIn
+if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
+	echo "Continuing..."
+else
+	echo "Exiting..."
+	exit
+fi
 
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
