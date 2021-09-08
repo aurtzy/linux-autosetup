@@ -66,7 +66,6 @@ app.install() {
 
 # Back up sources
 app.backup() {
-	requireExistingDir "$APP_BACKUP_DIR"
 	if [ "$(app.sourcePaths)" = '' ]; then
 		echo "app: No sourcePaths specified for app."
 		return

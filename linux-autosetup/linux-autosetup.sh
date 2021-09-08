@@ -90,25 +90,36 @@ extractSourcePath() {
 	echo $substring
 }
 
-# Move $2 = directory/file to $DUMP_DIR/$1
-# $1 = type of files to dump
+# Dumps file/folder into $DUMP_DIR
+# Dump must be initialized before using in a function.
+# $1 = path to file(s) $2 = dump name to be dumped
+# Special case: if $1 = "INITIALIZE," 
+# create new dump folder iteration with $2 as $dumpName
 dump() {
-	requireExistingDir "$DUMP_DIR"
-	# Idea to implement here: if $1 is "initialize,"
-	# then create a new dump directory
-	# Otherwise, $1 should be the sourcePath to dump.
-	if [[ -d "$2" || -f "$2" ]]; then
+	declare path="$1"
+	declare dumpName="$2"
+	if [ "$1" = 'INITIALIZE' ]; then
+		echo "dump(): Initializing $dumpName dump directory"
 		declare -i i=1
-		while [ -d "$DUMP_DIR/$1$i" ]
+		while [[ -d "$DUMP_DIR/$dumpName/$i" ]]
 		do
-			echo "$DUMP_DIR/$1$i already exists."
+			echo "dump(): $DUMP_DIR/$dumpName/$i already exists."
 			i+=1
-			echo "Trying $DUMP_DIR/$1$i..."
+			echo "dump(): Trying $DUMP_DIR/$dumpName/$i..."
 		done
-		mkdir "$DUMP_DIR/$1$i"
-		mv "$2" "$DUMP_DIR/$1$i"
+		echo "dump(): Dump initialized at $DUMP_DIR/$dumpName/$i"
+		mkdir -p "$DUMP_DIR/$dumpName/$i"
+	elif [[ -d "$path" || -f "$path" ]]; then
+		declare -i i=1
+		while [ -d "$DUMP_DIR/$dumpName/$i" ]
+		do
+			i+=1
+			continue
+		done
+		i=i-1
+		mv "$path" "$DUMP_DIR/$dumpName/$i"
 	else
-		echo "Error: $2 was not found"
+		echo "dump(): Error: $path was not found"
 	fi
 }
 
@@ -197,6 +208,7 @@ while IFS= read -r line; do
 	fi
 	
 done < "$CONFIG_FILE"
+
 
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
