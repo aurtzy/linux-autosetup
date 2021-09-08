@@ -71,9 +71,9 @@ requireExistingDir() {
 	fi
 }
 
-# Return extracted string from backup source string.
+# Return extracted string from backup sourcePaths string.
 # Takes $1 = string, $2 = field
-extractSource() {
+extractSourcePath() {
 	declare substring="$1"
 	declare -i int=$2
 	for (( j=1; j<$int; j++ ))

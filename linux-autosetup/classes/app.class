@@ -17,7 +17,7 @@ app.field() {
 }
 
 # app class constructor
-# Params: $1 = installCommand $2 = sources
+# Params: $1 = installCommand $2 = sourcePaths
 app.constructor() {
 	app.name = "app"
 	
@@ -30,7 +30,7 @@ app.constructor() {
 
 	# Directories/files that will be backed up
 	# Single string with dirs/files separated by $stringSeparator
-	app.sources = $2
+	app.sourcePaths = $2
 	
 	# Backup type
 	if [ ! "$3" ]; then
@@ -49,8 +49,8 @@ app.name() {
 app.installCommand() {
 	app.field installCommand "$1" "$2"
 }
-app.sources() {
-	app.field sources "$1" "$2"
+app.sourcePaths() {
+	app.field sourcePaths "$1" "$2"
 }
 app.backupType() {
 	app.field backupType "$1" "$2"
@@ -67,8 +67,8 @@ app.install() {
 # Back up sources
 app.backup() {
 	requireExistingDir "$APP_BACKUP_DIR"
-	if [ "$(app.sources)" = '' ]; then
-		echo "app: No sources specified for app."
+	if [ "$(app.sourcePaths)" = '' ]; then
+		echo "app: No sourcePaths specified for app."
 		return
 	else
 		backupDir="$APP_BACKUP_DIR/app"
@@ -79,40 +79,42 @@ app.backup() {
 		while
 		declare -i i+=1
 		do
-			source="$(extractSource "$(app.sources)" $i)"
-			if [ "$source" = '' ]; then
+			echo
+			sourcePath="$(extractSourcePath "$(app.sourcePaths)" $i)"
+			if [ "$sourcePath" = '' ]; then
 				break
 			else
-				if [ ${source: -1} = '/' ]; then
-					source=${source::-1}
+				if [ ${sourcePath: -1} = '/' ]; then
+					sourcePath=${sourcePath::-1}
 				fi
-				sourceName="${source##*"/"}"
-				sourceDir="${source%"/"*}"
+				source="${sourcePath##*"/"}"
+				sourceDir="${sourcePath%"/"*}"
 				
-				# Check if source exists
-				if [[ -f "$source" || -d "$source" ]]; then
-					echo "app: Found: $source"
+				# Check if sourcePath exists
+				if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+					echo "app: Found: $sourcePath"
 					
 					# Dump any old backup
-					if [[ -f "$backupDir/$sourceName" || -d "$backupDir/$sourceName" ]]; then
+					echo "$backupDir/$source"
+					if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
 						echo "app: Old backup found. Dumping..."
-						dump "backup" "$backupDir/$source"
+						dump "backups" "$backupDir/$source"
 						echo "app: Dumped old $source"
 					fi
 					
 					# PERFORM BACKUP
 					echo "app: Performing backup..."
 					if [ "$(app.backupType)" = "ARCHIVE" ]; then
-						cp -a "$source" "$backupDir/$sourceName"
-						echo "app: Archived $source"
+						cp -a "$sourcePath" "$backupDir/$source"
+						echo "app: Archived $sourcePath"
 					elif [ "$(app.backupType)" = "HARDLINK" ]; then
-						cp -al "$source" "$backupDir/$sourceName"
-						echo "app: Hard-linked $source"
+						cp -al "$sourcePath" "$backupDir/$source"
+						echo "app: Hard-linked $sourcePath"
 					else
 						echo "app: Error: Backup type $(app.backupType) not recognized."
 					fi
 				else
-					echo "app: Error: Could not find $source"
+					echo "app: Error: Could not find $sourcePath"
 					continue
 				fi
 			fi
