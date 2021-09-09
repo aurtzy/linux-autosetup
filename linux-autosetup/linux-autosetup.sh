@@ -12,8 +12,6 @@
 
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
-# String to detect in appstrings as indication of separate dirs
-declare stringSeparator=';;'
 # String used to substitute for app names
 declare name='_name_'
 
@@ -49,25 +47,6 @@ declare -ag appGroups
 ####################
 # GLOBAL FUNCTIONS #
 ####################
-
-# Return extracted string from backup sourcePaths string.
-# Takes $1 = string, $2 = field
-extractSourcePath() {
-	declare substring="$1"
-	declare -i int=$2
-	for (( j=1; j<$int; j++ ))
-	do
-		oldString=$substring
-		substring=${substring##*"$stringSeparator"}
-		if [[ $oldString = $substring ]]; then
-			substring=''
-			return
-		fi
-	done
-	
-	substring=${substring%"$stringSeparator"*}
-	echo $substring
-}
 
 # Dumps file/folder into $DUMP_DIR
 # Dump must be initialized before using in a function.
@@ -108,12 +87,12 @@ convertHyphens() {
 	echo ${1//-/"$hyphenConversion"}
 }
 
-# Functions used to construct new objects
-# Param $1 = name, additional params come after
+# App constructor caller
+# $1=name, $2=installCommand, $3=backupType, ${@:4}=sourcePaths
 app() {
 	noHyphens=$(convertHyphens "$1")
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
-	$1.constructor "$2" "$3" "$4"
+	$1.constructor "$2" "$3" "${@:4}"
 }
 # App group constructor caller
 # $1=name
@@ -196,6 +175,7 @@ done < "$CONFIG_FILE"
 # that have been set are okay with them. Then, proceed.
 echo
 echo "Please double-check the variables that have been set."
+echo "Directories will be created only when needed."
 echo
 echo "App backup directory: $APP_BACKUP_DIR"
 echo "Recovery backup directory: $RECOVERY_BACKUP_DIR"

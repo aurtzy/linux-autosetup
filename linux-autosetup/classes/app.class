@@ -27,17 +27,29 @@ app.constructor() {
 	else
 		app.installCommand = "$1"
 	fi
-
-	# Directories/files that will be backed up
-	# Single string with dirs/files separated by $stringSeparator
-	app.sourcePaths = $2
 	
 	# Backup type
-	if [ ! "$3" ]; then
+	if [[ "$2" != "" && "$2" != 'ARCHIVE' && "$2" != 'HARDLINK' ]]; then
+		echo "app: Encountered an error."
+		echo "Error: Backup type input $2 was not recognized!"
+		echo "Exiting..."
+		exit 1
+	fi
+	if [ ! "$2" ]; then
 		app.backupType = $DEFAULT_APP_BACKUP_TYPE
 	else
-		app.backupType = $3
+		app.backupType = $2
 	fi
+	
+	# Source paths to be backed up
+	declare -i i=1
+	for sourcePath in ${@:3}; do
+		echo $i
+		app.sourcePaths "$i" = "$sourcePath"
+		i+=1
+	done
+	i=i-1
+	app.sourcePathsCount = "$i"
 	
 	echo "app: Built."
 }
@@ -49,11 +61,21 @@ app.name() {
 app.installCommand() {
 	app.field installCommand "$1" "$2"
 }
-app.sourcePaths() {
-	app.field sourcePaths "$1" "$2"
-}
 app.backupType() {
 	app.field backupType "$1" "$2"
+}
+app.sourcePaths() {
+	if [ "$2" = '' ]; then
+		for (( i=1 ; i <= $(app.sourcePathsCount) ; i++ )); do
+			app.field sourcePath${i}
+		done
+	else
+		app.field sourcePath${1} "$2" "$3"
+	fi
+}
+# Stores number of sourcePaths
+app.sourcePathsCount() {
+	app.field sourcePathsCount "$1" "$2"
 }
 
 # Install app on call
