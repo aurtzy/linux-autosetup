@@ -19,7 +19,7 @@ appGroup.field() {
 # appGroup class constructor
 # Params: none
 appGroup.constructor() {
-	appGroup.name = appGroup
+	appGroup.name = "appGroup"
 	appGroup.apps = ''
 }
 
