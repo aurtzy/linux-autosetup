@@ -115,11 +115,15 @@ app() {
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
 	$1.constructor "$2" "$3" "$4"
 }
+# App group constructor caller
+# $1=name
 appGroup() {
 	noHyphens=$(convertHyphens "$1")
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
 	$1.constructor
 }
+# Recovery files constructor caller
+# $1=name, $2=? $3=?
 recovery() {
 	noHyphens=$(convertHyphens "$1")
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class))
