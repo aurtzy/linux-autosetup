@@ -102,6 +102,12 @@ dump() {
 	fi
 }
 
+# String converter methods to allow functionality with Bash
+# Convert '-' and $hyphenConversion from and to each other
+convertHyphens() {
+	echo ${1//-/"$hyphenConversion"}
+}
+
 # Functions used to construct new objects
 # Param $1 = name, additional params come after
 app() {
@@ -118,12 +124,6 @@ recovery() {
 	noHyphens=$(convertHyphens "$1")
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class))
 	$1.constructor "$2" "$3"
-}
-
-# String converter methods to allow functionality with Bash
-# Convert '-' and $hyphenConversion from and to each other
-convertHyphens() {
-	echo ${1//-/"$hyphenConversion"}
 }
 
 # Return all apps separated by spaces
