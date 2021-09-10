@@ -67,7 +67,7 @@ app.backupType() {
 app.sourcePaths() {
 	if [ "$2" = '' ]; then
 		for (( i=1 ; i <= $(app.sourcePathsCount) ; i++ )); do
-			app.field sourcePath${i}
+						app.field sourcePath${i}
 		done
 	else
 		app.field sourcePath${1} "$2" "$3"
@@ -92,54 +92,49 @@ app.backup() {
 		echo "app: No sourcePaths specified for app."
 		return
 	else
-		dump "INITIALIZE" "app"
 		backupDir="$APP_BACKUP_DIR/app"
 		if [ ! -d "$backupDir" ]; then
 			echo
 			echo "app: Backup directory not found. Making one for you..."
 			mkdir -p "$backupDir"
+		else
+			dump "INITIALIZE" "app"
 		fi
-		while
-		declare -i i+=1
-		do
+		
+		for sourcePath in $(testing.sourcePaths); do
 			echo
-			sourcePath="$(extractSourcePath "$(app.sourcePaths)" $i)"
-			if [ "$sourcePath" = '' ]; then
-				break
-			else
-				if [ ${sourcePath: -1} = '/' ]; then
-					sourcePath=${sourcePath::-1}
-				fi
-				source="${sourcePath##*"/"}"
-				sourceDir="${sourcePath%"/"*}"
+			if [ ${sourcePath: -1} = '/' ]; then
+				sourcePath=${sourcePath::-1}
+			fi
+			source="${sourcePath##*"/"}"
+			sourceDir="${sourcePath%"/"*}"
+			
+			# Check if sourcePath exists
+			if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+				echo "app: Found: $sourcePath"
 				
-				# Check if sourcePath exists
-				if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
-					echo "app: Found: $sourcePath"
-					
-					# Dump any old backup
-					echo "$backupDir/$source"
-					if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
-						echo "app: Old backup found. Dumping..."
-						dump "$backupDir/$source" "app"
-						echo "app: Dumped old $source"
-					fi
-					
-					# PERFORM BACKUP
-					echo "app: Performing backup..."
-					if [ "$(app.backupType)" = "ARCHIVE" ]; then
-						cp -a "$sourcePath" "$backupDir/$source"
-						echo "app: Archived $sourcePath"
-					elif [ "$(app.backupType)" = "HARDLINK" ]; then
-						cp -al "$sourcePath" "$backupDir/$source"
-						echo "app: Hard-linked $sourcePath"
-					else
-						echo "app: Error: Backup type $(app.backupType) not recognized."
-					fi
-				else
-					echo "app: Error: Could not find $sourcePath"
-					continue
+				# Dump any old backup
+				echo "$backupDir/$source"
+				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
+					echo "app: Old backup found. Dumping..."
+					dump "$backupDir/$source" "app"
+					echo "app: Dumped old $source"
 				fi
+				
+				# PERFORM BACKUP
+				echo "app: Performing backup..."
+				if [ "$(app.backupType)" = "ARCHIVE" ]; then
+					cp -a "$sourcePath" "$backupDir/$source"
+					echo "app: Archived $sourcePath"
+				elif [ "$(app.backupType)" = "HARDLINK" ]; then
+					cp -al "$sourcePath" "$backupDir/$source"
+					echo "app: Hard-linked $sourcePath"
+				else
+					echo "app: Error: Backup type $(app.backupType) not recognized."
+				fi
+			else
+				echo "app: Error: Could not find $sourcePath"
+				continue
 			fi
 		done
 		echo "app: Backup completed."
