@@ -5,15 +5,15 @@
 # Class named "archive" for bash object
 
 # fields
-declare -Ag archive_fields
+declare -Ag fields
 
 # Handles getting/setting fields.
 archive.field() {
 	if [ "$2" == "=" ]
 	then
-		archive_fields[$1]=$3
+		fields[$1]=$3
 	else
-		echo ${archive_fields[$1]}
+		echo ${fields[$1]}
 	fi
 }
 
