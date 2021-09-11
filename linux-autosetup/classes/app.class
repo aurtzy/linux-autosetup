@@ -51,6 +51,8 @@ app.constructor() {
 	i=i-1
 	app.sourcePathsCount = "$i"
 	
+	app.installed = 0
+	
 	app.failedInstall = 0
 	
 	echo "app: Built."
@@ -83,6 +85,10 @@ app.sourcePathsCount() {
 	declare -i intParam=$2
 	app.field sourcePathsCount "$1" "$intParam"
 }
+app.installed() {
+	declare -i intParam=$2
+	app.field installed "$1" "$intParam"
+}
 app.failedInstall() {
 	declare -i intParam=$2
 	app.field failedInstall "$1" "$intParam"
@@ -91,6 +97,10 @@ app.failedInstall() {
 # Install app on call
 # Also reset to original dir in case command used cd
 app.install() {
+	if [ $(app.installed) -eq 1 ]; then
+		echo "app: Already installed during this script."
+		return 3
+	fi
 	echo "app: Installing..."
 	eval $(app.installCommand)
 	if [ $? -ne 0 ]; then
@@ -118,8 +128,9 @@ app.install() {
 		else
 			echo "apps: Backups will not be installed."
 		fi
-		
 	fi
+	
+	app.installed = 1
 }
 
 app.installBackups() {
