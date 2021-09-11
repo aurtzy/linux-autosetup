@@ -24,7 +24,7 @@ declare -i installAppBackups=0
 declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
-# Default app backup type - "ARCHIVE", "HARDLINK"
+# Default app backup type - "COPY", "HARDLINK"
 declare APP_BACKUP_TYPE="COPY"
 # Where archive files go
 declare ARCHIVE_BACKUP_DIR="./archive"

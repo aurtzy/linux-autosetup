@@ -110,7 +110,7 @@ app.install() {
 	cd "$SCRIPT_WORKING_DIR"
 	
 	if [ "$(app.sourcePaths)" != '' ]; then
-		echo "apps: One or more backups were detected."
+		echo "app: One or more backups were detected."
 		if [ $installAppBackups -eq 1 ]; then
 			app.installBackups
 		elif [ $installAppBackups -eq 0 ]; then
