@@ -96,6 +96,7 @@ app() {
 	fields="$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
 	$1.constructor "$2" "$3" "${@:4}"
+	ALL.add "$1"
 }
 # App group constructor caller
 # $1=name
@@ -173,7 +174,6 @@ while IFS= read -r line; do
 	if [ "$section" = 'APPLICATIONS' ]; then
 		app="$(cut -d ' ' -f 1 <<< "$line ")"
 		apps+=($app)
-		ALL.add "$app"
 		eval app $line
 	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
 		if [ ${line:0:6} = 'group=' ]; then
