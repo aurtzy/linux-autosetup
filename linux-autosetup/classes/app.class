@@ -29,7 +29,7 @@ app.constructor() {
 	fi
 	
 	# Backup type
-	if [[ "$2" != "" && "$2" != 'ARCHIVE' && "$2" != 'HARDLINK' ]]; then
+	if [[ "$2" != "" && "$2" != 'COPY' && "$2" != 'HARDLINK' ]]; then
 		echo "app: Encountered an error."
 		echo "Error: Backup type input $2 was not recognized!"
 		echo "Exiting..."
@@ -181,9 +181,9 @@ app.backup() {
 				
 				# PERFORM BACKUP
 				echo "app: Performing backup..."
-				if [ "$(app.backupType)" = "ARCHIVE" ]; then
+				if [ "$(app.backupType)" = "COPY" ]; then
 					cp -a "$sourcePath" "$backupDir/$source"
-					echo "app: Archived $sourcePath"
+					echo "app: Copied $sourcePath"
 				elif [ "$(app.backupType)" = "HARDLINK" ]; then
 					cp -al "$sourcePath" "$backupDir/$source"
 					echo "app: Hard-linked $sourcePath"

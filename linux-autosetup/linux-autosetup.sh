@@ -25,7 +25,7 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
 # Default app backup type - "ARCHIVE", "HARDLINK"
-declare APP_BACKUP_TYPE="ARCHIVE"
+declare APP_BACKUP_TYPE="COPY"
 # Where archive files go
 declare ARCHIVE_BACKUP_DIR="./archive"
 # Where to dump files
