@@ -148,7 +148,7 @@ promptYesNo() {
 ###############
 
 # Import config autosetup.conf
-. autosetup.conf
+. config/autosetup.conf
 
 # Create APP appGroup
 appGroup ALL
@@ -187,7 +187,8 @@ while IFS= read -r line; do
 		eval $line
 	fi
 	
-done < "$CONFIG_FILE"
+done < "./config/$CONFIG_FILE"
+cd "$SCRIPT_WORKING_DIR"
 
 # Before starting script, ask user if the variables
 # that have been set are okay with them. Then, proceed.

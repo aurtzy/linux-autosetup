@@ -44,7 +44,6 @@ app.constructor() {
 	# Source paths to be backed up
 	declare -i i=1
 	for sourcePath in ${@:3}; do
-		echo $i
 		app.sourcePaths "$i" = "$sourcePath"
 		i+=1
 	done
