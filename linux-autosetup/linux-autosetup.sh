@@ -39,13 +39,12 @@ declare CONFIG_FILE="./autosetup_default.conf"
 # $nameSubstitution is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
 
-# Stores applications as keys
-# Stores "app strings" as data
+# Stores all app names
 declare -ag apps
 
 # Stores app groups as keys
 # Stores apps separated by spaces as data
-declare -ag appGroups
+declare -Ag appGroups
 
 ####################
 # GLOBAL FUNCTIONS #
@@ -93,6 +92,10 @@ convertHyphens() {
 # App constructor caller
 # $1=name, $2=installCommand, $3=backupType, ${@:4}=sourcePaths
 app() {
+	if [ "$1" = '' ]; then
+		echo "Error: app name parameter was empty."
+		return
+	fi
 	fields="$(convertHyphens "$1")_app_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
 	$1.constructor "$2" "$3" "${@:4}"
@@ -101,6 +104,10 @@ app() {
 # App group constructor caller
 # $1=name
 appGroup() {
+	if [ "$1" = '' ]; then
+		echo "Error: appGroup name parameter was empty."
+		return
+	fi
 	fields="$(convertHyphens "$1")_appGroup_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
 	$1.constructor
@@ -108,9 +115,20 @@ appGroup() {
 # Archive files constructor caller
 # $1=name, $2=? $3=?
 archive() {
+	if [ "$1" = '' ]; then
+		echo "Error: archive name parameter was empty."
+		return
+	fi
 	fields="$(convertHyphens "$1")_archive_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/archive/$1/g" "$CLASSES_DIR"/archive.class))
 	$1.constructor "$2" "$3"
+}
+
+# Initialize app groups in appGroups array
+initializeAppGroups() {
+	for appGroup in $(appGroups); do
+		appGroup $appGroup
+	done
 }
 
 # Return all apps separated by spaces
@@ -123,7 +141,7 @@ apps() {
 
 # Return all appGroups separated by spaces
 appGroups() {
-	for appGroup in "${appGroups[@]}"; do
+	for appGroup in "${!appGroups[@]}"; do
 		echo -n " $appGroup"
 	done
 	echo
@@ -154,43 +172,9 @@ promptYesNo() {
 # Create APP appGroup
 appGroup allApps
 
-# Import CONFIG_FILE
+# Import CONFIG_FILE & initialize stuff
 . config/$CONFIG_FILE
-exit
-# Skip lines that do not need to be parsed
-# Detects and assigns apps to groups
-while IFS= read -r line; do
-	# If line is empty or a comment
-	if [[ "$line" = '' || ${line:0:1} = '#' ]]; then
-		continue
-	fi
-	
-	if [ "$line" = 'APPLICATIONS' ]; then
-		section='APPLICATIONS'
-		continue
-	elif [ "$line" = 'APPLICATION_GROUPS' ]; then
-		section='APPLICATION_GROUPS'
-		continue
-	fi
-	
-	if [ "$section" = 'APPLICATIONS' ]; then
-		app="$(cut -d ' ' -f 1 <<< "$line ")"
-		apps+=($app)
-		eval app $line
-	elif [ "$section" = 'APPLICATION_GROUPS' ]; then
-		if [ ${line:0:6} = 'group=' ]; then
-			appGroup="${line:6}"
-			appGroups+=("$appGroup")
-			appGroup "$appGroup"
-		else
-			$appGroup.add "$line"
-		fi
-	else
-		eval $line
-	fi
-	
-done < "./config/$CONFIG_FILE"
-cd "$SCRIPT_WORKING_DIR"
+initializeAppGroups
 
 # Before starting script, ask user if the variables
 # that have been set are okay with them. Then, proceed.

@@ -23,6 +23,8 @@ appGroup.constructor() {
 		echo "appGroup: Confliction? There may be an overlap with this name."
 	fi
 	appGroup.apps = ''
+	
+	echo "appGroup: App group built."
 }
 
 # Getter/setter methods
@@ -43,6 +45,7 @@ appGroup.add() {
 # Also reset to original dir in case command used cd
 appGroup.install() {
 	echo "appGroup: Installing from app group..."
+	echo "Use -y/-n if you want to autofill."
 	for app in $(appGroup.apps); do
 		$app.install
 	done

@@ -19,7 +19,7 @@ app.field() {
 # app class constructor
 # Params: $1 = installCommand $2 = sourcePaths
 app.constructor() {
-	
+
 	# Command that is used to install app
 	if [ ! "$1" ]; then
 		app.installCommand = "${DEFAULT_APP_INSTALL_COMMAND//"$name"/app}"
@@ -53,7 +53,7 @@ app.constructor() {
 	
 	app.failedInstall = 0
 	
-	echo "app: Built."
+	echo "app: App built."
 }
 
 # Getter/setter methods
@@ -110,7 +110,6 @@ app.install() {
 		if [ $installAppBackups -eq 1 ]; then
 			app.installBackups
 		elif [ $installAppBackups -eq 0 ]; then
-			echo "Enter -y/-n if you want to autofill."
 			declare -i userIn=$(promptYesNo "Would you like to install them?")
 			if [ $userIn -eq 1 ]; then
 				app.installBackups
