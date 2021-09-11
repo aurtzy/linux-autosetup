@@ -93,6 +93,7 @@ app.install() {
 		if [ $installAppBackups -eq 1 ]; then
 			app.installBackups
 		elif [ $installAppBackups -eq 0 ]; then
+			echo "Enter -y/-n if you want to autofill."
 			declare -i userIn=$(promptYesNo "Would you like to install them?")
 			if [ $userIn -eq 1 ]; then
 				app.installBackups
@@ -114,9 +115,10 @@ app.installBackups() {
 	for sourcePath in $(app.sourcePaths); do
 		source="${sourcePath##*"/"}"
 		sourceDir="${sourcePath%"/"*}"
+		echo "app: Installing $sourcePath"
 		cp -a "$backupDir/$source" "$sourceDir"
 		if [ $? -ne 0 ]; then
-			echo "app: $source could not be installed."
+			echo "app: Error: $source could not be installed."
 		else
 			echo "app: $source was successfully installed!"
 		fi

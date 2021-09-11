@@ -13,7 +13,7 @@
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
 # String used to substitute for app names
-declare name='_name_'
+declare name='$name'
 
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
@@ -195,6 +195,7 @@ echo
 echo "**Please double-check the variables that have been set."
 echo "**Directories will be created only when needed."
 echo
+echo "Script working directory: $SCRIPT_WORKING_DIR"
 echo "App backup directory: $APP_BACKUP_DIR"
 echo "Recovery backup directory: $RECOVERY_BACKUP_DIR"
 echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
