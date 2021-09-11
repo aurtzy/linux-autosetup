@@ -20,8 +20,7 @@ declare name='_name_'
 declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
-# Default backup type of apps
-# Backup types: "ARCHIVE", "HARDLINK"
+# Default app backup type - "ARCHIVE", "HARDLINK"
 declare APP_BACKUP_TYPE="ARCHIVE"
 # Where recovery files go
 declare RECOVERY_BACKUP_DIR="./recovery"
