@@ -48,6 +48,7 @@ appGroup.add() {
 appGroup.install() {
 	echo "appGroup: Installing from app group..."
 	echo "Use -y/-n if you want to autofill prompts for backup installs."
+	echo
 	for app in $(appGroup.apps); do
 		$app.install
 	done
