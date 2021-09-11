@@ -67,10 +67,13 @@ app.backupType() {
 app.sourcePaths() {
 	if [ "$2" = '' ]; then
 		for (( i=1 ; i <= $(app.sourcePathsCount) ; i++ )); do
-						app.field sourcePath${i}
+			app.field sourcePath${i}
 		done
 	else
-		app.field sourcePath${1} "$2" "$3"
+		if [ ${3: -1} = '/' ]; then
+			sourcePath=${3::-1}
+		fi
+		app.field sourcePath${1} "$2" "$sourcePath"
 	fi
 }
 # Stores number of sourcePaths
@@ -103,9 +106,6 @@ app.backup() {
 		
 		for sourcePath in $(testing.sourcePaths); do
 			echo
-			if [ ${sourcePath: -1} = '/' ]; then
-				sourcePath=${sourcePath::-1}
-			fi
 			source="${sourcePath##*"/"}"
 			sourceDir="${sourcePath%"/"*}"
 			
