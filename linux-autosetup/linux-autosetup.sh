@@ -125,6 +125,21 @@ appGroups() {
 	echo
 }
 
+# Prompt user to input yes/no
+# In special cases, using -y/-n autofills y/n for all prompts
+# Returns: -n=-1, n=0, y=1, -y=2
+promptYesNo() {
+    while true; do
+        read -p "$* [y/n]: " userIn
+        case $userIn in
+            [Yy]*) echo 1; return;;  
+            [Nn]*) echo 0; return;;
+            -[Yy]*) echo 2; return;;
+            -[Nn]*) echo -1; return;;
+        esac
+    done
+}
+
 ###############
 # SCRIPT BODY #
 ###############
@@ -183,11 +198,7 @@ echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
 echo "Default app backup type: $DEFAULT_APP_BACKUP_TYPE"
 echo "Dump directory: $DUMP_DIR"
 echo
-echo "**If you are okay with these settings, type 'yes' to continue."
-echo "**Otherwise, type anything else to exit."
-echo -n ": "
-read userIn
-if [[ "$userIn" = 'y' || "$userIn" = 'yes' ]]; then
+if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then
 	echo "User is okay with these settings."
 	echo "Continuing..."
 else
