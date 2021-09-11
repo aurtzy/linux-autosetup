@@ -54,6 +54,7 @@ appGroup.install() {
 		# Implement checking if app failed to install
 	done
 	echo "appGroup: Installation completed!"
+	installAppBackups=0
 }
 
 # Back up sources

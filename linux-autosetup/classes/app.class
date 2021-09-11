@@ -87,6 +87,40 @@ app.install() {
 	echo "app: Installing..."
 	eval $(app.installCommand)
 	cd "$SCRIPT_WORKING_DIR"
+	
+	if [ "$(app.sourcePaths)" != '' ]; then
+		echo "apps: One or more backups were detected."
+		if [ $installAppBackups -eq 1 ]; then
+			app.installBackups
+		elif [ $installAppBackups -eq 0 ]; then
+			declare -i userIn=$(promptYesNo "Would you like to install them?")
+			if [ $userIn -eq 1 ]; then
+				app.installBackups
+			elif [ $userIn -eq 2 ]; then
+				installAppBackups=1
+				app.installBackups
+			elif [ $userIn -eq -1 ]; then
+				installAppBackups=-1
+			fi
+		else
+			echo "apps: Backups will not be installed."
+		fi
+		
+	fi
+}
+
+app.installBackups() {
+	backupDir="$APP_BACKUP_DIR/app"
+	for sourcePath in $(app.sourcePaths); do
+		source="${sourcePath##*"/"}"
+		sourceDir="${sourcePath%"/"*}"
+		cp -a "$backupDir/$source" "$sourceDir"
+		if [ $? -ne 0 ]; then
+			echo "app: $source could not be installed."
+		else
+			echo "app: $source was successfully installed!"
+		fi
+	done
 }
 
 # Back up sources

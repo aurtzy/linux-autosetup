@@ -15,7 +15,11 @@ declare hyphenConversion='1_1'
 # String used to substitute for app names
 declare name='_name_'
 
-# Script working directory
+# "Booleans": -1=false/no, 0=unset, 1=true/yes
+# Whether app backups should also be installed - 0 = always ask
+# Should reset to 0 after every user command or appGroup install
+declare -i installAppBackups=0
+
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
@@ -223,6 +227,7 @@ echo
 echo "You can manually run extra commands within the script or type 'exit' to quit."
 echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 while
+installAppBackups=0
 echo -n ": "
 read userIn
 do
