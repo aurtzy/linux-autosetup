@@ -110,7 +110,7 @@ appGroup() {
 	fi
 	fields="$(convertHyphens "$1")_appGroup_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
-	$1.constructor
+	$1.constructor ${@:2}
 }
 # Archive files constructor caller
 # $1=name, $2=? $3=?
@@ -127,7 +127,7 @@ archive() {
 # Initialize app groups in appGroups array
 initializeAppGroups() {
 	for appGroup in $(appGroups); do
-		appGroup $appGroup
+		appGroup $appGroup ${appGroups[$appGroup]}
 	done
 }
 

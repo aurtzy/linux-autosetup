@@ -22,7 +22,9 @@ appGroup.constructor() {
 	if [ "$fields" != '' ]; then
 		echo "appGroup: Confliction? There may be an overlap with this name."
 	fi
-	appGroup.apps = ''
+	for app in ${@}; do
+		appGroup.add $app
+	done
 	
 	echo "appGroup: App group built."
 }
@@ -45,7 +47,7 @@ appGroup.add() {
 # Also reset to original dir in case command used cd
 appGroup.install() {
 	echo "appGroup: Installing from app group..."
-	echo "Use -y/-n if you want to autofill."
+	echo "Use -y/-n if you want to autofill prompts for backup installs."
 	for app in $(appGroup.apps); do
 		$app.install
 	done
@@ -56,6 +58,7 @@ appGroup.install() {
 			echo $app
 		fi
 	done
+	echo
 	echo "appGroup: Installation completed!"
 	installAppBackups=0
 }
