@@ -26,8 +26,8 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 declare APP_BACKUP_DIR="./app-backups"
 # Default app backup type - "ARCHIVE", "HARDLINK"
 declare APP_BACKUP_TYPE="ARCHIVE"
-# Where recovery files go
-declare RECOVERY_BACKUP_DIR="./recovery"
+# Where archive files go
+declare ARCHIVE_BACKUP_DIR="./archive"
 # Where to dump files
 declare DUMP_DIR="./dump"
 # Where classes are stored
@@ -104,11 +104,11 @@ appGroup() {
 	. <(sed "s/fields/$noHyphens/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
 	$1.constructor
 }
-# Recovery files constructor caller
+# Archive files constructor caller
 # $1=name, $2=? $3=?
-recovery() {
+archive() {
 	noHyphens=$(convertHyphens "$1")
-	. <(sed "s/fields/$noHyphens/g" <(sed "s/recovery/$1/g" "$CLASSES_DIR"/recovery.class))
+	. <(sed "s/fields/$noHyphens/g" <(sed "s/archive/$1/g" "$CLASSES_DIR"/archive.class))
 	$1.constructor "$2" "$3"
 }
 
@@ -198,7 +198,7 @@ echo "**Directories will be created only when needed."
 echo
 echo "Script working directory: $SCRIPT_WORKING_DIR"
 echo "App backup directory: $APP_BACKUP_DIR"
-echo "Recovery backup directory: $RECOVERY_BACKUP_DIR"
+echo "Archive backup directory: $ARCHIVE_BACKUP_DIR"
 echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
 echo "Default app backup type: $DEFAULT_APP_BACKUP_TYPE"
 echo "Dump directory: $DUMP_DIR"
@@ -214,7 +214,7 @@ fi
 
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
-# If automatic: Ask user to choose from 'apps', 'recovery', or 'both'
+# If automatic: Ask user to choose from 'apps', 'archive', or 'both'
 
 ###################
 #  END OF SCRIPT  #
