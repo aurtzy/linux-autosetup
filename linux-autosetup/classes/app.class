@@ -51,6 +51,8 @@ app.constructor() {
 	i=i-1
 	app.sourcePathsCount = "$i"
 	
+	app.failedInstall = 0
+	
 	echo "app: Built."
 }
 
@@ -78,7 +80,12 @@ app.sourcePaths() {
 }
 # Stores number of sourcePaths
 app.sourcePathsCount() {
-	app.field sourcePathsCount "$1" "$2"
+	declare -i intParam=$2
+	app.field sourcePathsCount "$1" "$intParam"
+}
+app.failedInstall() {
+	declare -i intParam=$2
+	app.field failedInstall "$1" "$intParam"
 }
 
 # Install app on call
@@ -86,6 +93,11 @@ app.sourcePathsCount() {
 app.install() {
 	echo "app: Installing..."
 	eval $(app.installCommand)
+	if [ $? -ne 0 ]; then
+		echo "app: Error: app failed to install."
+		app.failedInstall = 1
+		return 1
+	fi
 	cd "$SCRIPT_WORKING_DIR"
 	
 	if [ "$(app.sourcePaths)" != '' ]; then

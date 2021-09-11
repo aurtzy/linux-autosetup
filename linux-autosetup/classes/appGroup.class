@@ -50,8 +50,9 @@ appGroup.install() {
 	echo
 	echo "If any apps failed to install, they will be listed below:"
 	for app in $(appGroup.apps); do
-		echo a
-		# Implement checking if app failed to install
+		if [ $($app.failedInstall) -eq 1 ]; then
+			echo $app
+		fi
 	done
 	echo "appGroup: Installation completed!"
 	installAppBackups=0
