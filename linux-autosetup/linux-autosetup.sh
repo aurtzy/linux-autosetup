@@ -93,22 +93,22 @@ convertHyphens() {
 # App constructor caller
 # $1=name, $2=installCommand, $3=backupType, ${@:4}=sourcePaths
 app() {
-	fields="$(convertHyphens "$1")_fields"
+	fields="$(convertHyphens "$1")_app_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
 	$1.constructor "$2" "$3" "${@:4}"
-	ALL.add "$1"
+	allApps.add "$1"
 }
 # App group constructor caller
 # $1=name
 appGroup() {
-	fields="$(convertHyphens "$1")_fields"
+	fields="$(convertHyphens "$1")_appGroup_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
 	$1.constructor
 }
 # Archive files constructor caller
 # $1=name, $2=? $3=?
 archive() {
-	fields="$(convertHyphens "$1")_fields"
+	fields="$(convertHyphens "$1")_archive_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/archive/$1/g" "$CLASSES_DIR"/archive.class))
 	$1.constructor "$2" "$3"
 }
@@ -152,9 +152,11 @@ promptYesNo() {
 . config/autosetup.conf
 
 # Create APP appGroup
-appGroup ALL
+appGroup allApps
 
-# Import apps.conf
+# Import CONFIG_FILE
+. config/$CONFIG_FILE
+exit
 # Skip lines that do not need to be parsed
 # Detects and assigns apps to groups
 while IFS= read -r line; do

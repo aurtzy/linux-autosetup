@@ -19,14 +19,13 @@ appGroup.field() {
 # appGroup class constructor
 # Params: none
 appGroup.constructor() {
-	appGroup.name = "appGroup"
+	if [ "$fields" != '' ]; then
+		echo "appGroup: Confliction? There may be an overlap with this name."
+	fi
 	appGroup.apps = ''
 }
 
 # Getter/setter methods
-appGroup.name() {
-	appGroup.field name "$1" "$2"
-}
 appGroup.apps() {
 	appGroup.field apps "$1" "$2"
 }

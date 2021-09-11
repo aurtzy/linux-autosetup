@@ -19,7 +19,6 @@ app.field() {
 # app class constructor
 # Params: $1 = installCommand $2 = sourcePaths
 app.constructor() {
-	app.name = "app"
 	
 	# Command that is used to install app
 	if [ ! "$1" ]; then
@@ -58,9 +57,6 @@ app.constructor() {
 }
 
 # Getter/setter methods
-app.name() {
-	app.field name "$1" "$2"
-}
 app.installCommand() {
 	app.field installCommand "$1" "$2"
 }
