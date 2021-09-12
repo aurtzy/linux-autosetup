@@ -11,4 +11,4 @@ Linux Autosetup may require some initial configuration beforehand in order to bu
 # Commands
 /* to-do */
 # Credit to:
-Maxim Norin https://github.com/mnorin, for their OOP emulation code in Bash, initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277 I'm not sure if I would have been able to write this script if I didn't find this.
+Maxim Norin https://github.com/mnorin, for their OOP emulation code in Bash, initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
