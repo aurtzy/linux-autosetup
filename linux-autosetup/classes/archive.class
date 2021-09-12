@@ -9,8 +9,7 @@ declare -Ag fields
 
 # Handles getting/setting fields.
 archive.field() {
-	if [ "$2" == "=" ]
-	then
+	if [ "$2" == "=" ]; then
 		fields[$1]=$3
 	else
 		echo ${fields[$1]}
