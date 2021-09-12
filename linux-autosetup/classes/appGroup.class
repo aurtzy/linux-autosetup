@@ -19,10 +19,10 @@ appGroup.field() {
 # appGroup class constructor
 # Params: none
 appGroup.constructor() {
-	if [ "$fields" != '' ]; then
-		echo "appGroup: Confliction? There may be an overlap with this name."
-	fi
 	for app in ${@}; do
+		if [ "appGroup" = "$app" ]; then
+			echo "appGroup: Confliction? There may be an overlap with this app group name."
+		fi
 		appGroup.add $app
 	done
 	
