@@ -157,7 +157,7 @@ app.backup() {
 			dump "INITIALIZE" "app"
 		fi
 		
-		for sourcePath in $(testing.sourcePaths); do
+		for sourcePath in $(app.sourcePaths); do
 			echo
 			source="${sourcePath##*"/"}"
 			sourceDir="${sourcePath%"/"*}"
