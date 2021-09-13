@@ -43,6 +43,19 @@ archive.sourcePathsCount() {
 	archive.field sourcePathsCount "$1" "$intParam"
 }
 
+# Archiving functions
+
+archive.compress() {
+	echo
+}
+archive.decompress() {
+	echo
+}
+
+archive.encrypt() {
+	echo
+}
+
 # Install archives to appropriate directories
 archive.install() {
 	echo "#implement archive.install"
