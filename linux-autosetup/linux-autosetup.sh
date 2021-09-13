@@ -17,7 +17,7 @@ declare name='$name'
 
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
-# Should reset to 0 after every user command or appGroup install
+# Should reset to 0 after every user command or AppGroup install
 declare -i installAppBackups=0
 
 # If a command call uses cd, this will allow remaining in proper dir
@@ -91,25 +91,25 @@ convertHyphens() {
 
 # App constructor caller
 # $1=name, $2=installCommand, $3=backupType, ${@:4}=sourcePaths
-app() {
+App() {
 	if [ "$1" = '' ]; then
 		echo "Error: app name parameter was empty."
 		return
 	fi
 	fields="$(convertHyphens "$1")_app_fields"
-	. <(sed "s/fields/$fields/g" <(sed "s/app/$1/g" "$CLASSES_DIR"/app.class))
+	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
 	$1.constructor "$2" "$3" "${@:4}"
 	allApps.add "$1"
 }
 # App group constructor caller
 # $1=name
-appGroup() {
+AppGroup() {
 	if [ "$1" = '' ]; then
-		echo "Error: appGroup name parameter was empty."
+		echo "Error: AppGroup name parameter was empty."
 		return
 	fi
 	fields="$(convertHyphens "$1")_appGroup_fields"
-	. <(sed "s/fields/$fields/g" <(sed "s/appGroup/$1/g" "$CLASSES_DIR"/appGroup.class))
+	. <(sed "s/fields/$fields/g" <(sed "s/AppGroup/$1/g" "$CLASSES_DIR"/AppGroup.class))
 	$1.constructor ${@:2}
 }
 # Archive files constructor caller
@@ -127,7 +127,7 @@ Archive() {
 # Initialize app groups in appGroups array
 initializeAppGroups() {
 	for appGroup in $(appGroups); do
-		appGroup $appGroup ${appGroups[$appGroup]}
+		AppGroup $appGroup ${appGroups[$appGroup]}
 	done
 }
 
@@ -170,7 +170,7 @@ promptYesNo() {
 . config/autosetup.conf
 
 # Create APP appGroup
-appGroup allApps
+AppGroup allApps
 
 # Import CONFIG_FILE & initialize stuff
 . config/$CONFIG_FILE

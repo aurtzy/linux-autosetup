@@ -21,7 +21,7 @@ Archive.field() {
 Archive.constructor() {
 	Archive.field name = "Archive"
 	
-	echo "Archive: archive object built."
+	echo "Archive: Built archive object."
 }
 
 # Getters/setters
