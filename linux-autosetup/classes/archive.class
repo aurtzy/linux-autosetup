@@ -21,9 +21,29 @@ archive.field() {
 archive.constructor() {
 	archive.field name = "archive"
 	
-	echo "$(archive.name): Built successfully."
+	echo "archive: Archive built."
 }
 
+#Getters/setters
+archive.sourcePaths() {
+	if [ "$2" = '' ]; then
+		for (( i=1 ; i <= $(app.sourcePathsCount) ; i++ )); do
+			archive.field sourcePath${i}
+		done
+	else
+		if [ ${3: -1} = '/' ]; then
+			sourcePath=${3::-1}
+		fi
+		archive.field sourcePath${1} "$2" "$sourcePath"
+	fi
+}
+ # Stores number of sourcePaths
+archive.sourcePathsCount() {
+	declare -i intParam=$2
+	archive.field sourcePathsCount "$1" "$intParam"
+}
+
+# Install archives to appropriate directories
 archive.install() {
 	echo "#implement archive.install"
 }

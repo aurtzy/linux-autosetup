@@ -113,7 +113,7 @@ appGroup() {
 	$1.constructor ${@:2}
 }
 # Archive files constructor caller
-# $1=name, $2=? $3=?
+# $1=name, ${@:2}=sourcePaths
 archive() {
 	if [ "$1" = '' ]; then
 		echo "Error: archive name parameter was empty."
