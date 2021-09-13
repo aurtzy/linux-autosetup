@@ -27,8 +27,6 @@ declare hyphenConversion='1_1'
 # String used to substitute for app names
 declare name='$name'
 
-
-
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
