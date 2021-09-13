@@ -21,13 +21,14 @@ archive.field() {
 archive.constructor() {
 	archive.field name = "archive"
 	
-	echo "archive: Archive built."
+	echo "archive: Archive object built."
 }
 
-#Getters/setters
+# Getters/setters
+
 archive.sourcePaths() {
 	if [ "$2" = '' ]; then
-		for (( i=1 ; i <= $(app.sourcePathsCount) ; i++ )); do
+		for (( i=0 ; i < $(archive.sourcePathsCount) ; i++ )); do
 			archive.field sourcePath${i}
 		done
 	else
@@ -37,7 +38,6 @@ archive.sourcePaths() {
 		archive.field sourcePath${1} "$2" "$sourcePath"
 	fi
 }
- # Stores number of sourcePaths
 archive.sourcePathsCount() {
 	declare -i intParam=$2
 	archive.field sourcePathsCount "$1" "$intParam"

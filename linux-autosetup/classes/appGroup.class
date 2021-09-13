@@ -17,16 +17,11 @@ appGroup.field() {
 }
 
 # appGroup class constructor
-# Params: none
+# Params: apps to add
 appGroup.constructor() {
-	for app in ${@}; do
-		if [ "appGroup" = "$app" ]; then
-			echo "appGroup: Confliction? There may be an overlap with this app group name."
-		fi
-		appGroup.add $app
-	done
+	appGroup.add "${@}"
 	
-	echo "appGroup: App group built."
+	echo "appGroup: App group object built."
 }
 
 # Getter/setter methods
@@ -36,11 +31,13 @@ appGroup.apps() {
 
 # Add app to apps field
 appGroup.add() {
-	if [ "$appGroup.apps" = '' ]; then
-		appGroup.apps = "$1"
-	else
-		appGroup.apps = "$(appGroup.apps) $1"
-	fi
+	for app in "${@}"; do
+		if [ "$appGroup.apps" != '' ]; then
+			appGroup.apps = "$(appGroup.apps) $app"
+		else
+			appGroup.apps = "$app"
+		fi
+	done
 }
 
 # Install appGroup on call
@@ -57,6 +54,8 @@ appGroup.install() {
 	for app in $(appGroup.apps); do
 		if [ $($app.failedInstall) -eq 1 ]; then
 			echo $app
+		else
+			echo "No app was found with the name $app!"
 		fi
 	done
 	echo
