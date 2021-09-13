@@ -114,13 +114,13 @@ appGroup() {
 }
 # Archive files constructor caller
 # $1=name, ${@:2}=sourcePaths
-archive() {
+Archive() {
 	if [ "$1" = '' ]; then
-		echo "Error: archive name parameter was empty."
+		echo "Error: Archive name parameter was empty."
 		return
 	fi
 	fields="$(convertHyphens "$1")_archive_fields"
-	. <(sed "s/fields/$fields/g" <(sed "s/archive/$1/g" "$CLASSES_DIR"/archive.class))
+	. <(sed "s/fields/$fields/g" <(sed "s/Archive/$1/g" "$CLASSES_DIR"/Archive.class))
 	$1.constructor "$2" "$3"
 }
 

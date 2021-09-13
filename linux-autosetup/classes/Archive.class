@@ -1,0 +1,66 @@
+# Credit to Maxim Norin https://github.com/mnorin
+# for OOP emulation base from https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
+# Modified by Aurtzy
+
+# Class named "Archive" for bash object
+
+# fields
+declare -Ag fields
+
+# Handles getting/setting fields.
+Archive.field() {
+	if [ "$2" == "=" ]; then
+		fields[$1]=$3
+	else
+		echo ${fields[$1]}
+	fi
+}
+
+# Archive class constructor
+# Params: $1 = 
+Archive.constructor() {
+	Archive.field name = "Archive"
+	
+	echo "Archive: archive object built."
+}
+
+# Getters/setters
+
+Archive.sourcePaths() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.sourcePathsCount) ; i++ )); do
+			Archive.field sourcePath${i}
+		done
+	else
+		if [ ${3: -1} = '/' ]; then
+			sourcePath=${3::-1}
+		fi
+		Archive.field sourcePath${1} "$2" "$sourcePath"
+	fi
+}
+Archive.sourcePathsCount() {
+	declare -i intParam=$2
+	Archive.field sourcePathsCount "$1" "$intParam"
+}
+
+# Archiving functions
+
+Archive.compress() {
+	echo
+}
+Archive.decompress() {
+	echo
+}
+
+Archive.encrypt() {
+	echo
+}
+
+# Install Archives to appropriate directories
+Archive.install() {
+	echo "#implement Archive.install"
+}
+
+Archive.backup() {
+	echo "#implement Archive.backup"
+}
