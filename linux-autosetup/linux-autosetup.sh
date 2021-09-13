@@ -6,19 +6,28 @@
 #	exit 1
 #fi
 
-#########################
-# VARIABLE DECLARATIONS #
-#########################
+# Stores all app names
+declare -ag apps
+
+# Stores app groups as keys
+# Stores apps separated by spaces as data
+declare -Ag appGroups
+
+# "Booleans": -1=false/no, 0=unset, 1=true/yes
+# Whether app backups should also be installed - 0 = always ask
+# Should reset to 0 after every user command or AppGroup install
+declare -i appInstallBackups=0
+
+#############################
+# CONFIGURABLE DECLARATIONS #
+#############################
 
 # String used to substitute hyphens in creating custom functions
 declare hyphenConversion='1_1'
 # String used to substitute for app names
 declare name='$name'
 
-# "Booleans": -1=false/no, 0=unset, 1=true/yes
-# Whether app backups should also be installed - 0 = always ask
-# Should reset to 0 after every user command or AppGroup install
-declare -i installAppBackups=0
+
 
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
@@ -38,13 +47,6 @@ declare CONFIG_FILE="./autosetup_default.conf"
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
-
-# Stores all app names
-declare -ag apps
-
-# Stores app groups as keys
-# Stores apps separated by spaces as data
-declare -Ag appGroups
 
 ####################
 # GLOBAL FUNCTIONS #
@@ -216,7 +218,7 @@ echo
 echo "You can manually run extra commands within the script or type 'exit' to quit."
 echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 while
-installAppBackups=0
+appInstallBackups=0
 echo -n ": "
 read userIn
 do

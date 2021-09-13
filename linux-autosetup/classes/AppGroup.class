@@ -60,7 +60,7 @@ AppGroup.install() {
 	done
 	echo
 	echo "AppGroup: Installation completed!"
-	installAppBackups=0
+	appInstallBackups=0
 }
 
 # Back up sources

@@ -110,17 +110,17 @@ App.install() {
 	
 	if [ "$(App.sourcePaths)" != '' ]; then
 		echo "App: One or more backups were detected."
-		if [ $installBackups -eq 1 ]; then
+		if [ $appInstallBackups -eq 1 ]; then
 			App.installBackups
-		elif [ $installBackups -eq 0 ]; then
+		elif [ $appInstallBackups -eq 0 ]; then
 			declare -i userIn=$(promptYesNo "Would you like to install them?")
 			if [ $userIn -eq 1 ]; then
 				App.installBackups
 			elif [ $userIn -eq 2 ]; then
-				installBackups=1
+				appInstallBackups=1
 				App.installBackups
 			elif [ $userIn -eq -1 ]; then
-				installBackups=-1
+				appInstallBackups=-1
 			fi
 		else
 			echo "App: Backups will not be installed."
