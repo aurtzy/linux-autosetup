@@ -183,6 +183,7 @@ echo "**Please double-check the variables that have been set."
 echo "**Directories will be created only when needed."
 echo
 echo "Script working directory: $SCRIPT_WORKING_DIR"
+echo "Config file to work from: $CONFIG_FILE"
 echo "App backup directory: $APP_BACKUP_DIR"
 echo "Archive backup directory: $ARCHIVE_BACKUP_DIR"
 echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
