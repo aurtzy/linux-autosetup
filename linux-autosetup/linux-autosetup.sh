@@ -260,6 +260,7 @@ if [ "insert check for if user wanted manual, maybe through script params?" ]; t
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
 		echo "Installing apps..."
 		for entry in "${setupEntries[@]}"; do
+			echo
 			$entry.install
 		done
 		echo
@@ -267,6 +268,7 @@ if [ "insert check for if user wanted manual, maybe through script params?" ]; t
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
+			echo
 			$entry.backup
 		done
 		echo
