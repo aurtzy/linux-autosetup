@@ -152,7 +152,7 @@ runAtEnd() {
 # Import config autosetup.conf
 . config/linux-autosetup.conf.sh
 
-# Choose CONFIG_FILE
+# Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
 	while true; do
 		echo "Which config file do you want to use?"
