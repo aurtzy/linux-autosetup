@@ -25,22 +25,23 @@ declare name='$name'
 # CONFIGURABLE VARIABLES #
 ##########################
 
-# Default configiguration file
-declare CONFIG_FILE=""
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
+# Default configiguration file
+declare CONFIG_FILE=""
+# Where classes are stored
+declare CLASSES_DIR="./classes"
+
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
 # Default app backup type - "COPY", "HARDLINK"
 declare APP_BACKUP_TYPE="COPY"
-# Where to dump files
-declare DUMP_DIR="./dump"
-# Where classes are stored
-declare CLASSES_DIR="./classes"
-
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
+
+# Where to dump files
+declare DUMP_DIR="./dump"
 
 ####################
 # GLOBAL FUNCTIONS #

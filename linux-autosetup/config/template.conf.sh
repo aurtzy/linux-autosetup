@@ -2,13 +2,13 @@
 # CONFIGURABLE VARIABLES #
 ##########################
 
-# DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
-
 # DEFAULT_APP_BACKUP_TYPE="COPY"
 
 # APP_BACKUP_DIR="./app-backups"
 
-# DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
+# DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
+
+# DUMP_DIR="./dump"
 
 ################
 # APPLICATIONS #
