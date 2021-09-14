@@ -54,6 +54,7 @@ App.backupType() {
 		echo "App: Error: Backup type input $2 was not recognized!"
 		echo "Script will not continue. Please resolve."
 		echo "Exiting..."
+		read
 		exit 1
 	fi
 	App.field backupType "$1" "$2"

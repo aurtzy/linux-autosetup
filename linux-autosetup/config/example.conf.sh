@@ -123,7 +123,7 @@ appGroups=(
 	"
 )
 
-# Runs any commands the specified in the function
+# Runs any commands the specified in the function after automatic autosetup
 # If you want to include some other commands that
 # this script does not automatically handle, you're
 # free to add them here

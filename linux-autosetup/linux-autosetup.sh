@@ -3,6 +3,7 @@
 # Require run as root
 #if [ $(id -u) -ne 0 ]; then
 #	echo "Please run script as root! Exiting..."
+#	read
 #	exit 1
 #fi
 
@@ -111,6 +112,7 @@ AppGroup() {
 
 # Initialize app groups in appGroups array
 initializeAppGroups() {
+	appGroups[All]="${apps[*]}" # App group allApps; contains all apps
 	for appGroup in $(appGroups); do
 		AppGroup $appGroup "${appGroups[$appGroup]}"
 	done
@@ -126,19 +128,30 @@ appGroups() {
 	echo "${!appGroups[*]}"
 }
 
+# Check if given App/AppGroup exists
+isValid() {
+	if [[ " ${apps[*]} " =~ " ${1} " || " ${!appGroups[*]} " =~ " ${1} " ]]; then
+    	echo 1
+    	return
+	else
+		echo 0
+		return 1
+	fi
+}
+
 # Prompt user to input yes/no
 # In special cases, using -y/-n autofills y/n for all prompts
 # Returns: -n=-1, n=0, y=1, -y=2
 promptYesNo() {
-    while true; do
-        read -p "$* [y/n]: " userIn
-        case $userIn in
-            [Yy]*) echo 1; return;;  
-            [Nn]*) echo 0; return;;
-            -[Yy]*) echo 2; return;;
-            -[Nn]*) echo -1; return;;
-        esac
-    done
+	while true; do
+		read -p "$* [y/n]: " userIn
+		case $userIn in
+			[Yy]*) echo 1; return;;  
+			[Nn]*) echo 0; return;;
+			-[Yy]*) echo 2; return;;
+			-[Nn]*) echo -1; return;;
+		esac
+	done
 }
 
 runAtEnd() {
@@ -173,21 +186,21 @@ else
 	CONFIG_FILE="${CONFIG_FILES[0]}"
 fi
 
-# Import CONFIG_FILE & initialize stuff
+# Import CONFIG_FILE & initialize objects
+echo
 echo "Initializing objects..."
 . config/$CONFIG_FILE
 initializeAppGroups
-AppGroup allApps "${apps[*]}" # App group allApps; contains all apps
 echo "All objects successfully initialized."
 
 # Before starting script, ask user if the variables
 # that have been set are okay with them. Then, proceed.
 echo
-echo "**Please double-check the variables that have been set."
-echo "**Directories will be created only when needed."
+echo "**Please double-check the variables that have been set.**"
+echo "**Directories will be created only when needed.**"
 echo
 echo "CONFIG_FILE: $CONFIG_FILE"
-echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
+echo "APP_BACKUP_DIR: $APP_BACKUP_DIzR"
 echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
 echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
 echo "DUMP_DIR: $DUMP_DIR"
@@ -201,13 +214,57 @@ else
 	exit
 fi
 
-# Implementation: Let user choose from:
-# manual/automatic install/backup here
-# If automatic: Ask user to choose from 'apps', 'archive', or 'both'
-
-# runAtEnd - can be edited in CONFIG_FILE
-# runs any commands the user specifies in the function
-runAtEnd
+echo 
+if [ "insert check for if user wanted manual, maybe through script params?" ]; then
+	
+	declare AUTOSETUP_TYPE
+	while true; do
+        read -p "Choose an autosetup type for apps [install/backup]: " userIn
+        case $userIn in
+        	[Ii]*) AUTOSETUP_TYPE="install"; break;;
+        	[Bb]*) AUTOSETUP_TYPE="backup"; break;;
+        esac
+	done
+	
+	declare -a appsToSetup
+	echo
+	echo "Your apps:"
+	echo " $(apps)"
+	echo
+	echo "Your app groups:"
+	echo " All $(appGroups)"
+	echo
+	echo "Add apps or app groups you want to $AUTOSETUP_TYPE from your config."
+	echo "Separate entries with spaces or add one every line"
+	echo "Type 'done' to finish adding"
+	
+	while true
+	read -p ": " userIn
+	do
+		if [ "$userIn" = 'done' ]; then
+			echo "Done with the list!"
+			break
+		fi
+		for entry in $userIn; do
+			if [ $(isValid "$entry") -eq 1 ]; then
+				appsToSetup+=("$entry")
+			else
+				echo "Error: $entry could not be found"
+			fi
+		done
+		echo "Your current $AUTOSETUP_TYPE list: ${appsToSetup[*]}"
+	done
+	
+	if [ "$AUTOSETUP_TYPE" = "install" ]; then
+		echo "Installing apps..."
+	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
+		echo "Backing up apps..."
+	fi
+	
+	# runAtEnd - can be edited in CONFIG_FILE
+	# runs any commands the user specifies in the function
+	runAtEnd
+fi
 
 ###################
 #  END OF SCRIPT  #
