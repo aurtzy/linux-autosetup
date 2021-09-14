@@ -201,8 +201,7 @@ echo "You can manually run extra commands within the script or type 'exit' to qu
 echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
 while
 appInstallBackups=0
-echo -n ": "
-read userIn
+read -p ": " userIn
 do
 	if [ "$userIn" = 'help' ]; then
 		echo "Help function should be called..."
