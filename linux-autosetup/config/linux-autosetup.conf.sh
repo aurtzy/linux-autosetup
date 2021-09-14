@@ -1,5 +1,4 @@
-# Configuration file that is always called
-# autosetup.conf will always be read
+# Configuration file that is always read
 
 # Additional variables may be set here instead
 # but will be overwritten if set in CONFIG_FILE

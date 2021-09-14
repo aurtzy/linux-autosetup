@@ -150,7 +150,7 @@ runAtEnd() {
 ###############
 
 # Import config autosetup.conf
-. config/autosetup.conf.sh
+. config/linux-autosetup.conf.sh
 
 # Import CONFIG_FILE & initialize stuff
 echo "Initializing objects..."
