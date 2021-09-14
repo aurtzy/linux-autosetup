@@ -92,7 +92,7 @@ App() {
 		echo "Error: app name parameter was empty."
 		return
 	fi
-	fields="$(convertHyphens "$1")_app_fields"
+	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
 	$1.constructor "$2" "$3" "${@:4}"
 }
@@ -103,7 +103,7 @@ AppGroup() {
 		echo "Error: AppGroup name parameter was empty."
 		return
 	fi
-	fields="$(convertHyphens "$1")_appGroup_fields"
+	fields="appGroup_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/AppGroup/$1/g" "$CLASSES_DIR"/AppGroup.class))
 	$1.constructor ${@:2}
 }
@@ -147,14 +147,12 @@ promptYesNo() {
 # Import config autosetup.conf
 . config/autosetup.conf
 
-# Create APP appGroup
-
-
 # Import CONFIG_FILE & initialize stuff
 echo "Initializing objects..."
 . config/$CONFIG_FILE
 initializeAppGroups
-AppGroup allApps "${apps[*]}"
+AppGroup allApps "${apps[*]}" # App group allApps; contains all apps
+echo "All objects successfully initialized."
 
 # Before starting script, ask user if the variables
 # that have been set are okay with them. Then, proceed.

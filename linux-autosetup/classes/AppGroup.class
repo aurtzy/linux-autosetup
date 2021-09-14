@@ -20,8 +20,6 @@ AppGroup.field() {
 # Params: apps to add
 AppGroup.constructor() {
 	AppGroup.add "${@}"
-	
-	echo "AppGroup: Built app group object."
 }
 
 # Getter/setter methods
@@ -32,10 +30,10 @@ AppGroup.apps() {
 # Add app to apps field
 AppGroup.add() {
 	for app in "${@}"; do
-		$app.field
-		if [ $? -ne 0 ]; then
+		if [[ ! " ${apps[*]} " =~ " ${app} " ]]; then
 			echo
-			echo "AppGroup: Error: App object '$app' was not found."
+			echo "AppGroup: Error: App object '$app' was not found"
+			echo "An App object must exist before it can be added to an AppGroup"
 			echo "Please check your config and resolve. Exiting..."
 			exit 1
 		fi
