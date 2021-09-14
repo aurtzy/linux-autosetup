@@ -27,8 +27,8 @@ declare name='$name'
 
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
-# Default configiguration file
-declare CONFIG_FILE=""
+# Default configiguration files
+declare -a CONFIG_FILES=("")
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
@@ -152,6 +152,27 @@ runAtEnd() {
 # Import config autosetup.conf
 . config/linux-autosetup.conf.sh
 
+# Choose CONFIG_FILE
+if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
+	while true; do
+		echo "Which config file do you want to use?"
+		for i in ${!CONFIG_FILES[*]}; do
+			echo "$i ${CONFIG_FILES[$i]}"
+		done
+		read -p "Enter the index of the config file: " userIn
+		if [[ -z "$userIn" || "$userIn" > 'a' ]]; then
+			continue
+		fi
+		declare -i i="$userIn"
+		if [[ $i -ge 0 && $i -lt ${#CONFIG_FILES[@]} ]]; then
+			declare CONFIG_FILE="${CONFIG_FILES[$i]}"
+			break
+		fi
+	done
+else
+	CONFIG_FILE="${CONFIG_FILES[0]}"
+fi
+
 # Import CONFIG_FILE & initialize stuff
 echo "Initializing objects..."
 . config/$CONFIG_FILE
@@ -165,12 +186,11 @@ echo
 echo "**Please double-check the variables that have been set."
 echo "**Directories will be created only when needed."
 echo
-echo "Script working directory: $SCRIPT_WORKING_DIR"
-echo "Config file to work from: $CONFIG_FILE"
-echo "App backup directory: $APP_BACKUP_DIR"
-echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
-echo "Default app backup type: $DEFAULT_APP_BACKUP_TYPE"
-echo "Dump directory: $DUMP_DIR"
+echo "CONFIG_FILE: $CONFIG_FILE"
+echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
+echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
+echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
+echo "DUMP_DIR: $DUMP_DIR"
 echo
 if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then
 	echo "User is okay with these settings."
