@@ -1,1 +1,0 @@
-On Pop!_OS: use kernelstub to assign kernel parameter
