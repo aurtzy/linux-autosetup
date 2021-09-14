@@ -226,7 +226,7 @@ if [ "insert check for if user wanted manual, maybe through script params?" ]; t
         esac
 	done
 	
-	declare -a appsToSetup
+	declare -a setupEntries
 	echo
 	echo "Your apps:"
 	echo " $(apps)"
@@ -241,25 +241,39 @@ if [ "insert check for if user wanted manual, maybe through script params?" ]; t
 	while true
 	read -p ": " userIn
 	do
-		if [ "$userIn" = 'done' ]; then
-			echo "Done with the list!"
-			break
-		fi
 		for entry in $userIn; do
 			if [ $(isValid "$entry") -eq 1 ]; then
-				appsToSetup+=("$entry")
+				setupEntries+=("$entry")
+			elif [ "$entry" = 'done' ]; then
+				echo "Done with the list!"
+				break
 			else
 				echo "Error: $entry could not be found"
 			fi
 		done
-		echo "Your current $AUTOSETUP_TYPE list: ${appsToSetup[*]}"
+		if [ "$entry" = 'done' ]; then
+			break
+		fi
+		echo "Your current $AUTOSETUP_TYPE list: ${setupEntries[*]}"
 	done
 	
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
 		echo "Installing apps..."
+		for entry in "${setupEntries[@]}"; do
+			$entry.install
+		done
+		echo
+		echo "Finished installing."
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
+		for entry in "${setupEntries[@]}"; do
+			$entry.backup
+		done
+		echo
+		echo "Finished backing up."
 	fi
+	
+	
 	
 	# runAtEnd - can be edited in CONFIG_FILE
 	# runs any commands the user specifies in the function

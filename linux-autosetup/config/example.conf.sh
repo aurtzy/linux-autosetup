@@ -33,8 +33,8 @@ DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
 # Parameters are optional. "" represents default - use to skip params
 
 # Example 1
-App example "youtube-dl.install; echo this command is being run in installCommand for example app" "HARDLINK" "./example/some-dir/" "./example2/some-file"
-App example2 ""
+App example "youtube-dl.install; echo this command is being run in installCommand for example app" "HARDLINK" "./example/some-dir/" "./example2/some-file.txt"
+App example2 "example.install; echo working?"
 App example3
 
 # general
