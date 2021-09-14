@@ -138,7 +138,7 @@ apps() {
 
 # Return all appGroups separated by spaces
 appGroups() {
-	echo "${appGroups[*]}"
+	echo "${!appGroups[*]}"
 }
 
 # Prompt user to input yes/no
