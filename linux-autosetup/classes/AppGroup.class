@@ -32,6 +32,13 @@ AppGroup.apps() {
 # Add app to apps field
 AppGroup.add() {
 	for app in "${@}"; do
+		$app.field
+		if [ $? -ne 0 ]; then
+			echo
+			echo "AppGroup: Error: App object '$app' was not found."
+			echo "Please check your config and resolve. Exiting..."
+			exit 1
+		fi
 		if [ "$AppGroup.apps" != '' ]; then
 			AppGroup.apps = "$(AppGroup.apps) $app"
 		else
@@ -54,8 +61,6 @@ AppGroup.install() {
 	for app in $(AppGroup.apps); do
 		if [ $($app.failedInstall) -eq 1 ]; then
 			echo $app
-		else
-			echo "No app was found with the name $app!"
 		fi
 	done
 	echo
