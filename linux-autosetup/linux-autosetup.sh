@@ -20,12 +20,10 @@ declare -i appInstallBackups=0
 
 # String used to substitute app names
 declare name='$name'
-# String used to substitute archive files
-declare files='$files'
 
-#############################
-# CONFIGURABLE DECLARATIONS #
-#############################
+##########################
+# CONFIGURABLE VARIABLES #
+##########################
 
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
@@ -33,8 +31,6 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 declare APP_BACKUP_DIR="./app-backups"
 # Default app backup type - "COPY", "HARDLINK"
 declare APP_BACKUP_TYPE="COPY"
-# Where archive files go
-declare ARCHIVE_BACKUP_DIR="./archive"
 # Where to dump files
 declare DUMP_DIR="./dump"
 # Where classes are stored
@@ -45,11 +41,6 @@ declare CONFIG_FILE="./autosetup_default.conf"
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
-
-declare COMPRESS_COMMAND=""
-declare DECOMPRESS_COMMAND
-declare ENCRYPT_COMMAND="tar -cJvpf - $files | gpg -c > Archive.tar.gz.gpg"
-declare DECRYPT_COMMAND
 
 ####################
 # GLOBAL FUNCTIONS #
@@ -117,22 +108,11 @@ AppGroup() {
 	. <(sed "s/fields/$fields/g" <(sed "s/AppGroup/$1/g" "$CLASSES_DIR"/AppGroup.class))
 	$1.constructor ${@:2}
 }
-# Archive files constructor caller
-# $1=name, ${@:2}=sourcePaths
-Archive() {
-	if [ "$1" = '' ]; then
-		echo "Error: Archive name parameter was empty."
-		return
-	fi
-	fields="$(convertHyphens "$1")_archive_fields"
-	. <(sed "s/fields/$fields/g" <(sed "s/Archive/$1/g" "$CLASSES_DIR"/Archive.class))
-	$1.constructor "$2" "$3"
-}
 
 # Initialize app groups in appGroups array
 initializeAppGroups() {
 	for appGroup in $(appGroups); do
-		AppGroup $appGroup ${appGroups[$appGroup]}
+		AppGroup $appGroup "${appGroups[$appGroup]}"
 	done
 }
 
@@ -184,7 +164,6 @@ echo
 echo "Script working directory: $SCRIPT_WORKING_DIR"
 echo "Config file to work from: $CONFIG_FILE"
 echo "App backup directory: $APP_BACKUP_DIR"
-echo "Archive backup directory: $ARCHIVE_BACKUP_DIR"
 echo "Default app installation command: $DEFAULT_APP_INSTALL_COMMAND"
 echo "Default app backup type: $DEFAULT_APP_BACKUP_TYPE"
 echo "Dump directory: $DUMP_DIR"
