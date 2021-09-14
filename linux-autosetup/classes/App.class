@@ -42,7 +42,7 @@ App.constructor() {
 	
 	App.failedInstall = 0
 	
-	apps=("${apps[*]}" "App")
+	apps+=("App")
 }
 
 # Getter/setter methods
