@@ -19,9 +19,9 @@ APP_BACKUP_DIR="./app-backups"
 # Directory where old backups are dumped
 # NOTE: Script does not overwrite, so it may create multiple dumps.
 # e.g. .../dump/1 exists, so dump to .../dump/2
-# DEFAULT is "./dump"
-# Uncomment below (comes with path to Trash as alt.) to modify dump dir
-#DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
+# Internal default is "./dump"
+# Below is an alternative path to Trash
+DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
 
 ################
 # APPLICATIONS #
@@ -93,33 +93,33 @@ appGroups=(
 		example
 		clamtk
 		youtube-dl
-		"
+	"
 	[Essentials]="
 		ffmpeg
 		pavucontrol
 		wine
 		youtube-dl
-		"
+	"
 	[Gnome]="
 		gnome-extensions
 		gnome-tweaks
 		file-roller
-		"
+	"
 	[Video_editors]="
 		losslesscut
 		kdenlive
-		"
+	"
 	[Gaming]="
 		gamemode
 		lutris
 		piper
 		steam
-		"
+	"
 	[Development]="
 		github-desktop
 		intellij
 		openjdk-16-jdk
-		"
+	"
 )
 
 

@@ -7,4 +7,4 @@
 # Majority of configuration is usually located in CONFIG_FILE
 # May be useful to use different conf files
 # for different distros
-CONFIG_FILE="distro_example.conf"
+CONFIG_FILE="example.conf.sh"

@@ -25,6 +25,8 @@ declare name='$name'
 # CONFIGURABLE VARIABLES #
 ##########################
 
+# Default configiguration file
+declare CONFIG_FILE=""
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
 # Where application backups go
@@ -35,8 +37,6 @@ declare APP_BACKUP_TYPE="COPY"
 declare DUMP_DIR="./dump"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
-# Default configiguration file
-declare CONFIG_FILE="./autosetup_default.conf"
 
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
@@ -145,7 +145,7 @@ promptYesNo() {
 ###############
 
 # Import config autosetup.conf
-. config/autosetup.conf
+. config/autosetup.conf.sh
 
 # Import CONFIG_FILE & initialize stuff
 echo "Initializing objects..."
