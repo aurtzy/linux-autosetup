@@ -42,6 +42,7 @@ App.constructor() {
 	
 	App.failedInstall = 0
 	
+	apps=("${apps[*]}" "App")
 	echo "App: Built app object."
 }
 

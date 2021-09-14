@@ -133,18 +133,12 @@ initializeAppGroups() {
 
 # Return all apps separated by spaces
 apps() {
-	for app in "${apps[@]}"; do
-		echo -n " $app"
-	done
-	echo
+	echo "${apps[*]}"
 }
 
 # Return all appGroups separated by spaces
 appGroups() {
-	for appGroup in "${!appGroups[@]}"; do
-		echo -n " $appGroup"
-	done
-	echo
+	echo "${appGroups[*]}"
 }
 
 # Prompt user to input yes/no
