@@ -95,7 +95,6 @@ App() {
 	fields="$(convertHyphens "$1")_app_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
 	$1.constructor "$2" "$3" "${@:4}"
-	allApps.add "$1"
 }
 # App group constructor caller
 # $1=name
@@ -149,11 +148,13 @@ promptYesNo() {
 . config/autosetup.conf
 
 # Create APP appGroup
-AppGroup allApps
+
 
 # Import CONFIG_FILE & initialize stuff
+echo "Initializing objects..."
 . config/$CONFIG_FILE
 initializeAppGroups
+AppGroup allApps "${apps[*]}"
 
 # Before starting script, ask user if the variables
 # that have been set are okay with them. Then, proceed.
