@@ -123,6 +123,10 @@ appGroups=(
 	"
 )
 
+# Runs any commands the specified in the function
+# If you want to include some other commands that
+# this script does not automatically handle, you're
+# free to add them here
 runAtEnd() {
 	return
 }

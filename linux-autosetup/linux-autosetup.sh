@@ -205,6 +205,8 @@ fi
 # manual/automatic install/backup here
 # If automatic: Ask user to choose from 'apps', 'archive', or 'both'
 
+# runAtEnd - can be edited in CONFIG_FILE
+# runs any commands the user specifies in the function
 runAtEnd
 
 ###################
