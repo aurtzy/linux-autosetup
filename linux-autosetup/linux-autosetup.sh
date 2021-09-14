@@ -22,8 +22,6 @@ declare -i appInstallBackups=0
 # CONFIGURABLE DECLARATIONS #
 #############################
 
-# String used to substitute hyphens in creating custom functions
-declare hyphenConversion='1_1'
 # String used to substitute for app names
 declare name='$name'
 
@@ -86,7 +84,7 @@ dump() {
 # String converter methods to allow functionality with Bash
 # Convert '-' and $hyphenConversion from and to each other
 convertHyphens() {
-	echo ${1//-/"$hyphenConversion"}
+	echo ${1//-/_}
 }
 
 # App constructor caller

@@ -53,7 +53,7 @@ App.installCommand() {
 App.backupType() {
 	if [[ "$2" != "" && "$2" != 'COPY' && "$2" != 'HARDLINK' ]]; then
 		echo "App: Error: Backup type input $2 was not recognized!"
-		echo "Script will not continue until this is resolved."
+		echo "Script will not continue. Please resolve."
 		echo "Exiting..."
 		exit 1
 	fi
