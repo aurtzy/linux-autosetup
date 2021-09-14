@@ -18,12 +18,14 @@ declare -Ag appGroups
 # Should reset to 0 after every user command or AppGroup install
 declare -i appInstallBackups=0
 
+# String used to substitute app names
+declare name='$name'
+# String used to substitute archive files
+declare files='$files'
+
 #############################
 # CONFIGURABLE DECLARATIONS #
 #############################
-
-# String used to substitute for app names
-declare name='$name'
 
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
@@ -43,6 +45,11 @@ declare CONFIG_FILE="./autosetup_default.conf"
 # Default install command used if one is not specified for app
 # $nameSubstitution is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
+
+declare COMPRESS_COMMAND=""
+declare DECOMPRESS_COMMAND
+declare ENCRYPT_COMMAND="tar -cJvpf - $files | gpg -c > Archive.tar.gz.gpg"
+declare DECRYPT_COMMAND
 
 ####################
 # GLOBAL FUNCTIONS #
