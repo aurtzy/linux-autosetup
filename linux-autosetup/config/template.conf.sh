@@ -27,3 +27,7 @@ appGroups=(
 		app3
 	"
 )
+
+runAtEnd() {
+	return
+}

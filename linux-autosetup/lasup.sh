@@ -141,6 +141,10 @@ promptYesNo() {
     done
 }
 
+runAtEnd() {
+	return
+}
+
 ###############
 # SCRIPT BODY #
 ###############
@@ -180,6 +184,8 @@ fi
 # Implementation: Let user choose from:
 # manual/automatic install/backup here
 # If automatic: Ask user to choose from 'apps', 'archive', or 'both'
+
+runAtEnd
 
 ###################
 #  END OF SCRIPT  #
