@@ -34,13 +34,14 @@ DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
 
 # Example 1
 App example "youtube-dl.install; echo this command is being run in installCommand for example app" "HARDLINK" "./example/some-dir/" "./example2/some-file"
-# Example 2 
-App firefox "" "COPY" "$HOME/.mozilla/firefox/some-profile"
+App example2 ""
+App example3
 
 # general
 App clamtk
 App discord "flatpak install com.discordapp.Discord"
 App file-roller
+App firefox "" "COPY" "$HOME/.mozilla/firefox/some-profile"
 App gnome-extensions
 App gnome-tweaks
 App obs-studio
@@ -91,8 +92,8 @@ App youtube-dl
 appGroups=(
 	[Example]="
 		example
-		clamtk
-		youtube-dl
+		example2
+		example3
 	"
 	[Essentials]="
 		ffmpeg
@@ -122,4 +123,6 @@ appGroups=(
 	"
 )
 
-
+runAtEnd() {
+	return
+}
