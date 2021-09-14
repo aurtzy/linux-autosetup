@@ -1,5 +1,5 @@
-# LASUP (Linux AutoSetUP)
-LASUP is a script that uses bash to automate installation and backup processes. Its goal is to be as configurable as possible so that additions and removals can be made with minimal effort.
+# Linux AutoSetup
+Linux Autosetup is a script that uses bash to automate installation and backup processes. Its goal is to be as configurable as possible so that additions and removals can be made with minimal effort.
 
 This program was born from an inability to find a program that could easily set up and back up a system without having me search through files and keep locations of files to back up in a crude text document. I might want to set up my main pc for gaming and schoolwork, for example, but my laptop wouldn't need that gaming software - this is supposed to make that application installation process quicker and easier. If you have the same problems, maybe you'll find this script useful.
 # Requirements
