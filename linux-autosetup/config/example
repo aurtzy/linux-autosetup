@@ -4,7 +4,7 @@
 
 # default install command used if one is not specified for app
 # $name will be substituted with app name.
-DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $name will not be installed until this is done."
+DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
 
 # Default backup type of apps
 # COPY copies files, HARDLINK hard links files

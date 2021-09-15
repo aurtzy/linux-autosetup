@@ -22,7 +22,7 @@ App.constructor() {
 
 	# Command that is used to install App
 	if [ ! "$1" ]; then
-		App.installCommand = "${DEFAULT_APP_INSTALL_COMMAND//"$name"/App}"
+		App.installCommand = "${DEFAULT_APP_INSTALL_COMMAND//"$app"/App}"
 	else
 		App.installCommand = "$1"
 	fi
