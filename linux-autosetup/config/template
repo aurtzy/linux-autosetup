@@ -14,7 +14,7 @@
 # APPLICATIONS #
 ################
 
-# App "appname" "one-liner custom install command" "dir/or/files/to/backup;;other/separated/by/2semicolons" "backupType:COPY,HARDLINK"
+# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "dir/or/files/to/backup;;other/separated/by/2semicolons"
 
 ######################
 # APPLICATION GROUPS #

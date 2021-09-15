@@ -27,7 +27,7 @@ DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
 # APPLICATIONS #
 ################
 
-# App "appname" "one-liner custom install command" "dir/or/files/to/backup;;other/separated/by/2semicolons" "backupType:COPY,HARDLINK"
+# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "dir/or/files/to/backup;;other/separated/by/2semicolons"
 # Name "appname" whatever is used in the installCommand - if this is
 # not relevant, then you can name it whatever you want
 # Parameters are optional. "" represents default - use to skip params
