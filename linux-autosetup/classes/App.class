@@ -114,7 +114,7 @@ App.install() {
 		if [ $appInstallBackups -eq 1 ]; then
 			App.installBackups
 		elif [ $appInstallBackups -eq 0 ]; then
-			declare -i userIn=$(promptYesNo "Would you like to install them?")
+			declare -i userIn=$(promptYesNo "Would you like to install them? This will replace existing files.")
 			if [ $userIn -eq 1 ]; then
 				App.installBackups
 			elif [ $userIn -eq 2 ]; then
