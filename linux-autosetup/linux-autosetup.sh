@@ -213,7 +213,7 @@ echo "**Please double-check the variables that have been set.**"
 echo "**Directories will be created only when needed.**"
 echo
 echo "CONFIG_FILE: $CONFIG_FILE"
-echo "APP_BACKUP_DIR: $APP_BACKUP_DIzR"
+echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
 echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
 echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
 echo "DUMP_DIR: $DUMP_DIR"
