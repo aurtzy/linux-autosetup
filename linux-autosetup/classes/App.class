@@ -137,8 +137,9 @@ App.installBackups() {
 	for sourcePath in $(App.sourcePaths); do
 		source="${sourcePath##*"/"}"
 		sourceDir="${sourcePath%"/"*}"
+		echo
 		echo "App: Installing $sourcePath"
-		cp -a "$backupDir/$source" "$sourceDir"
+		mkdir -p "$sourceDir" && cp -a "$backupDir/$source" "$sourceDir"
 		if [ $? -ne 0 ]; then
 			echo "App: Error: $source could not be installed."
 		else
