@@ -36,7 +36,7 @@ declare CLASSES_DIR="./classes"
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
 # Default app backup type - "COPY", "HARDLINK"
-declare APP_BACKUP_TYPE="COPY"
+declare DEFAULT_APP_BACKUP_TYPE="COPY"
 # Default install command used if one is not specified for app
 # $app is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
