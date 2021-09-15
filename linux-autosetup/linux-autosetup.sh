@@ -182,7 +182,7 @@ done
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
 	while true; do
 		echo "Which config file do you want to use?"
-		for i in ${!CONFIG_FILES[*]}; do
+		for i in "${!CONFIG_FILES[@]}"; do
 			echo "$i ${CONFIG_FILES[$i]}"
 		done
 		read -p "Enter the index of the config file: " userIn
@@ -202,7 +202,7 @@ fi
 # Import CONFIG_FILE & initialize objects
 echo
 echo "Initializing objects..."
-. config/$CONFIG_FILE
+. "config/$CONFIG_FILE"
 initializeAppGroups
 echo "All objects successfully initialized."
 
