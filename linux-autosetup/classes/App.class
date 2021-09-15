@@ -133,6 +133,7 @@ App.install() {
 
 App.installBackups() {
 	backupDir="$APP_BACKUP_DIR/App"
+	IFS=$'\n'
 	for sourcePath in $(App.sourcePaths); do
 		source="${sourcePath##*"/"}"
 		sourceDir="${sourcePath%"/"*}"
@@ -144,6 +145,7 @@ App.installBackups() {
 			echo "App: $source was successfully installed!"
 		fi
 	done
+	unset IFS
 }
 
 # Back up sources
@@ -160,7 +162,7 @@ App.backup() {
 		else
 			dump "INITIALIZE" "App"
 		fi
-		
+		IFS=$'\n'
 		for sourcePath in $(App.sourcePaths); do
 			echo
 			source="${sourcePath##*"/"}"
@@ -194,6 +196,7 @@ App.backup() {
 				continue
 			fi
 		done
+		unset IFS
 		echo "App: Backup completed."
 	fi
 }
