@@ -48,6 +48,10 @@ declare DUMP_DIR="./dump"
 # GLOBAL FUNCTIONS #
 ####################
 
+Help() {
+	echo hi
+}
+
 # Dumps file/folder into $DUMP_DIR
 # Dump must be initialized before using in a function.
 # $1 = path to file(s) $2 = dump name to be dumped
@@ -158,12 +162,21 @@ runAtEnd() {
 	return
 }
 
-###############
-# SCRIPT BODY #
-###############
+##################
+# INITIALIZATION #
+##################
 
-# Import config autosetup.conf
-. config/linux-autosetup.conf.sh
+# Check for options passed
+while getopts ":hm" option; do
+	case $option in
+		h) Help; exit;;
+		m) skipAutosetup="1"; break;;
+		\?) echo "Error: Option not recognized."; exit;;
+   esac
+done
+
+# Import linux-autosetup config
+. config/linux-autosetup
 
 # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
@@ -214,8 +227,12 @@ else
 	exit
 fi
 
+###############
+# SCRIPT BODY #
+###############
+
 echo 
-if [ "insert check for if user wanted manual, maybe through script params?" ]; then
+if [ "$skipAutosetup" != '1' ]; then
 	
 	declare AUTOSETUP_TYPE
 	while true; do
@@ -280,6 +297,9 @@ if [ "insert check for if user wanted manual, maybe through script params?" ]; t
 	# runAtEnd - can be edited in CONFIG_FILE
 	# runs any commands the user specifies in the function
 	runAtEnd
+	echo "Autosetup finished!"
+else
+	echo "Skipping autosetup..."
 fi
 
 ###################
@@ -290,10 +310,8 @@ fi
 # User can remain in script & 
 # input extra commands or exit script here.
 echo
-echo "End of script!"
-echo
-echo "You can manually run extra commands within the script or type 'exit' to quit."
-echo "TO BE IMPLEMENTED: Type 'help' to get help on custom script commands."
+echo "You can manually run commands within the script or type 'exit' to quit."
+echo "Type 'Help' to get help on custom script commands."
 while
 appInstallBackups=0
 read -p ": " userIn
