@@ -12,4 +12,5 @@
 CONFIG_FILES=(
 	"example"
 	"template"
+	"fedora34"
 )
