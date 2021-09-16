@@ -253,7 +253,7 @@ if [ "$skipAutosetup" != '1' ]; then
 	echo
 	echo "Add apps or app groups you want to $AUTOSETUP_TYPE from your config."
 	echo "Separate entries with spaces or add one every line"
-	echo "Type 'done' to finish adding"
+	echo "Type 'done' to finish adding or 'clear' to clear your entries"
 	
 	while true
 	read -p ": " userIn
@@ -264,15 +264,30 @@ if [ "$skipAutosetup" != '1' ]; then
 			elif [ "$entry" = 'done' ]; then
 				echo "Done with the list!"
 				break
+			elif [ "$entry" = 'clear' ]; then
+				setupEntries=()
+				echo "Setup entries cleared."
 			else
 				echo "Error: $entry could not be found"
 			fi
 		done
+		
 		if [ "$entry" = 'done' ]; then
-			break
+			echo "Please confirm that the following will $AUTOSETUP_TYPE:"
+			echo "${setupEntries[*]}"
+			if [ $(promptYesNo "Are you okay with this?") -ge 1 ]; then
+				break
+			else
+				echo "User is not okay with this"
+				setupEntries=()
+				echo "Setup entries cleared."
+			fi
 		fi
+		
 		echo "Your current $AUTOSETUP_TYPE list: ${setupEntries[*]}"
 	done
+	
+	
 	
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
 		echo "Installing apps..."
