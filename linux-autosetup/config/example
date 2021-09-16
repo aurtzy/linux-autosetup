@@ -27,10 +27,10 @@ DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
 # APPLICATIONS #
 ################
 
-# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "dir/or/files/to/backup;;other/separated/by/2semicolons"
-# Name "appname" whatever is used in the installCommand - if this is
+# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
+# Name "appname" whatever should be substituted in the installCommand - if this is
 # not relevant, then you can name it whatever you want
-# Parameters are optional. "" represents default - use to skip params
+# Parameters are optional - "" represents default - use to skip params
 
 # Example 1
 App example "youtube-dl.install; echo this command is being run in installCommand for example app" "HARDLINK" "./example/some-dir/" "./example2/some-file.txt"
@@ -127,6 +127,9 @@ appGroups=(
 # If you want to include some other commands that
 # this script does not automatically handle, you're
 # free to add them here
-runAtEnd() {
+onInstallFinish() {
+	return
+}
+onBackupFinish() {
 	return
 }

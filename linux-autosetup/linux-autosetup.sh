@@ -158,7 +158,10 @@ promptYesNo() {
 	done
 }
 
-runAtEnd() {
+onInstallFinish() {
+	return
+}
+onBackupFinish() {
 	return
 }
 
@@ -297,6 +300,8 @@ if [ "$skipAutosetup" != '1' ]; then
 		done
 		echo
 		echo "Finished installing."
+		echo "Running onInstallFinish..."
+		onInstallFinish
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
@@ -305,13 +310,14 @@ if [ "$skipAutosetup" != '1' ]; then
 		done
 		echo
 		echo "Finished backing up."
+		echo "Running onBackupFinish..."
+		onBackupFinish
 	fi
 	
 	
 	
 	# runAtEnd - can be edited in CONFIG_FILE
 	# runs any commands the user specifies in the function
-	runAtEnd
 	echo "Autosetup finished!"
 else
 	echo "Skipping autosetup..."

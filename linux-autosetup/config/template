@@ -14,7 +14,7 @@
 # APPLICATIONS #
 ################
 
-# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "dir/or/files/to/backup;;other/separated/by/2semicolons"
+# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
 ######################
 # APPLICATION GROUPS #
@@ -28,6 +28,9 @@ appGroups=(
 	"
 )
 
-runAtEnd() {
+onInstallFinish() {
+	return
+}
+onBackupFinish() {
 	return
 }
