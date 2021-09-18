@@ -23,11 +23,11 @@ Extract the tar and place the linux-autosetup folder wherever you want.
 # Configuration
 *This script assumes a working directory where linux-autosetup.sh is located.*  
 
-## Creating a Config File  
 Configuration files should be found in the ./config directory. The following link contains example config files that are based on lists of apps that I've compiled which you may copy or use as a guideline:  
 https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/config  
 
-Start off by making a config file from scratch or copying from one of the examples in the link above.  
+## Creating a Config File  
+You can make a config file from scratch or copy from one of the examples in the link above.  
 
 Add this config file name to the CONFIG_FILES variable which should be found in ./config/src:  
 ```
