@@ -1,4 +1,4 @@
-# linux-autosetup is always read
+# src is always read
 
 # Variables may be set here instead
 # but will be overwritten if set in CONFIG_FILE

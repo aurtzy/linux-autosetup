@@ -178,8 +178,8 @@ while getopts ":hm" option; do
    esac
 done
 
-# Import linux-autosetup config
-. config/linux-autosetup
+# Import src config
+. config/src
 
 # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
