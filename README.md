@@ -25,9 +25,27 @@ CONFIG_FILES=(
   "etc..."
 )
 ```
+
+### Configurating Options  
+This script offers a couple of options that you can customize by changing specific variables:  
+
+/* to-do */
+
 ### Adding Apps
+Creating apps simply requires a call to the App function in the config file in the following format:  
+```App "appname" "install_command" "backup_type" "directory/to/back/up" "or/file/to/back/up" ...```  
+
+```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
+If a custom install command is used, you can call your appname anything. This should not have spaces.  
+
+```"install_command"``` is any custom install command that you do not want to use the default install command for.  
+
+```"backup_type"``` has two valid options: "COPY" and "HARDLINK".  
+
+Every parameter after these are interpreted as backup sources.  
 
 ### Adding App Groups
+/* to-do */
 
 ## Usage
 /* to-do */
