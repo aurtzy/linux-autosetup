@@ -34,7 +34,7 @@ This script offers a couple of options that you can customize by changing specif
 
 - ```DEFAULT_APP_INSTALL_COMMAND``` must be set by the user. It is the default command used for apps that do not have a specified custom install command. ```$app``` can be used to substitute the app name provided, e.g: ```"sudo apt install $app"```  
 
-- ```DEFAULT_APP_BACKUP_TYPE``` uses ```"COPY"``` as a fallback. This is the default backup type used for apps that do not have a specified backup type. See the entry on ```"backup_type"``` in [Adding Apps](https://github.com/aurtzy/linux-autosetup#adding-apps) for more information on this option.  
+- ```DEFAULT_APP_BACKUP_TYPE``` uses ```"COPY"``` as a fallback. This is the default backup type used for apps that do not have a specified backup type. See the entry on ```"backup_type"``` in [Adding Apps](#adding-apps) for more information on this option.  
 
 - ```APP_BACKUP_DIR``` uses ```"./app-backups"``` as a fallback. This tells the script where the application backups should be located.  
 
