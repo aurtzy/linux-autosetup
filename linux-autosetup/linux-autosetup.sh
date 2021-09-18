@@ -41,10 +41,6 @@ declare DUMP_DIR="./dump"
 # GLOBAL FUNCTIONS #
 ####################
 
-Help() {
-	echo hi
-}
-
 # Dumps file/folder into $DUMP_DIR
 # Dump must be initialized before using in a function.
 # $1 = path to file(s) $2 = dump name to be dumped
@@ -165,7 +161,6 @@ onBackupFinish() {
 # Check for options passed
 while getopts ":hm" option; do
 	case $option in
-		h) Help; exit;;
 		m) skipAutosetup="1"; break;;
 		\?) echo "Error: Option not recognized."; exit;;
    esac
