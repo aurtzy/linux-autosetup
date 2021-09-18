@@ -67,7 +67,7 @@ If a custom install command is used, you can call your appname anything. This sh
 - Every parameter after these are interpreted as backup source paths.  
 
 ## Adding App Groups  
-App groups are an easy way to organize apps for different use-cases depending on the system. For example, you may want to install gaming and development apps on your main desktop computer, but only want development apps for your laptop.  
+App groups are an easy way to organize apps for different use-cases depending on the system. For example, you may want to install gaming and development apps on your main desktop computer, but only want development apps for your laptop - instead of finding and listing all of the apps you want to install every time, you only have to do it once in the config and call the group names.  
 
 App groups are initialized through the following format:
 ```
