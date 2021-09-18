@@ -3,8 +3,8 @@
 Linux Autosetup is a script that uses bash to automate installation and backup processes. Its goal is to be as configurable as possible so that users can customize how and what they want to back up or install.  
 
 ## Requirements
-- Bash 5.0.17+ (Older versions may also work, but this is not guaranteed)
-- Any Linux distribution
+- Bash 5.0.17+, which should be present on most modern Linux distributions (Older versions may also work, but this is not guaranteed)
+- A Linux distribution
 
 ## Installation
 Extract the tar and place the linux-autosetup folder wherever you want.  
@@ -50,16 +50,34 @@ Descriptions of the parameters:
 
 - ```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
 If a custom install command is used, you can call your appname anything. This should not have spaces.  
-
 - ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead.
-
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
+- Every parameter after these are interpreted as backup source paths.  
 
-Every parameter after these are interpreted as backup source paths.  
+### Adding App Groups  
+App groups are an easy way to organize apps for different use-cases depending on the system. For example, you may want to install gaming and development apps on your main desktop computer, but only want development apps for your laptop.  
 
-### Adding App Groups
-/* to-do */
+App groups are initialized through the following format:
+```
+appGroups=(
+  [AppGroupName]="
+    app1
+    app2
+    app3
+  "
+  [AnotherAppGroupName]="
+    app2
+    app4
+    app5
+  "
+)
+```  
+Notes:  
+- App groups are completely optional.  
+- Apps are not limited to one app group - you can assign an app to more than one app group  
+- App groups are limited to names without spaces and names that do not overlap with app names. The latter can be avoided by capitalizing app group names.  
+
 
 ## Usage
 /* to-do */
