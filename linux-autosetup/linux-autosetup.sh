@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Require run as root
-#if [ $(id -u) -ne 0 ]; then
-#	echo "Please run script as root! Exiting..."
-#	read
-#	exit 1
-#fi
-
 # Stores all app names
 declare -ag apps
 
@@ -177,6 +170,13 @@ while getopts ":hm" option; do
 		\?) echo "Error: Option not recognized."; exit;;
    esac
 done
+
+# Require run as root
+if [ $(id -u) -ne 0 ]; then
+	echo "Please run script as root! Exiting..."
+	read
+	exit 1
+fi
 
 # Import src config
 . config/src
