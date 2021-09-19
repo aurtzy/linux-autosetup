@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version="0.9.0"
+
 # Stores all app names
 declare -ag apps
 
@@ -147,6 +149,32 @@ promptYesNo() {
 	done
 }
 
+# Print information about the script,
+# including version # and copyright
+# Pass 'less' param to print shortened vers.
+printScriptInfo() {
+	echo "Linux-Autosetup, version $version"
+	echo "Copyright (C) 2021 Aurtzy"
+	if [ "$1" ]; then
+		echo
+		if [ "$1" = 'more' ]; then
+			echo "Linux-Autosetup comes with ABSOLUTELY NO WARRANTY; for details run this script with the -w option. This is free software, and you are welcome to redistribute it under certain conditions; run this script with the -c option for details."
+		elif [ "$1" = 'warranty' ]; then
+			echo "This program is distributed in the hope that it will be useful, WITHOUT ANY WARRANTY; without even the implied warranty of or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details."
+		elif [ "$1" = 'copyright' ]; then
+			echo "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or at your option) any later version."
+		elif [ "$1" = 'help' ]; then
+			echo "Linux-Autosetup options:"
+			echo "	-m		run in manual mode; skip autosetup"
+			echo
+			echo "	-v		display version"
+			echo "	-c		display copyright information"
+			echo "	-w		display warranty information"
+		fi
+	fi
+	echo
+}
+
 onInstallFinish() {
 	return
 }
@@ -159,17 +187,23 @@ onBackupFinish() {
 ##################
 
 # Check for options passed
-while getopts ":hm" option; do
+while getopts ":mhvcw" option; do
 	case $option in
 		m) skipAutosetup="1"; break;;
+		h) printScriptInfo help; exit;;
+		v) printScriptInfo; exit;;
+		c) printScriptInfo copyright; exit;;
+		w) printScriptInfo warranty; exit;;
 		\?) echo "Error: Option not recognized."; exit;;
    esac
 done
 
+# Print basic copyright information
+printScriptInfo 'more'
+
 # Require run as root
 if [ $(id -u) -ne 0 ]; then
 	echo "Please run script as root! Exiting..."
-	read
 	exit 1
 fi
 
