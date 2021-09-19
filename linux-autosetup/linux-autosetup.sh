@@ -288,8 +288,8 @@ if [ "$skipAutosetup" != '1' ]; then
 	echo " All $(appGroups)"
 	echo
 	echo "Add apps or app groups you want to $AUTOSETUP_TYPE from your config."
-	echo "Separate entries with spaces or add one every line"
-	echo "Type 'done' to finish adding or 'clear' to clear your entries"
+	echo "Separate entries with spaces or add one every line."
+	echo "Type 'done' to finish adding or 'clear' to clear your entries."
 	
 	while true
 	read -p ": " userIn
@@ -298,6 +298,7 @@ if [ "$skipAutosetup" != '1' ]; then
 			if [ $(isValid "$entry") -eq 1 ]; then
 				setupEntries+=("$entry")
 			elif [ "$entry" = 'done' ]; then
+				echo
 				echo "Done with the list!"
 				break
 			elif [ "$entry" = 'clear' ]; then
@@ -335,6 +336,7 @@ if [ "$skipAutosetup" != '1' ]; then
 		echo "Finished installing."
 		echo "Running onInstallFinish..."
 		onInstallFinish
+		echo "onInstallFinish completed."
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
@@ -343,11 +345,20 @@ if [ "$skipAutosetup" != '1' ]; then
 		done
 		echo
 		echo "Finished backing up."
+		echo
 		echo "Running onBackupFinish..."
 		onBackupFinish
+		echo "onBackupFinish completed."
 	fi
 	
-	
+	echo
+	echo "If any apps failed to install, they will be listed below:"
+	for app in "${apps[@]}"; do
+		if [ "$($app.failedInstall)" = 1 ]; then
+			echo "$app"
+		fi
+	done
+	echo
 	
 	# runAtEnd - can be edited in CONFIG_FILE
 	# runs any commands the user specifies in the function

@@ -33,9 +33,10 @@ DUMP_DIR="$USER_HOME/.local/share/Trash/files/linux-autosetup/dump"
 # Parameters are optional - "" represents default - use to skip params
 
 # Example 1
-App example "youtube-dl.install; echo this command is being run in installCommand for example app" "HARDLINK" "./example/some-dir/" "./example2/some-file.txt"
+App example "youtube-dl.install; echo this command is being run in installCommand for example app; hi" "HARDLINK" "./example/some-dir/" "./example2/some-file.txt"
 App example2 "example.install; echo working?"
 App example3
+App example4 "hi"
 
 # general
 App clamtk
@@ -94,6 +95,7 @@ appGroups=(
 		example
 		example2
 		example3
+		example4
 	"
 	[Essentials]="
 		ffmpeg
