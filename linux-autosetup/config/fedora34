@@ -14,8 +14,8 @@ DEFAULT_APP_INSTALL_COMMAND="sudo dnf install $app"
 # APPLICATIONS #
 ################
 
-ffProfile="$HOME/.mozilla/firefox/PROFILE"
-thProfile="$HOME/.thunderbird/PROFILE"
+ffProfile="$USER_HOME/.mozilla/firefox/PROFILE"
+thProfile="$USER_HOME/.thunderbird/PROFILE"
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 

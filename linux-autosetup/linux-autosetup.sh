@@ -2,6 +2,9 @@
 
 version="0.9.0"
 
+# Overwrite $HOME with sudo user
+USER_HOME="$(eval echo ~${SUDO_USER})"
+
 # Stores all app names
 declare -ag apps
 
@@ -35,7 +38,6 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 # Default install command used if one is not specified for app
 # $app is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
-
 # Where to dump files
 declare DUMP_DIR="./dump"
 

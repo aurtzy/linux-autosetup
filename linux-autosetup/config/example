@@ -21,7 +21,7 @@ APP_BACKUP_DIR="./app-backups"
 # e.g. .../dump/1 exists, so dump to .../dump/2
 # Internal default is "./dump"
 # Below is an alternative path to Trash
-DUMP_DIR="$HOME/.local/share/Trash/files/linux-autosetup/dump"
+DUMP_DIR="$USER_HOME/.local/share/Trash/files/linux-autosetup/dump"
 
 ################
 # APPLICATIONS #
@@ -41,7 +41,7 @@ App example3
 App clamtk
 App discord "flatpak install com.discordapp.Discord"
 App file-roller
-App firefox "" "COPY" "$HOME/.mozilla/firefox/some-profile"
+App firefox "" "COPY" "$USER_HOME/.mozilla/firefox/PROFILE"
 App gnome-extensions
 App gnome-tweaks
 App obs-studio
