@@ -10,6 +10,7 @@ Linux Autosetup is a script that uses bash to automate installation and backup p
   - [Configuration Options](#configuration-options)  
   - [Adding Apps](#adding-apps)  
   - [Adding App Groups](#adding-app-groups)  
+  - [Function Calls at End of Autosetup](#function-calls-at-end-of-autosetup)
 - [Usage](#usage)  
 - [Mentions](#mentions)  
 
@@ -64,7 +65,7 @@ If a custom install command is used, you can call your appname anything. This sh
 - ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead.
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
-- Every parameter after these are interpreted as backup source paths.  
+- Every parameter after these are interpreted as backup source paths. You can use ```$USER_HOME``` to substitute for the user home directory; note that "~/" will not work.    
 
 ## Adding App Groups  
 App groups are an easy way to organize apps for different use-cases depending on the system. For example, you may want to install gaming and development apps on your main desktop computer, but only want development apps for your laptop - instead of finding and listing all of the apps you want to install every time, you only have to do it once in the config and call the group names.  
@@ -88,6 +89,9 @@ Notes:
 - App groups are completely optional.  
 - Apps are not limited to one app group - you can assign an app to more than one app group  
 - App groups are limited to names without spaces and names that do not overlap with app names. The latter can be avoided by capitalizing app group names.  
+
+## Function Calls at End of Autosetup  
+/* to-do */
 
 # Usage  
 Open a terminal in your linux-autosetup directory and run ```bash linux-autosetup.sh``` with root priviliges.  
