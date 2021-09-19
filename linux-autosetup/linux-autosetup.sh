@@ -160,9 +160,9 @@ printScriptInfo() {
 	if [ "$1" ]; then
 		echo
 		if [ "$1" = 'more' ]; then
-			echo "Linux-Autosetup comes with ABSOLUTELY NO WARRANTY; for details run this script with the -w option. This is free software, and you are welcome to redistribute it under certain conditions; run this script with the -c option for details."
-			echo
 			echo "Use the -h option to see all available options you can run the script with."
+			echo
+			echo "Linux-Autosetup comes with ABSOLUTELY NO WARRANTY; for details run this script with the -w option. This is free software, and you are welcome to redistribute it under certain conditions; run this script with the -c option for details."
 		elif [ "$1" = 'warranty' ]; then
 			echo "This program is distributed in the hope that it will be useful, WITHOUT ANY WARRANTY; without even the implied warranty of or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details."
 		elif [ "$1" = 'copyright' ]; then
