@@ -24,7 +24,7 @@ App.constructor() {
 	if [ ! "$1" ]; then
 		App.installCommand = "${DEFAULT_APP_INSTALL_COMMAND//"$app"/App}"
 	else
-		App.installCommand = "$1"
+		App.installCommand = "${1//"$app"/App}"
 	fi
 	
 	# Backup type
