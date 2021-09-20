@@ -28,7 +28,6 @@ printScriptInfo() {
 			echo "	-w		display warranty information"
 		fi
 	fi
-	echo
 }
 
 # Check for options passed
@@ -45,6 +44,7 @@ done
 
 # Force run as root
 if [ $(id -u) -ne 0 ]; then
+	echo
 	echo "Root permissions are required to run this script."
 	sudo bash "$0" "$@"
 	exit $?
@@ -55,7 +55,7 @@ fi
 ####################
 
 # Overwrite $HOME with sudo user
-USER_HOME="$(eval echo ~${SUDO_USER})"
+declare HOME="$(eval echo ~${SUDO_USER})"
 
 # Stores all app names
 declare -ag apps
