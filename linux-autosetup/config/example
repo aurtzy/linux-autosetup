@@ -34,8 +34,8 @@ DUMP_DIR="$USER_HOME/.local/share/Trash/files/linux-autosetup/dump"
 
 # Example 1
 App example "youtube-dl.install; echo this command is being run in installCommand for example app; hi" "HARDLINK" "./example/some-dir/" "./example2/some-file.txt"
-App example2 "example.install; echo working?"
-App example3
+App example2 "example.install; echo working?" "" "./34535325141/"
+App example3 "" "" "./test"
 App example4 "hi"
 
 # general

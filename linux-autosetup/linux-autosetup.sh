@@ -337,6 +337,14 @@ if [ "$skipAutosetup" != '1' ]; then
 		echo "Running onInstallFinish..."
 		onInstallFinish
 		echo "onInstallFinish completed."
+		
+		echo
+		echo "If any apps failed to install, they will be listed below:"
+		for app in "${apps[@]}"; do
+			if [ "$($app.failedInstall)" -eq 1 ]; then
+				echo "$app"
+			fi
+		done
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
@@ -349,19 +357,18 @@ if [ "$skipAutosetup" != '1' ]; then
 		echo "Running onBackupFinish..."
 		onBackupFinish
 		echo "onBackupFinish completed."
+		
+		echo
+		echo "If any apps failed to back up something, they will be listed below:"
+		for app in "${apps[@]}"; do
+			if [ "$($app.failedBackup)" -eq 1 ]; then
+				echo "$app:"
+				echo "$($app.failedBackupSources)"
+			fi
+		done
 	fi
-	
 	echo
-	echo "If any apps failed to install, they will be listed below:"
-	for app in "${apps[@]}"; do
-		if [ "$($app.failedInstall)" = 1 ]; then
-			echo "$app"
-		fi
-	done
-	echo
-	
-	# runAtEnd - can be edited in CONFIG_FILE
-	# runs any commands the user specifies in the function
+
 	echo "Autosetup finished!"
 else
 	echo "Skipping autosetup..."

@@ -39,8 +39,11 @@ App.constructor() {
 	App.sourcePathsAdd "${@:3}"
 	
 	App.installed = 0
+	App.backedUp = 0
 	
 	App.failedInstall = 0
+	App.failedBackup = 0
+	App.failedBackupSourcesCount = 0
 	
 	apps+=("App")
 }
@@ -75,15 +78,35 @@ App.sourcePathsCount() {
 	declare -i intParam=$2
 	App.field sourcePathsCount "$1" "$intParam"
 }
+App.failedBackupSourcesCount() {
+	declare -i intParam=$2
+	App.field failedBackupSourcesCount "$1" "$intParam"
+}
 App.installed() {
 	declare -i intParam=$2
 	App.field installed "$1" "$intParam"
+}
+App.backedUp() {
+	declare -i intParam=$2
+	App.field backedUp "$1" "$intParam"
 }
 App.failedInstall() {
 	declare -i intParam=$2
 	App.field failedInstall "$1" "$intParam"
 }
-
+App.failedBackup() {
+	declare -i intParam=$2
+	App.field failedInstall "$1" "$intParam"
+}
+App.failedBackupSources() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(App.failedBackupSourcesCount) ; i++ )); do
+			App.field failedBackupSource${i}
+		done
+	else
+		App.field failedBackupSource${1} "$2" "$3"
+	fi
+}
 App.sourcePathsAdd() {
 	declare -i i=$(App.sourcePathsCount)
 	for sourcePath in "${@}"; do
@@ -91,6 +114,15 @@ App.sourcePathsAdd() {
 		i+=1
 	done
 	App.sourcePathsCount = $i
+}
+App.failedBackupSourcesAdd() {
+	App.failedBackup = 1
+	declare -i i=$(App.failedBackupSourcesCount)
+	for sourcePath in "${@}"; do
+		App.failedBackupSources "$i" = "$sourcePath"
+		i+=1
+	done
+	App.failedBackupSourcesCount = $i
 }
 
 # Install App on call
@@ -151,7 +183,10 @@ App.installBackups() {
 
 # Back up sources
 App.backup() {
-	if [ "$(App.sourcePaths)" = '' ]; then
+	if [ "$(App.backedUp)" -eq 1 ]; then
+		echo "App: Already backed up during this script."
+		return 3
+	elif [ "$(App.sourcePaths)" = '' ]; then
 		echo "App: No sourcePaths specified for App."
 		return
 	else
@@ -194,11 +229,13 @@ App.backup() {
 				fi
 			else
 				echo "App: Error: Could not find $sourcePath"
+				App.failedBackupSourcesAdd $sourcePath
 				continue
 			fi
 		done
 		unset IFS
 		echo "App: Backup completed."
 	fi
+	App.backedUp = 1
 }
 
