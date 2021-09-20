@@ -371,6 +371,9 @@ if [ "$skipAutosetup" != '1' ]; then
 				echo "$($app.failedBackupSources)"
 			fi
 		done
+		echo
+		echo "Be sure to double check if all files were backed up properly,"
+		echo "especially if this is a first-time backup!"
 	fi
 	echo
 
