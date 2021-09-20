@@ -45,7 +45,7 @@ done
 # Force run as root
 if [ $(id -u) -ne 0 ]; then
 	echo
-	echo "Root permissions are required to run this script."
+	echo "This script must be run with root priviliges. Running with sudo..."
 	sudo bash "$0" "$@"
 	exit $?
 fi
