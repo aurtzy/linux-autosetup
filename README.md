@@ -62,7 +62,7 @@ Descriptions of the parameters:
 
 - ```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
 If a custom install command is used, you can call your appname anything. This should not have spaces.  
-- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies.
+- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies. See [Manual Commands](#manual-commands) for more functions you can use.  
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
 - Every parameter after these are interpreted as backup source paths. You can use ```$HOME``` to substitute for the user home directory; note that ```~/``` will not work.    
@@ -98,7 +98,15 @@ Open a terminal in your linux-autosetup directory and run ```bash linux-autosetu
 
 The script will prompt you with some settings to choose from, after which it will automatically begin the autosetup based on those settings. It will end with any apps it failed to perform the autosetup on.  
 
+### Manual Commands  
 You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase into the manual mode, which will interpret input as normal terminal commands - just with all of the functions and configurations loaded from the script. You may want to look through the .class files in ./class or the main script .sh where some documentation is provided for the functions used.  
+
+Here are some commands that may be of interest:  
+- ```App.install``` or ```AppGroup.install``` runs install commands for the apps in question.  
+- ```App.installBackups``` installs only the backups from the specified app.  
+- ```App.backup``` or ```AppGroup.backup``` perform backups.  
+
+*App and AppGroup can be substituted with app and app group names, respectively.*
 
 ## Mentions
 Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
