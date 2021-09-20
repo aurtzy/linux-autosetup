@@ -128,6 +128,7 @@ App.failedBackupSourcesAdd() {
 # Install App on call
 # Also reset to original dir in case command used cd
 App.install() {
+	echo
 	if [ $(App.installed) -eq 1 ]; then
 		echo "App: Already installed during this script."
 		return 3
@@ -142,6 +143,7 @@ App.install() {
 	cd "$SCRIPT_WORKING_DIR"
 	
 	if [ "$(App.sourcePaths)" != '' ]; then
+		echo
 		echo "App: One or more backups were detected."
 		if [ $appInstallBackups -eq 1 ]; then
 			App.installBackups
@@ -188,6 +190,7 @@ App.installBackups() {
 
 # Back up sources
 App.backup() {
+	echo
 	if [ "$(App.backedUp)" -eq 1 ]; then
 		echo "App: Already backed up during this script."
 		return 3

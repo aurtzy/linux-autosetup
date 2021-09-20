@@ -329,11 +329,11 @@ if [ "$skipAutosetup" != '1' ]; then
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
 		echo "Installing apps..."
 		for entry in "${setupEntries[@]}"; do
-			echo
 			$entry.install
 		done
 		echo
 		echo "Finished installing."
+		echo
 		echo "Running onInstallFinish..."
 		onInstallFinish
 		echo "onInstallFinish completed."
@@ -348,7 +348,6 @@ if [ "$skipAutosetup" != '1' ]; then
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
-			echo
 			$entry.backup
 		done
 		echo
