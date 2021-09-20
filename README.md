@@ -1,6 +1,6 @@
 **This is currently in a *beta* state, and focus is mainly targeted on polishing features and bugfixing.**
 # Linux Autosetup
-Linux Autosetup is a script that uses Bash to semi-automate installing and backing up applications to reduce downtime from pains like forgetting certain apps to install or searching for certain files to back up through a crude text document. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.  
+Linux Autosetup is a script that uses Bash to semi-automate installing and backing up applications to reduce downtime from pains like forgetting to install some apps (including backups associated with them) or searching for certain files to back up through a crude text document. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.  
 
 ## Contents  
 - [Requirements](#requirements)  
