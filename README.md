@@ -1,6 +1,6 @@
 **This is currently in a *beta* state. Features are being wrapped up, and focus is mainly on documentation and bugfixing.**
 # Linux Autosetup
-Linux Autosetup is a script that uses bash to automate installation and backup processes. Its goal is to be as configurable as possible so that users can customize how and what they want to back up or install.  
+Linux Autosetup is a script that uses Bash to automate installation and backup processes. Its goal is to be as configurable as possible so that users can customize how and what they want to back up or install.  
 
 ## Contents  
 - [Requirements](#requirements)  
@@ -15,7 +15,7 @@ Linux Autosetup is a script that uses bash to automate installation and backup p
 - [Mentions](#mentions)  
 
 # Requirements
-- Bash 5.0.17+, which should be present on most modern Linux distributions (Older versions may also work, but this is not guaranteed)
+- Bash 5.0.17+ (Older versions may also work, but this is not guaranteed)
 - A Linux distribution
 
 # Installation
