@@ -24,7 +24,7 @@ Extract the tar and place the linux-autosetup folder wherever you want.
 # Configuration
 *This script assumes a working directory where linux-autosetup.sh is located.*  
 
-Configuration files should be found in the ./config directory. The following link contains example config files that are based on lists of apps that I've compiled which you may copy or use as a guideline:  
+Configuration files should be found in the ./config directory. The following link contains example config files that are based on lists of apps that I've compiled which you may copy or use as a guideline. They may also be helpful to use in understanding what kind of things you can do, particularly the example config:  
 https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/config  
 
 ## Creating a Config File  
@@ -62,7 +62,7 @@ Descriptions of the parameters:
 
 - ```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
 If a custom install command is used, you can call your appname anything. This should not have spaces.  
-- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead.
+- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies.
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
 - Every parameter after these are interpreted as backup source paths. You can use ```$HOME``` to substitute for the user home directory; note that ```~/``` will not work.    
