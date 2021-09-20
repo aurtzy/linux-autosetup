@@ -96,9 +96,9 @@ Notes:
 # Usage  
 Open a terminal in your linux-autosetup directory and run ```bash linux-autosetup.sh``` with root priviliges.  
 
-The script will prompt you to choose settings for the autosetup to run.  
+The script will prompt you with some settings to choose from, after which it will automatically begin the autosetup based on those settings. It will end with any apps it failed to perform the autosetup on.  
 
-You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase and allow you to enter manual commands if the autosetup does not accomplish what you want. You can read documentation on functions that the ./class/ and linux-autosetup.sh files employ if you wish to directly call them while running in the manual mode.  
+You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase into the manual mode, which will interpret input as normal terminal commands - just with all of the functions and configurations loaded from the script. You may want to look through the .class files in ./class or the main script .sh where some documentation is provided for the functions used.  
 
 ## Mentions
 Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
