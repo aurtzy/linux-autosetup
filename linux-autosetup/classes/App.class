@@ -171,7 +171,12 @@ App.installBackups() {
 		sourceDir="${sourcePath%"/"*}"
 		echo
 		echo "App: Installing $sourcePath"
-		mkdir -p "$sourceDir" && cp -a "$backupDir/$source" "$sourceDir"
+		sudo -u $SUDO_USER mkdir -p "$sourceDir"
+		if [ "$?" -ne 0 ]; then
+			echo "Elevating permissions for mkdir to work..."
+			mkdir -p "$sourceDir"
+		fi
+		cp -a "$backupDir/$source" "$sourceDir"
 		if [ $? -ne 0 ]; then
 			echo "App: Error: $source could not be installed."
 		else
@@ -194,7 +199,11 @@ App.backup() {
 		if [ ! -d "$backupDir" ]; then
 			echo
 			echo "App: Backup directory not found. Making one for you..."
-			mkdir -p "$backupDir"
+			sudo -u $SUDO_USER mkdir -p "$backupDir"
+			if [ "$?" -ne 0 ]; then
+				echo "Elevating permissions for mkdir to work..."
+				mkdir -p "$backupDir"
+			fi
 		else
 			dump "INITIALIZE" "App"
 		fi
