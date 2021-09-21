@@ -12,6 +12,7 @@ Linux Autosetup is a script that uses Bash to semi-automate installing and backi
   - [Adding App Groups](#adding-app-groups)  
   - [Function Calls at End of Autosetup](#function-calls-at-end-of-autosetup)
 - [Usage](#usage)  
+  - [Manual Commands](#manual-commands)
 - [Mentions](#mentions)  
 
 # Requirements
@@ -91,7 +92,9 @@ Notes:
 - App groups are limited to names without spaces and names that do not overlap with app names. The latter can be avoided by capitalizing app group names.  
 
 ## Function Calls at End of Autosetup  
-/* to-do */
+It's recommended that you have some knowledge in Bash before you attempt to use this.  
+
+This script provides two functions, ```onInstallFinish()``` and ```onBackupFinish()``` that you can overwrite and add commands to if the autosetup does not completely accomplish what you need, which run specifically after the autosetup performs an install or backup, respectively.  
 
 # Usage  
 Open a terminal in your linux-autosetup directory and run ```bash linux-autosetup.sh``` with root priviliges.  
