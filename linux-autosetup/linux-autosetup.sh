@@ -396,10 +396,6 @@ while
 appInstallBackups=0
 read -p ": " userIn
 do
-	if [ "$userIn" = 'help' ]; then
-		echo "Help function should be called..."
-	else
-		eval $userIn
-	fi
+	eval $userIn
 done
 
