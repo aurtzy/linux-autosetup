@@ -109,7 +109,7 @@ Here are some commands that may be of interest:
 - ```App.installBackups``` installs only the backups from the specified app.  
 - ```App.backup``` or ```AppGroup.backup``` perform backups.  
 
-*App and AppGroup can be substituted with app and app group names, respectively.*
+*App and AppGroup are substituted with app and app group names, respectively.*
 
 ## Mentions
 Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
