@@ -111,5 +111,5 @@ Here are some commands that may be of interest:
 
 *App and AppGroup are substituted with app and app group names, respectively.*
 
-## Mentions
+# Mentions
 Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
