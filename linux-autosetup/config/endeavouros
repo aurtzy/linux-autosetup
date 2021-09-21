@@ -6,7 +6,7 @@
 
 # APP_BACKUP_DIR="./app-backups"
 
-DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
+DEFAULT_APP_INSTALL_COMMAND="sudo pacman -S $app || "
 
 # DUMP_DIR="./dump"
 

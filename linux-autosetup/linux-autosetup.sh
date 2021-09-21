@@ -203,6 +203,13 @@ promptYesNo() {
 	done
 }
 
+# Event functions that are meant to be overwritten in configs
+onInstall() {
+	return
+}
+onBackup() {
+	return
+}
 onInstallFinish() {
 	return
 }
@@ -331,17 +338,24 @@ if [ "$skipAutosetup" != '1' ]; then
 	done
 	
 	
-	
+	echo
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
+		echo "Running onInstall first..."
+		onInstall
+		echo
+		echo "onInstall completed."
+		echo
 		echo "Installing apps..."
 		for entry in "${setupEntries[@]}"; do
 			$entry.install
 		done
 		echo
 		echo "Finished installing."
+		
 		echo
 		echo "Running onInstallFinish..."
 		onInstallFinish
+		echo
 		echo "onInstallFinish completed."
 		
 		echo
@@ -352,15 +366,22 @@ if [ "$skipAutosetup" != '1' ]; then
 			fi
 		done
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
+		echo "Running onBackup first..."
+		onBackup
+		echo "onBackup completed."
+		
+		echo
 		echo "Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
 			$entry.backup
 		done
 		echo
 		echo "Finished backing up."
+		
 		echo
 		echo "Running onBackupFinish..."
 		onBackupFinish
+		echo
 		echo "onBackupFinish completed."
 		
 		echo
