@@ -102,7 +102,7 @@ Open a terminal in your linux-autosetup directory and run ```bash linux-autosetu
 The script will prompt you with some settings to choose from, after which it will automatically begin the autosetup based on those settings. It will end with any apps it failed to perform the autosetup on.  
 
 ### Manual Commands  
-You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase into the manual mode, which will interpret input as normal terminal commands - just with all of the functions and configurations loaded from the script. You may want to read through [linux-autosetup.sh](https://github.com/aurtzy/linux-autosetup/blob/release/linux-autosetup/linux-autosetup.sh) or the [class files](https://github.com/aurtzy/linux-autosetup/tree/release/linux-autosetup/classes) where some documentation is provided for the functions used.  
+You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase into the manual mode, which will interpret input as normal terminal commands - just with all of the functions and configurations loaded from the script. You may want to read through [linux-autosetup.sh](https://github.com/aurtzy/linux-autosetup/blob/stable/linux-autosetup/linux-autosetup.sh) or the [class files](https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/classes) where some documentation is provided for the functions used.  
 
 Here are some commands that may be of interest:  
 - ```App.install``` or ```AppGroup.install``` runs install commands for the apps in question.  
