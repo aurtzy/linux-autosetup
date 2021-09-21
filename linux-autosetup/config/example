@@ -43,6 +43,7 @@ App clamtk
 App discord "flatpak install com.discordapp.Discord"
 App file-roller
 App firefox "" "COPY" "$HOME/.mozilla/firefox/PROFILE"
+App flatseal "flatpak install flathub com.github.tchx84.Flatseal"
 App gnome-extensions
 App gnome-tweaks
 App obs-studio
