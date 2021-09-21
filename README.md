@@ -1,6 +1,6 @@
 **This is currently in a *beta* state, and focus is mainly targeted on polishing features and bugfixing.**
 # Linux Autosetup
-Linux Autosetup is a script that uses Bash to semi-automate installing and backing up applications to reduce downtime from pains like forgetting certain apps to install or searching for certain files to back up through a crude text document. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.  
+Linux Autosetup is a script that uses Bash to semi-automate installing and backing up applications to reduce downtime from pains like forgetting to install some apps (including backups associated with them) or searching for certain files to back up through a crude text document. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.  
 
 ## Contents  
 - [Requirements](#requirements)  
@@ -12,6 +12,7 @@ Linux Autosetup is a script that uses Bash to semi-automate installing and backi
   - [Adding App Groups](#adding-app-groups)  
   - [Function Calls at End of Autosetup](#function-calls-at-end-of-autosetup)
 - [Usage](#usage)  
+  - [Manual Commands](#manual-commands)
 - [Mentions](#mentions)  
 
 # Requirements
@@ -62,7 +63,7 @@ Descriptions of the parameters:
 
 - ```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
 If a custom install command is used, you can call your appname anything. This should not have spaces.  
-- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies.
+- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies. See [Manual Commands](#manual-commands) for more functions you can use.  
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
 - Every parameter after these are interpreted as backup source paths. You can use ```$HOME``` to substitute for the user home directory; note that ```~/``` will not work.    
@@ -91,14 +92,24 @@ Notes:
 - App groups are limited to names without spaces and names that do not overlap with app names. The latter can be avoided by capitalizing app group names.  
 
 ## Function Calls at End of Autosetup  
-/* to-do */
+It's recommended that you have some knowledge in Bash before you attempt to use this.  
+
+This script provides two functions, ```onInstallFinish()``` and ```onBackupFinish()``` that you can overwrite and add commands to if the autosetup does not completely accomplish what you need, which run specifically after the autosetup performs an install or backup, respectively.  
 
 # Usage  
 Open a terminal in your linux-autosetup directory and run ```bash linux-autosetup.sh``` with root priviliges.  
 
 The script will prompt you with some settings to choose from, after which it will automatically begin the autosetup based on those settings. It will end with any apps it failed to perform the autosetup on.  
 
+### Manual Commands  
 You can run the command ```bash linux-autosetup.sh -m``` in order to skip the autosetup phase into the manual mode, which will interpret input as normal terminal commands - just with all of the functions and configurations loaded from the script. You may want to look through the .class files in ./class or the main script .sh where some documentation is provided for the functions used.  
+
+Here are some commands that may be of interest:  
+- ```App.install``` or ```AppGroup.install``` runs install commands for the apps in question.  
+- ```App.installBackups``` installs only the backups from the specified app.  
+- ```App.backup``` or ```AppGroup.backup``` perform backups.  
+
+*App and AppGroup can be substituted with app and app group names, respectively.*
 
 ## Mentions
 Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
