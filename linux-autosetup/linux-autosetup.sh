@@ -230,6 +230,7 @@ printScriptInfo 'more'
 # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
 	while true; do
+		echo
 		echo "Which config file do you want to use?"
 		for i in "${!CONFIG_FILES[@]}"; do
 			echo "$i ${CONFIG_FILES[$i]}"
