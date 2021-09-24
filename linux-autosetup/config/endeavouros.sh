@@ -1,5 +1,3 @@
-#!bin/bash
-
 ##########################
 # CONFIGURABLE VARIABLES #
 ##########################
@@ -8,7 +6,7 @@
 
 # APP_BACKUP_DIR="./app-backups"
 
-DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
+DEFAULT_APP_INSTALL_COMMAND="sudo pacman -S $app || "
 
 # DUMP_DIR="./dump"
 
@@ -17,6 +15,8 @@ DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in c
 ################
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
+
+
 
 ######################
 # APPLICATION GROUPS #
