@@ -22,7 +22,7 @@ SOME_ALTERNATE_INSTALL_COMMAND="echo omg you just installed $app through an alte
 App defaultTest "" "" ""
 App tooManyArgs "" "" "" "" ""
 App alternateDefaultTest "$SOME_ALTERNATE_INSTALL_COMMAND"
-App oneLinerInstaller "echo custom command, here i come from $app; echo this should be the second line to the oneLinerInstaller app"
+App oneLinerInstaller "echo custom command, here i come from $app; echo this should be the second line to the oneLinerInstaller app; declare somevariable='somevariablestoredstring'; eval echo probably won't work, but if it does it should print 'somevariablestoredstring': $somevariable"
 App notActualInstallCommand "thisshouldnotbeavalidcommand"
 
 App oneDir "" "" "./testerFiles/oneDir/"
@@ -30,7 +30,7 @@ App oneDirHardLinked "" "HARDLINK" "./testerFiles/oneDirHardLinked/"
 App oneDirWithSpaces "" "" "./testerFiles/one Dir With Spaces"
 App oneDirWithSpacesFile "" "" "./testerFiles/oneDirWithSpacesFile/this file has spaces"
 App multDirs "" "" "./testerFiles/multDirs1" "./testerFiles/multDirs 2" "./testerFiles/multDirs3"
-App dirsDoNotExist "" "" "./testerFiles/do not create this directory" "./testerFiles/hello there" "./testerFiles/yes"
+App dirsDoNotExist "" "" "./testerFiles/do not create these directories" "./testerFiles/hello there" "./testerFiles/yes"
 
 # try https://stackoverflow.com/questions/13659318/how-to-remove-space-from-string if this doesn't already give an error
 App 'app with space'
