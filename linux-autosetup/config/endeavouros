@@ -18,6 +18,8 @@ DEFAULT_APP_INSTALL_COMMAND="sudo pacman -S $app || "
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
+
+
 ######################
 # APPLICATION GROUPS #
 ######################

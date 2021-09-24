@@ -63,7 +63,7 @@ App tlp
 ######################
 
 appGroups=(
-	[]
+	
 )
 
 onInstall() {
