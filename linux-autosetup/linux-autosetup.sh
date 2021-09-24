@@ -359,7 +359,7 @@ if [ "$skipAutosetup" != '1' ]; then
 				done
 			fi
 			echo
-			if [ $(promptYesNo "Script will $AUTOSETUP_TYPE these apps. Is this okay?") -ge 1 ]; then
+			if [ $(promptYesNo "Script will $AUTOSETUP_TYPE everything above. Is this okay?") -ge 1 ]; then
 				break
 			else
 				echo "User is not okay with this"
@@ -383,6 +383,7 @@ if [ "$skipAutosetup" != '1' ]; then
 		for entry in "${setupEntries[@]}"; do
 			$entry.install
 		done
+		appInstallBackups=0
 		echo
 		echo "AUTOSETUP: Finished autosetup install."
 		

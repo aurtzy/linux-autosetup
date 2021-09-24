@@ -65,7 +65,6 @@ AppGroup.install() {
 	done
 	echo
 	echo "AppGroup: Installation completed!"
-	appInstallBackups=0
 }
 
 # Back up sources
@@ -80,8 +79,9 @@ AppGroup.backup() {
 	echo
 	echo "If any apps failed to be backed up from this app group, they will be listed below:"
 	for app in $(AppGroup.apps); do
-		if [ $($app.failedBackup) -eq 1 ]; then
-			echo $app
+		if [ "$($app.failedBackup)" -eq 1 ]; then
+			echo "$app:"
+			echo "$($app.failedBackupSources)"
 		fi
 	done
 	echo
