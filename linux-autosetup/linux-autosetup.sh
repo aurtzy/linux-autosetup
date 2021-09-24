@@ -253,7 +253,7 @@ fi
 # Import CONFIG_FILE & initialize objects
 echo
 echo "Initializing objects..."
-. "config/$CONFIG_FILE"
+. "$CONFIG_FOLDER/$CONFIG_FILE"
 initializeAppGroups
 echo "All objects successfully initialized."
 
