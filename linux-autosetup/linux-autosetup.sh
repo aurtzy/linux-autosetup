@@ -115,7 +115,12 @@ dump() {
 			echo "dump(): Trying $DUMP_DIR/$dumpName/$i..."
 		done
 		echo "dump(): Dump initialized at $DUMP_DIR/$dumpName/$i"
-		mkdir -p "$DUMP_DIR/$dumpName/$i"
+		
+		sudo -u $SUDO_USER mkdir -p "$DUMP_DIR/$dumpName/$i"
+		if [ "$?" -ne 0 ]; then
+			echo "Elevating permissions for mkdir to work..."
+			mkdir -p "$DUMP_DIR/$dumpName/$i"
+		fi
 	elif [[ -d "$path" || -f "$path" ]]; then
 		declare -i i=1
 		while [ -d "$DUMP_DIR/$dumpName/$i" ]
@@ -328,14 +333,31 @@ if [ "$skipAutosetup" != '1' ]; then
 		done
 		
 		if [ "$entry" = 'done' ]; then
+			echo
 			echo "Please confirm that you want to $AUTOSETUP_TYPE the following:"
-			for entry in "${setupEntries[*]}"; do
-				echo -n "$entry"
-				if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
-					echo -n ": $($entry.apps)"
-				fi
-				echo
-			done
+			if [ "$AUTOSETUP_TYPE" = 'install' ]; then
+				for entry in "${setupEntries[@]}"; do
+					echo
+					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
+						echo "$entry: $($entry.apps)"
+					else
+						echo "$entry"
+					fi
+				done
+			elif [ "$AUTOSETUP_TYPE" = 'backup' ]; then
+				for entry in "${setupEntries[@]}"; do
+					echo
+					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
+						echo "$entry:"
+						for app in $($entry.apps); do
+							echo "  $app:"
+							echo "$($app.sourcePaths)"
+						done
+					else
+						echo "$entry: $($entry.sourcePaths)"
+					fi
+				done
+			fi
 			echo
 			if [ $(promptYesNo "Are you okay with this?") -ge 1 ]; then
 				break

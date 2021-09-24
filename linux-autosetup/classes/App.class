@@ -200,7 +200,6 @@ App.backup() {
 	else
 		backupDir="$APP_BACKUP_DIR/App"
 		if [ ! -d "$backupDir" ]; then
-			echo
 			echo "App: Backup directory not found. Making one for you..."
 			sudo -u $SUDO_USER mkdir -p "$backupDir"
 			if [ "$?" -ne 0 ]; then
@@ -221,7 +220,6 @@ App.backup() {
 				echo "App: Found: $sourcePath"
 				
 				# Dump any old backup
-				echo "$backupDir/$source"
 				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
 					echo "App: Old backup found. Dumping..."
 					dump "$backupDir/$source" "App"
