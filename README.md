@@ -44,7 +44,7 @@ This script offers a couple of options that you can customize by changing specif
 
 - ```DUMP_DIR``` uses ```"./dump"``` as a fallback. This tells the script where to dump old backups.  
 
-*If there is something you would like to change that is not found in this section (e.g. config directory), , you may be able to find it in the CONFIGURABLE VARIABLES section in the main bash script.*
+*If there is something you would like to change that is not found in this section (e.g. config directory), you may be able to find it in the CONFIGURABLE VARIABLES section in the main bash script.*  
 ## Adding Apps
 Creating apps simply requires a call to the App function in the config file in the following format:  
 ```App "appname" "install_command" "backup_type" "directory/to/back/up" "or/file/to/back/up" ...```  
