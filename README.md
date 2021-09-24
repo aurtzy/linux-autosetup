@@ -31,6 +31,8 @@ https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/config
 ## Creating a Config File  
 You can make a config file from scratch or copy from one of the examples in the link above and place it in the config folder. The sections below describe what and how you can add to the config file.  
 
+Config files are read as as actual Bash scripts, so you can add a .sh extension to your file if you'd like it to automatically recognize the syntax - this is not required, though.  
+
 ## Configuration Options  
 Options are completely optional unless otherwise stated.  
 
