@@ -90,6 +90,10 @@ App.backedUp() {
 	declare -i intParam=$2
 	App.field backedUp "$1" "$intParam"
 }
+App.backupsInstalled() {
+	declare -i intParam=$2
+	App.field backupsInstalled "$1" "$intParam"
+}
 App.failedInstall() {
 	declare -i intParam=$2
 	App.field failedInstall "$1" "$intParam"
@@ -166,6 +170,10 @@ App.install() {
 }
 
 App.installBackups() {
+	if [ "$(App.backupsInstalled)" -eq 1 ]; then
+		echo "App: Backups already installed."
+		return
+	fi
 	backupDir="$APP_BACKUP_DIR/App"
 	IFS=$'\n'
 	for sourcePath in $(App.sourcePaths); do
@@ -186,6 +194,7 @@ App.installBackups() {
 		fi
 	done
 	unset IFS
+	App.backupsInstalled = 1
 }
 
 # Back up sources
