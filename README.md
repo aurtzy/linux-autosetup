@@ -29,16 +29,7 @@ Configuration files should be found in the ./config directory. The following lin
 https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/config  
 
 ## Creating a Config File  
-You can make a config file from scratch or copy from one of the examples in the link above.  
-
-Add this config file name to the CONFIG_FILES variable which should be found in ./config/src:  
-```
-CONFIG_FILES=(  
-  "insert_config_file_name_here"
-  "add_second_config_file_here_if_desired"
-  "etc..."
-)
-```
+You can make a config file from scratch or copy from one of the examples in the link above and place it in the config folder. The sections below describe what and how you can add to the config file.  
 
 ## Configuration Options  
 Options are completely optional unless otherwise stated.  
@@ -53,6 +44,7 @@ This script offers a couple of options that you can customize by changing specif
 
 - ```DUMP_DIR``` uses ```"./dump"``` as a fallback. This tells the script where to dump old backups.  
 
+*If there is something you would like to change that is not found in this section (e.g. config directory), , you may be able to find it in the CONFIGURABLE VARIABLES section in the main bash script.*
 ## Adding Apps
 Creating apps simply requires a call to the App function in the config file in the following format:  
 ```App "appname" "install_command" "backup_type" "directory/to/back/up" "or/file/to/back/up" ...```  
