@@ -140,8 +140,19 @@ convertHyphens() {
 # $1=name, $2=installCommand, $3=backupType, ${@:4}=sourcePaths
 App() {
 	if [ "$1" = '' ]; then
-		echo "Error: app name parameter was empty."
-		return
+		echo
+		echo "Error: app name parameter was empty"
+		echo "App names cannot be empty."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
+	elif [[ "$1" =~ [[:blank:]] ]]; then
+		echo
+		echo "Error: app name '$1' has whitespaces"
+		echo "App names cannot have whitespaces (e.g. spaces, tabs)."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
 	fi
 	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
@@ -161,7 +172,6 @@ AppGroup() {
 
 # Initialize app groups in appGroups array
 initializeAppGroups() {
-	appGroups[All]="${apps[*]}" # App group allApps; contains all apps
 	for appGroup in $(appGroups); do
 		AppGroup $appGroup "${appGroups[$appGroup]}"
 	done
@@ -175,17 +185,6 @@ apps() {
 # Return all appGroups separated by spaces
 appGroups() {
 	echo "${!appGroups[*]}"
-}
-
-# Check if given App/AppGroup exists
-isValid() {
-	if [[ " ${apps[*]} " =~ " ${1} " || " ${!appGroups[*]} " =~ " ${1} " ]]; then
-    	echo 1
-    	return
-	else
-		echo 0
-		return 1
-	fi
 }
 
 # Prompt user to input yes/no
@@ -300,7 +299,7 @@ if [ "$skipAutosetup" != '1' ]; then
 	echo " $(apps)"
 	echo
 	echo "Your app groups:"
-	echo " All $(appGroups)"
+	echo " $(appGroups)"
 	echo
 	echo "Add apps or app groups you want to $AUTOSETUP_TYPE from your config."
 	echo "Separate entries with spaces or add one every line."
@@ -310,7 +309,11 @@ if [ "$skipAutosetup" != '1' ]; then
 	read -p ": " userIn
 	do
 		for entry in $userIn; do
-			if [ $(isValid "$entry") -eq 1 ]; then
+			if [[ " ${setupEntries[*]} " =~ " $entry " ]]; then
+				echo "$entry has already been entered."
+				continue
+			fi
+			if [[ " ${apps[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
 				setupEntries+=("$entry")
 			elif [ "$entry" = 'done' ]; then
 				echo
@@ -325,8 +328,15 @@ if [ "$skipAutosetup" != '1' ]; then
 		done
 		
 		if [ "$entry" = 'done' ]; then
-			echo "Please confirm that the following will $AUTOSETUP_TYPE:"
-			echo "${setupEntries[*]}"
+			echo "Please confirm that you want to $AUTOSETUP_TYPE the following:"
+			for entry in "${setupEntries[*]}"; do
+				echo -n "$entry"
+				if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
+					echo -n ": $($entry.apps)"
+				fi
+				echo
+			done
+			echo
 			if [ $(promptYesNo "Are you okay with this?") -ge 1 ]; then
 				break
 			else
@@ -342,52 +352,52 @@ if [ "$skipAutosetup" != '1' ]; then
 	
 	echo
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
-		echo "Running onInstall first..."
+		echo "AUTOSETUP: Running onInstall first..."
 		onInstall
 		echo
-		echo "onInstall completed."
+		echo "AUTOSETUP: onInstall completed."
 		echo
-		echo "Installing apps..."
+		echo "AUTOSETUP: Installing apps..."
 		for entry in "${setupEntries[@]}"; do
 			$entry.install
 		done
 		echo
-		echo "Finished installing."
+		echo "AUTOSETUP: Finished autosetup install."
 		
 		echo
-		echo "Running onInstallFinish..."
+		echo "AUTOSETUP: Running onInstallFinish..."
 		onInstallFinish
 		echo
-		echo "onInstallFinish completed."
+		echo "AUTOSETUP: onInstallFinish completed."
 		
 		echo
-		echo "If any apps failed to install, they will be listed below:"
+		echo "AUTOSETUP: IF ANY APPS FAILED TO INSTALL, THEY WILL BE LISTED BELOW:"
 		for app in "${apps[@]}"; do
 			if [ "$($app.failedInstall)" -eq 1 ]; then
 				echo "$app"
 			fi
 		done
 	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
-		echo "Running onBackup first..."
+		echo "AUTOSETUP: Running onBackup first..."
 		onBackup
-		echo "onBackup completed."
+		echo "AUTOSETUP: onBackup completed."
 		
 		echo
-		echo "Backing up apps..."
+		echo "AUTOSETUP: Backing up apps..."
 		for entry in "${setupEntries[@]}"; do
 			$entry.backup
 		done
 		echo
-		echo "Finished backing up."
+		echo "AUTOSETUP: Finished autosetup backup."
 		
 		echo
-		echo "Running onBackupFinish..."
+		echo "AUTOSETUP: Running onBackupFinish..."
 		onBackupFinish
 		echo
-		echo "onBackupFinish completed."
+		echo "AUTOSETUP: onBackupFinish completed."
 		
 		echo
-		echo "If any apps failed to back up something, they will be listed below:"
+		echo "AUTOSETUP: IF ANY APPS FAILED TO BE BACKED UP, THEY WILL BE LISTED BELOW:"
 		for app in "${apps[@]}"; do
 			if [ "$($app.failedBackup)" -eq 1 ]; then
 				echo "$app:"
@@ -395,14 +405,14 @@ if [ "$skipAutosetup" != '1' ]; then
 			fi
 		done
 		echo
-		echo "Be sure to double check if all files were backed up properly,"
+		echo "AUTOSETUP: Be sure to double check if all files were backed up properly,"
 		echo "especially if this is a first-time backup!"
 	fi
 	echo
 
-	echo "Autosetup finished!"
+	echo "AUTOSETUP: Autosetup finished!"
 else
-	echo "Skipping autosetup..."
+	echo "AUTOSETUP: Skipping autosetup..."
 fi
 
 ###################

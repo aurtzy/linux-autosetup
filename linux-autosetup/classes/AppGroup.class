@@ -33,10 +33,9 @@ AppGroup.add() {
 		if [[ ! " ${apps[*]} " =~ " ${app} " ]]; then
 			echo
 			echo "AppGroup: Error: App object '$app' was not found"
-			echo "An App object must exist before it can be added to an AppGroup"
+			echo "An App object must exist before it can be added to an app group."
 			echo "Please check your config and resolve."
 			echo "Exiting..."
-			read
 			exit 1
 		fi
 		if [ "$AppGroup.apps" != '' ]; then
@@ -50,14 +49,15 @@ AppGroup.add() {
 # Install AppGroup on call
 # Also reset to original dir in case command used cd
 AppGroup.install() {
+	echo
+	echo
 	echo "AppGroup: Installing from app group..."
 	echo "Use -y/-n if you want to autofill prompts for backup installs."
-	echo
 	for app in $(AppGroup.apps); do
 		$app.install
 	done
 	echo
-	echo "If any apps failed to install, they will be listed below:"
+	echo "If any apps failed to install from this app group, they will be listed below:"
 	for app in $(AppGroup.apps); do
 		if [ $($app.failedInstall) -eq 1 ]; then
 			echo $app
@@ -70,11 +70,21 @@ AppGroup.install() {
 
 # Back up sources
 AppGroup.backup() {
+	echo
+	echo
 	echo "AppGroup: Backing up from app group..."
 	for app in $(AppGroup.apps)
 	do
 		$app.backup
 	done
+	echo
+	echo "If any apps failed to be backed up from this app group, they will be listed below:"
+	for app in $(AppGroup.apps); do
+		if [ $($app.failedBackup) -eq 1 ]; then
+			echo $app
+		fi
+	done
+	echo
 	echo "AppGroup: Backup completed!"
 }
 
