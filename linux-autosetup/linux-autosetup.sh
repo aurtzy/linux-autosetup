@@ -78,8 +78,8 @@ declare app='$app'
 
 # If a command call uses cd, this will allow remaining in proper dir
 declare SCRIPT_WORKING_DIR="$(pwd)"
-# Default configiguration files
-declare -a CONFIG_FILES=("")
+# Default configuration folder
+declare CONFIG_FOLDER="./config"
 # Where classes are stored
 declare CLASSES_DIR="./classes"
 
@@ -224,8 +224,9 @@ onBackupFinish() {
 # Print basic copyright information
 printScriptInfo 'more'
 
-# Import src config
-. config/src
+# Assign everything in designated config folder
+# to CONFIG_FILES
+declare -a CONFIG_FILES=("$CONFIG_FOLDER/"*)
 
 # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
@@ -233,7 +234,7 @@ if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
 		echo
 		echo "Which config file do you want to use?"
 		for i in "${!CONFIG_FILES[@]}"; do
-			echo "$i ${CONFIG_FILES[$i]}"
+			echo "$i ${CONFIG_FILES[$i]##*"/"}"
 		done
 		read -p "Enter the index of the config file: " userIn
 		if [[ -z "$userIn" || "$userIn" > 'a' ]]; then
