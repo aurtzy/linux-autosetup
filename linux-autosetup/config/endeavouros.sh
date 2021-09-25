@@ -137,7 +137,7 @@ appGroups=(
 )
 
 onInstall() {
-	pacman -Syu
+	yay
 }
 onBackup() {
 	return

@@ -6,7 +6,7 @@
 
 # APP_BACKUP_DIR="./app-backups"
 
-DEFAULT_APP_INSTALL_COMMAND="sudo dnf install $app"
+DEFAULT_APP_INSTALL_COMMAND="sudo dnf -y install $app"
 
 # DUMP_DIR="./dump"
 
