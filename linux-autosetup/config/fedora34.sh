@@ -28,7 +28,7 @@ App wine "sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/f
 App discord "flatpak install com.discordapp.Discord"
 App easyeffects "flatpak install flathub com.github.wwmm.easyeffects"
 App obs-studio
-App gifski "rust.install; cargo install gifski"
+App gifski "cargo.install; cargo install gifski"
 App quodlibet
 App pavucontrol
 App winetricks
@@ -56,7 +56,7 @@ App gnome-tweaks
 # Misc.
 App clamtk
 App tlp
-App cargo
+App cargo "$DEFAULT_APP_INSTALL_COMMAND; echo PATH=$HOME/.cargo/bin:$PATH >> $HOME/.bash_profile"
 
 ######################
 # APPLICATION GROUPS #
