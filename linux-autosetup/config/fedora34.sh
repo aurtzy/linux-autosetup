@@ -23,7 +23,6 @@ App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile
 # http://kb.mozillazine.org/Files_and_folders_in_the_profile_-_Thunderbird
 App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App ffmpeg
-App rust
 App wine "sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/34/winehq.repo; sudo dnf install winehq-stable; winetricks.install"
 
 App discord "flatpak install com.discordapp.Discord"
@@ -57,6 +56,7 @@ App gnome-tweaks
 # Misc.
 App clamtk
 App tlp
+App cargo
 
 ######################
 # APPLICATION GROUPS #
