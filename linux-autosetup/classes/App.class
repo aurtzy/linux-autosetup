@@ -149,6 +149,10 @@ App.install() {
 	if [ "$(App.sourcePaths)" != '' ]; then
 		echo
 		echo "App: One or more backups were detected."
+		if [ "$(App.backupsInstalled)" -eq 1 ]; then
+			echo "App: Backups already installed."
+			return
+		fi
 		if [ $appInstallBackups -eq 1 ]; then
 			App.installBackups
 		elif [ $appInstallBackups -eq 0 ]; then
@@ -170,10 +174,6 @@ App.install() {
 }
 
 App.installBackups() {
-	if [ "$(App.backupsInstalled)" -eq 1 ]; then
-		echo "App: Backups already installed."
-		return
-	fi
 	backupDir="$APP_BACKUP_DIR/App"
 	IFS=$'\n'
 	for sourcePath in $(App.sourcePaths); do
