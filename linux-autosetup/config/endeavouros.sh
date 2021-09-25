@@ -24,7 +24,6 @@ App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile
 App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App flatpak "$DEFAULT_APP_INSTALL_COMMAND; flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo; systemctl reboot"
 App ffmpeg
-App rust
 
 # Extras
 App discord "flatpak install com.discordapp.Discord"
@@ -66,7 +65,8 @@ App losslesscut-bin
 App gimp
 App krita
 
-# Helpers
+# Dependencies
+App rust
 App linux-headers
 
 # Misc
