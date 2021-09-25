@@ -345,9 +345,9 @@ if [ "$skipAutosetup" != '1' ]; then
 		if [ "$entry" = 'done' ]; then
 			echo
 			echo "Please confirm that you want to $AUTOSETUP_TYPE the following:"
+			echo
 			if [ "$AUTOSETUP_TYPE" = 'install' ]; then
 				for entry in "${setupEntries[@]}"; do
-					echo
 					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
 						echo "$entry: $($entry.apps)"
 					else
@@ -356,7 +356,6 @@ if [ "$skipAutosetup" != '1' ]; then
 				done
 			elif [ "$AUTOSETUP_TYPE" = 'backup' ]; then
 				for entry in "${setupEntries[@]}"; do
-					echo
 					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
 						echo "$entry:"
 						for app in $($entry.apps); do
