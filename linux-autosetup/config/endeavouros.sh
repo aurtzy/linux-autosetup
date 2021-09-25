@@ -20,7 +20,7 @@ thProfile="$HOME/.thunderbird/PROFILE"
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
 # Essentials
-App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json} "$ffProfile/storage/default/"
+App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
 App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App flatpak "$DEFAULT_APP_INSTALL_COMMAND; flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo; systemctl reboot"
 App ffmpeg

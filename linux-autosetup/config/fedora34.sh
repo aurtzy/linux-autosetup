@@ -19,7 +19,7 @@ thProfile="$HOME/.thunderbird/PROFILE"
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
-App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json} "$ffProfile/storage/default/"
+App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
 # http://kb.mozillazine.org/Files_and_folders_in_the_profile_-_Thunderbird
 App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App ffmpeg
