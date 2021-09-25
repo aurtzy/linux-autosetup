@@ -21,7 +21,7 @@ thProfile="$HOME/.thunderbird/PROFILE"
 
 # Essentials
 App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json} "$ffProfile/storage/default/"
-App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/abook.sqlite" "$thProfile/cert9.db" "$thProfile/history.sqlite" "$thProfile/key4.db" "$thProfile/logins.json" "$thProfile/prefs.js"
+App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App flatpak "$DEFAULT_APP_INSTALL_COMMAND; flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo; systemctl reboot"
 App ffmpeg
 App rust
@@ -77,6 +77,11 @@ App clamtk
 ######################
 
 appGroups=(
+	[Backup]="
+		firefox
+		thunderbird
+		nvidia-tdp-1660ti
+	"
 	[Essentials]="
 		firefox
 		thunderbird
