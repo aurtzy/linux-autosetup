@@ -25,7 +25,7 @@ Extract the tar and place the linux-autosetup folder wherever you want.
 # Configuration
 *This script assumes a working directory where linux-autosetup.sh is located.*  
 
-Configuration files should be found in the ./config directory. The following link contains example config files that are based on lists of apps that I've compiled which you may copy or use as a guideline. They may also be helpful to use in understanding what kind of things you can do, particularly the example config:  
+Configuration files should be found in the ./config directory. The following link contains config files that I've compiled, which you may find helpful as guidelines for setting up a config file. They may also be helpful in understanding what kind of things you can do:  
 https://github.com/aurtzy/linux-autosetup/tree/stable/linux-autosetup/config  
 
 ## Creating a Config File  
@@ -45,6 +45,7 @@ This script offers a couple of options that you can customize by changing specif
 - ```APP_BACKUP_DIR``` uses ```"./app-backups"``` as a fallback. This tells the script where the application backups should be located.  
 
 - ```DUMP_DIR``` uses ```"./dump"``` as a fallback. This tells the script where to dump old backups.  
+```"$HOME/.local/share/Trash/files/linux-autosetup/dump"``` is an alternative path if you prefer dumping to your Trash.
 
 *If there is something you would like to change that is not found in this section (e.g. config directory), you may be able to find it in the CONFIGURABLE VARIABLES section in the main bash script.*  
 ## Adding Apps
