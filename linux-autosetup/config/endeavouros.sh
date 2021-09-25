@@ -27,7 +27,7 @@ App ffmpeg
 App rust
 
 # Extras
-App discord "flatpak.install; flatpak install com.discordapp.Discord"
+App discord "flatpak install com.discordapp.Discord"
 App quodlibet
 App gifski "cargo.install; cargo install gifski"
 App youtube-dl
