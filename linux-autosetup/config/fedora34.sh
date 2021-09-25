@@ -19,19 +19,19 @@ thProfile="$HOME/.thunderbird/PROFILE"
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 # https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data
-App firefox "" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json} "$ffProfile/storage/default/"*
-App firefoxBackups "firefox.installBackups"
+App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json} "$ffProfile/storage/default/"
 # http://kb.mozillazine.org/Files_and_folders_in_the_profile_-_Thunderbird
 App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/abook.sqlite" "$thProfile/cert9.db" "$thProfile/history.sqlite" "$thProfile/key4.db" "$thProfile/logins.json" "$thProfile/prefs.js"
+App ffmpeg
+App cargo
+App wine "sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/34/winehq.repo; sudo dnf install winehq-stable; winetricks.install"
 
 App discord "flatpak install com.discordapp.Discord"
-App ffmpeg
 App easyeffects "flatpak install flathub com.github.wwmm.easyeffects"
 App obs-studio
 App gifski "cargo.install; cargo install gifski"
 App quodlibet
 App pavucontrol
-App wine "sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/34/winehq.repo; sudo dnf install winehq-stable; winetricks.install"
 App winetricks
 App youtube-dl
 
@@ -39,10 +39,11 @@ App youtube-dl
 App gamemode
 App steam
 App lutris
+
 App piper
+App nvidia-tdp-1660ti "nvidia-tdp.installBackups; systemctl enable nvidia-tdp.timer" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
 
 # Dev tools
-App cargo
 App eclipse
 App github-desktop
 App intellij
@@ -62,7 +63,33 @@ App tlp
 ######################
 
 appGroups=(
-	
+	[Essentials]="
+		firefox
+		thunderbird
+		ffmpeg
+		wine
+	"
+	# Gaming
+	[All-G]="
+		G
+		G-1660ti
+		G-periph
+	"
+	[G]="
+		gamemode
+		steam
+		lutris
+	"
+	[G-1660ti]="
+		nvidia-tdp-1660ti
+	"
+	[G-periph]="
+		piper
+	"
+	# Laptop
+	[Laptop]="
+		tlp
+	"
 )
 
 onInstall() {
