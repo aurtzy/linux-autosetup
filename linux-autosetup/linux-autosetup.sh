@@ -308,6 +308,8 @@ if [ "$skipAutosetup" != '1' ]; then
 	echo
 	echo "Add apps or app groups you want to $AUTOSETUP_TYPE from your config."
 	echo "Separate entries with spaces or add one every line."
+	echo "Type 'apps' or 'appGroups' to show their respective lists again."
+	echo
 	echo "Type 'done' to finish adding or 'clear' to clear your entries."
 	
 	while true
@@ -320,6 +322,14 @@ if [ "$skipAutosetup" != '1' ]; then
 			fi
 			if [[ " ${apps[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
 				setupEntries+=("$entry")
+			elif [ "$entry" = 'apps' ]; then
+				echo
+				echo "Your apps:"
+				echo " $(apps)"
+			elif [ "$entry" = 'appGroups' ]; then
+				echo
+				echo "Your app groups:"
+				echo " $(appGroups)"
 			elif [ "$entry" = 'done' ]; then
 				echo
 				echo "Done with the list!"
@@ -368,7 +378,33 @@ if [ "$skipAutosetup" != '1' ]; then
 			fi
 		fi
 		
-		echo "Your current $AUTOSETUP_TYPE list: ${setupEntries[*]}"
+		if [ "$entry" = 'apps' ] || [ "$entry" = 'appGroups' ]; then
+			continue
+		fi
+		
+		echo
+		echo "Your current $AUTOSETUP_TYPE list:"
+		if [ "$AUTOSETUP_TYPE" = 'install' ]; then
+			for entry in "${setupEntries[@]}"; do
+				if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
+					echo "$entry: $($entry.apps)"
+				else
+					echo "$entry"
+				fi
+			done
+		elif [ "$AUTOSETUP_TYPE" = 'backup' ]; then
+			for entry in "${setupEntries[@]}"; do
+				if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
+					echo "$entry:"
+					for app in $($entry.apps); do
+						echo "  $app:"
+						echo "$($app.sourcePaths)"
+					done
+				else
+					echo "$entry: $($entry.sourcePaths)"
+				fi
+			done
+		fi
 	done
 	
 	
