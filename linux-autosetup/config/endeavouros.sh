@@ -30,7 +30,7 @@ App rust
 App discord "flatpak install com.discordapp.Discord"
 App soundux
 App quodlibet
-App gifski "cargo.install; cargo install gifski"
+App gifski "rust.install; cargo install gifski"
 App youtube-dl
 
 # Pipewire setup

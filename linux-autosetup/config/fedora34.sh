@@ -29,7 +29,7 @@ App wine "sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/f
 App discord "flatpak install com.discordapp.Discord"
 App easyeffects "flatpak install flathub com.github.wwmm.easyeffects"
 App obs-studio
-App gifski "cargo.install; cargo install gifski"
+App gifski "rust.install; cargo install gifski"
 App quodlibet
 App pavucontrol
 App winetricks
