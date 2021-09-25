@@ -28,6 +28,7 @@ App rust
 
 # Extras
 App discord "flatpak install com.discordapp.Discord"
+App soundux
 App quodlibet
 App gifski "cargo.install; cargo install gifski"
 App youtube-dl

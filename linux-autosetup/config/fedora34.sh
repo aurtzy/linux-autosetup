@@ -86,6 +86,7 @@ appGroups=(
 	[G-periph]="
 		piper
 	"
+	[G-saves]=""
 	# Laptop
 	[Laptop]="
 		tlp
