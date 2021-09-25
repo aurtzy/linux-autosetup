@@ -26,6 +26,11 @@ AppGroup.constructor() {
 AppGroup.apps() {
 	AppGroup.field apps "$1" "$2"
 }
+AppGroup.sourcePaths() {
+	for object in $(AppGroup.apps); do
+		$object.sourcePaths
+	done
+}
 
 # Add app to apps field
 AppGroup.add() {
@@ -39,9 +44,9 @@ AppGroup.add() {
 			exit 1
 		fi
 		if [ "$AppGroup.apps" != '' ]; then
-			AppGroup.apps = "$(AppGroup.apps) $app"
+			AppGroup.apps = "$(AppGroup.apps) $object"
 		else
-			AppGroup.apps = "$app"
+			AppGroup.apps = "$object"
 		fi
 	done
 }
