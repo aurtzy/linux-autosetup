@@ -4,9 +4,12 @@
 
 # DEFAULT_APP_BACKUP_TYPE="COPY"
 
-# APP_BACKUP_DIR="./app-backups"
+APP_BACKUP_DIR="../app-backups"
 
-DEFAULT_APP_INSTALL_COMMAND="yay -S $app"
+alias yay="sudo -u $SUDO_USER yay"
+alias flatpak="sudo -u $SUDO_USER flatpak"
+
+DEFAULT_APP_INSTALL_COMMAND="yay -S --noconfirm $app"
 
 # DUMP_DIR="./dump"
 
@@ -20,34 +23,38 @@ thProfile="$HOME/.thunderbird/PROFILE"
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
 # Essentials
-App firefox "firefox.installBackups" "" "$ffProfile/../profiles.ini" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
-App thunderbird "" "" "$thProfile/../profiles.ini" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
-App flatpak "$DEFAULT_APP_INSTALL_COMMAND; flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo; systemctl reboot"
+App firefox "firefox.installBackups" "" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
+App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
+App flatpak
 App ffmpeg
+App redshift "" "" "$HOME/.config/redshift.conf"
 
 # Extras
 App discord "flatpak install com.discordapp.Discord"
 App soundux
 App quodlibet
-App gifski "rust.install; cargo install gifski"
+App gifski "rust.install && cargo install gifski"
 App youtube-dl
 
 # Pipewire setup
-App pipewire
+App pipewire "$DEFAULT_APP_INSTALL_COMMAND; yay -R pulseaudio-jack; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
+App pipewire-pulse
 App easyeffects
 
 # Gaming
 App gamemode
 App steam
+App protonup-git
 App lutris
 
 # Gaming - nvidia 1660ti
-App nvidia-driver "linux-headers.install; pacman -S nvidia-installer-dkms; nvidia-installer-dkms; systemctl reboot"
-App nvidia-tdp-1660ti "nvidia-tdp.installBackups; systemctl enable nvidia-tdp.timer" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
+App nvidia-tdp-1660ti "nvidia-tdp-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
+App remove-tlp "yay -R tlp"
 App gwe #greenwithenvy
 
 # Gaming - peripherals apps
 App piper
+App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
 App keyboard-center
 
 # Dev tools
@@ -77,7 +84,7 @@ App clamtk
 ######################
 
 appGroups=(
-	[Backup]="
+	[ToBackup]="
 		firefox
 		thunderbird
 		nvidia-tdp-1660ti
@@ -99,13 +106,12 @@ appGroups=(
 		pipewire
 		easyeffects
 	"
-	[G]="
+	[G-main]="
 		gamemode
 		steam
 		lutris
 	"
 	[G-1660ti]="
-		nvidia-driver
 		nvidia-tdp-1660ti
 	"
 	[G-periph]="

@@ -56,7 +56,7 @@ App gnome-tweaks
 # Misc.
 App clamtk
 App tlp
-App cargo "$DEFAULT_APP_INSTALL_COMMAND; echo PATH=$HOME/.cargo/bin:$PATH >> $HOME/.bash_profile"
+App cargo "$DEFAULT_APP_INSTALL_COMMAND && echo PATH=$HOME/.cargo/bin:$PATH >> $HOME/.bash_profile"
 
 ######################
 # APPLICATION GROUPS #
