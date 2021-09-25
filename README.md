@@ -38,7 +38,7 @@ Options are completely optional unless otherwise stated.
 
 This script offers a couple of options that you can customize by changing specific variables:  
 
-- ```DEFAULT_APP_INSTALL_COMMAND``` must be set by the user. It is the default command used for apps that do not have a specified custom install command. ```$app``` can be used to substitute the app name provided, e.g: ```"sudo apt install $app"```  
+- ```DEFAULT_APP_INSTALL_COMMAND``` is the default command used when the install_command parameter is omitted. This must be set by the user if they plan on omitting the parameter for some apps. See more information on what you can put in this in [Adding Apps](#adding-apps) ```$app``` can be used to substitute the app name provided, e.g: ```"sudo apt install $app"```  
 
 - ```DEFAULT_APP_BACKUP_TYPE``` uses ```"COPY"``` as a fallback. This is the default backup type used for apps that do not have a specified backup type. See the entry on ```"backup_type"``` in [Adding Apps](#adding-apps) for more information on this option.  
 
@@ -58,7 +58,8 @@ Descriptions of the parameters:
 
 - ```"appname"``` should be the same name used for installing the app (e.g. ```sudo apt install github-desktop``` should use "github-desktop" for appname)  
 If a custom install command is used, you can call your appname anything. This should not have spaces.  
-- ```"install_command"``` replaces the default install command. If this parameter is not empty, the script will run this command (or commands - you can enter a one-liner with commands separated by semicolons) instead. You can even call other apps present the config by calling appname.install, which may be useful for apps that require certain dependencies. See [Manual Commands](#manual-commands) for more functions you can use.  
+- ```"install_command"``` replaces the default install command if it is not empty. This string is evaluated as an actual command, so users can put virtually anything in this parameter, including calling script functions like appname.install, which may be useful for apps that require certain dependencies. See [Manual Commands](#manual-commands) for more functions that can be used.  
+***Note**: if certain commands have to be run as a normal user (e.g. ```yay```), prepend it with ```sudo -u $SUDO_USER``` since the script is run as root (```alias``` may be useful for not forgetting this).*  
 - ```"backup_type"``` has two valid options: ```"COPY"``` and ```"HARDLINK"```. ```"COPY"``` uses the traditional method of backing up by copying files, while ```"HARDLINK"``` hard-links files.  
 *Note: Hard-linking saves space, but is only recommended if accompanied by additional backups to other sources (e.g. compressing backup folder to secondary drive) as problematic changes to the original files will also affect the backup files.*  
 - Every parameter after these are interpreted as backup source paths. You can use ```$HOME``` to substitute for the user home directory; note that ```~/``` will not work.    
