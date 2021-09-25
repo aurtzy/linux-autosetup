@@ -1,3 +1,5 @@
+# WARNING: This config file may be outdated.
+
 ##########################
 # CONFIGURABLE VARIABLES #
 ##########################
