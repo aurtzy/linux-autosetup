@@ -39,7 +39,7 @@ App youtube-dl
 # Pipewire setup
 App pipewire "$DEFAULT_APP_INSTALL_COMMAND; yay -R pulseaudio-jack; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
 App pipewire-pulse
-App easyeffects
+App easyeffects "" "" "$HOME/.config/easyeffects"
 
 # Gaming
 App gamemode
@@ -55,7 +55,7 @@ App gwe #greenwithenvy
 # Gaming - peripherals apps
 App piper
 App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
-App keyboard-center
+App keyboard-center "" "" "$HOME/.config/keyboard-center"
 
 # Dev tools
 App github-desktop-bin
