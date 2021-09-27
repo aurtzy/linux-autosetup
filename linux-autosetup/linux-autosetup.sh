@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="v1.0.0-pre_release-1"
+version="v1.0.0"
 
 # Print information about the script,
 # including version # and copyright
