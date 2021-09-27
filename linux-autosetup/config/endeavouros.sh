@@ -53,7 +53,8 @@ ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-li
 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
 
 # Gaming - nvidia 1660ti
-App nvidia-tdp-1660ti "nvidia-tdp-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
+App nvidia-driver "$yay nvidia-installer-dkms"
+App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
 App remove-tlp "$yay -R tlp"
 App gwe #greenwithenvy
 
@@ -92,14 +93,13 @@ appGroups=(
 	[ToBackup]="
 		firefox
 		thunderbird
-		nvidia-tdp-1660ti
+		nvidia-1660ti
 	"
 	[Essentials]="
 		firefox
 		thunderbird
 		flatpak
 		ffmpeg
-		rust
 	"
 	[Extras]="
 		discord
@@ -116,17 +116,14 @@ appGroups=(
 		steam
 		lutris
 	"
-	[G-1660ti]="
-		nvidia-tdp-1660ti
-	"
 	[G-periph]="
 		piper
 		keyboard-center
 	"
 	[G-All]="
 		G-main
-		G-1660ti
 		G-periph
+		nvidia-1660ti
 	"
 	[Dev]="
 		github-desktop-bin
@@ -141,9 +138,6 @@ appGroups=(
 	[C-Image]="
 		gimp
 		krita
-	"
-	[Security]="
-		clamtk
 	"
 )
 
