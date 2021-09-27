@@ -6,10 +6,10 @@
 
 APP_BACKUP_DIR="../app-backups"
 
-alias yay="sudo -u $SUDO_USER yay"
-alias flatpak="sudo -u $SUDO_USER flatpak"
+yay="sudo -u $SUDO_USER yay"
+flatpak="sudo -u $SUDO_USER flatpak"
 
-DEFAULT_APP_INSTALL_COMMAND="yay -S --noconfirm $app"
+DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 
 # DUMP_DIR="./dump"
 
@@ -37,7 +37,7 @@ App gifski "rust.install && cargo install gifski"
 App youtube-dl
 
 # Pipewire setup
-App pipewire "$DEFAULT_APP_INSTALL_COMMAND; yay -R pulseaudio-jack; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
+App pipewire "$DEFAULT_APP_INSTALL_COMMAND; $yay -R pulseaudio-jack; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
 App pipewire-pulse
 App easyeffects "" "" "$HOME/.config/easyeffects"
 
@@ -45,11 +45,16 @@ App easyeffects "" "" "$HOME/.config/easyeffects"
 App gamemode
 App steam
 App protonup-git
-App lutris
+App lutris "$DEFAULT_APP_INSTALL_COMMAND; pacman -S --needed wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls \
+mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error \
+lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo \
+sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
+ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 \
+lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
 
 # Gaming - nvidia 1660ti
 App nvidia-tdp-1660ti "nvidia-tdp-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
-App remove-tlp "yay -R tlp"
+App remove-tlp "$yay -R tlp"
 App gwe #greenwithenvy
 
 # Gaming - peripherals apps
@@ -119,7 +124,7 @@ appGroups=(
 		keyboard-center
 	"
 	[G-All]="
-		G
+		G-main
 		G-1660ti
 		G-periph
 	"
@@ -143,13 +148,13 @@ appGroups=(
 )
 
 onInstall() {
-	yay
+	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu
 }
 onBackup() {
 	return
 }
 onInstallFinish() {
-	return
+	$yay --noanswerclean --noanswerdiff --noansweredit --noanswerupgrade
 }
 onBackupFinish() {
 	return
