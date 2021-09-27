@@ -410,7 +410,7 @@ if [ "$skipAutosetup" != '1' ]; then
 	echo
 	if [ "$AUTOSETUP_TYPE" = "install" ]; then
 		echo "Do you want to autofill installing backups?"
-		echo "Type 'n' to not do anything. 'y' will autofill yes; '-n' will autofill no."
+		echo "Type 'n' to prompt for installing backups. 'y' will autofill yes; '-n' will autofill no."
 		declare -i userIn=$(promptYesNo)
 		if [ $userIn -eq -1 ]; then
 			appInstallBackups=-1
