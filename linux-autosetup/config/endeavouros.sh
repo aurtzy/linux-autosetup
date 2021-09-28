@@ -93,7 +93,11 @@ appGroups=(
 	[ToBackup]="
 		firefox
 		thunderbird
+		easyeffects
+		redshift
 		nvidia-1660ti
+		keyboard-center
+		
 	"
 	[Essentials]="
 		firefox
