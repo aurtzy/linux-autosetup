@@ -93,9 +93,9 @@ declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMM
 # Where to dump files
 declare DUMP_DIR="./dump"
 
-####################
-# GLOBAL FUNCTIONS #
-####################
+#############
+# FUNCTIONS #
+#############
 
 # Dumps file/folder into $DUMP_DIR
 # Dump must be initialized before using in a function.
