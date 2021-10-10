@@ -176,6 +176,7 @@ App.install() {
 	fi
 	
 	App.installed = 1
+	App.failedInstall = 0
 }
 
 App.installBackups() {
