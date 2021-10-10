@@ -12,40 +12,21 @@ printScriptInfo() {
 	if [ "$1" ]; then
 		echo
 		if [ "$1" = 'more' ]; then
-			echo "Use the -h option to see all available options you can run the script with."
-			echo
-			echo "Linux-Autosetup comes with ABSOLUTELY NO WARRANTY; for details run this script with the -w option. This is free software, and you are welcome to redistribute it under certain conditions; run this script with the -c option for details."
+			echo "Linux-Autosetup comes with ABSOLUTELY NO WARRANTY; for details type 'show w'. This is free software, and you are welcome to redistribute it under certain conditions; type 'show c' for details."
 		elif [ "$1" = 'warranty' ]; then
 			echo "This program is distributed in the hope that it will be useful, WITHOUT ANY WARRANTY; without even the implied warranty of or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details."
 		elif [ "$1" = 'copyright' ]; then
 			echo "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or at your option) any later version."
 		elif [ "$1" = 'help' ]; then
-			echo "Linux-Autosetup options:"
-			echo "	-m		run in manual mode; skip autosetup"
-			echo
-			echo "	-v		display version"
-			echo "	-c		display copyright information"
-			echo "	-w		display warranty information"
+			echo 'to-be-documented...'
 		fi
 	fi
 }
 
-# Check for options passed
-while getopts ":mhvcw" option; do
-	case $option in
-		m) skipAutosetup="1"; break;;
-		h) printScriptInfo help; exit;;
-		v) printScriptInfo; exit;;
-		c) printScriptInfo copyright; exit;;
-		w) printScriptInfo warranty; exit;;
-		\?) echo "Error: Option not recognized."; exit;;
-   esac
-done
-
 # Force run as root
 if [ $(id -u) -ne 0 ]; then
 	echo
-	echo "This script must be run with root priviliges. Running with sudo..."
+	echo "This script must be run with root priviliges. Running as sudo..."
 	sudo bash "$0" "$@"
 	exit $?
 fi
@@ -431,10 +412,9 @@ AppBackup() {
 #	echo "AUTOSETUP: Skipping autosetup..."
 #fi
 
-###################
-#  END OF SCRIPT  #
-# USER INPUT HERE #
-###################
+##############
+# USER INPUT #
+##############
 
 # User can remain in script & 
 # input extra commands or exit script here.
@@ -445,6 +425,11 @@ while
 appInstallBackups=0
 read -p ": " userIn
 do
+	case $userIn in
+		"Help") printScriptInfo help; continue;;
+		"show c") printScriptInfo copyright; continue;;
+		"show w") printScriptInfo warranty; continue;;
+	esac
 	eval $userIn
 done
 
