@@ -32,6 +32,15 @@ AppGroup.sourcePaths() {
 	done
 }
 
+# Display apps; allows for recursive displaying of apps in app groups
+AppGroup.display() {
+	echo -n "AppGroup:"
+	for app in $(AppGroup.apps); do
+		echo -n " $($app.display)"
+	done
+	echo ";"
+}
+
 # Add app to apps field
 AppGroup.add() {
 	for object in "${@}"; do

@@ -129,6 +129,11 @@ App.failedBackupSourcesAdd() {
 	App.failedBackupSourcesCount = $i
 }
 
+# Display app
+App.display() {
+	echo -n "App"
+}
+
 # Install App on call
 # Also reset to original dir in case command used cd
 App.install() {
