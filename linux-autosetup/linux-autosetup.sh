@@ -146,7 +146,14 @@ App() {
 	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
 	$1.constructor "$2" "$3" "${@:4}"
+	
 	apps+=("$1")
+	for arg in "${@:4}"; do
+		if [ "$arg" ]; then
+			appBackups+=("$1")
+			break
+		fi
+	done
 }
 # App group constructor caller
 # $1=name
@@ -167,14 +174,19 @@ initializeAppGroups() {
 	done
 }
 
-# Return all apps separated by spaces
+# Return all apps
 apps() {
 	echo "${apps[*]}"
 }
-
-# Return all appGroups separated by spaces
+# Return all appGroups
 appGroups() {
 	echo "${!appGroups[*]}"
+}
+# Return all apps with backups
+appBackups() {
+	for appBackup in "${appBackups[@]}"; do 
+		$appBackup.displayBackups
+	done
 }
 
 # Prompt user to input yes/no
@@ -204,6 +216,123 @@ onInstallFinish() {
 }
 onBackupFinish() {
 	return
+}
+
+# Autosetup installer function for apps
+AppInstall() {
+	if [ "$1" = "" ]; then
+		echo "Your apps:"
+		apps
+		echo
+		echo "Your app groups:"
+		appGroups
+		echo
+		echo "Use this function by running it with the apps you want to install as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${apps[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm you want to install the following:"
+	for entry in "$@"; do 
+		echo " $($entry.display)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo "Do you want to autofill installing backups?"
+	echo "Type 'n' to prompt for installing backups. 'y' will autofill yes; '-n' will autofill no."
+	declare -i userIn=$(promptYesNo)
+	if [ $userIn -eq -1 ]; then
+		appInstallBackups=-1
+	elif [ $userIn -ge 1 ]; then
+		appInstallBackups=1
+	fi
+	echo
+	echo "AUTOSETUP: Running onInstall first..."
+	onInstall
+	echo "AUTOSETUP: onInstall completed."
+	echo
+	echo "AUTOSETUP: Installing apps..."
+	for entry in "$@"; do
+		$entry.install
+	done
+	appInstallBackups=0
+	echo
+	echo "AUTOSETUP: Finished autosetup install."
+	echo
+	echo "AUTOSETUP: Running onInstallFinish..."
+	onInstallFinish
+	echo "AUTOSETUP: onInstallFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANY APPS FAILED TO INSTALL, THEY WILL BE LISTED BELOW:"
+	for app in "${apps[@]}"; do
+		if [ "$($app.failedInstall)" -eq 1 ]; then
+			echo "$app"
+		fi
+	done
+	echo
+	echo "Installation completed."
+}
+
+# Autosetup back-uper function for apps
+AppBackup() {
+	if [ "$1" = "" ]; then
+		echo "Your app backups:"
+		appBackups
+		echo
+		echo "Your app groups:"
+		appGroups
+		echo
+		echo "Use this function by running it with the apps you want to back up as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${appBackups[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm that you want to back up the following:"
+	for entry in "$@"; do 
+		echo " $($entry.displayBackups)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo
+	echo "AUTOSETUP: Running onBackup first..."
+	onBackup
+	echo "AUTOSETUP: onBackup completed."
+	echo
+	echo "AUTOSETUP: Backing up apps..."
+	for entry in "$@"; do
+		$entry.backup
+	done
+	echo
+	echo "AUTOSETUP: Finished autosetup backup."
+	echo
+	echo "AUTOSETUP: Running onBackupFinish..."
+	onBackupFinish
+	echo "AUTOSETUP: onBackupFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANY APPS FAILED TO BE BACKED UP, THEY WILL BE LISTED BELOW:"
+	for appBackup in "${appBackups[@]}"; do
+		if [ "$($appBackup.failedBackup)" -eq 1 ]; then
+			echo "$appBackup:"
+			echo "$($appBackup.failedBackupSources)"
+		fi
+	done
+	echo
+	echo "Be sure to double check if all files were backed up properly,"
+	echo "especially if this is a first-time backup!"
+	echo
+	echo "Backup completed."
 }
 
 ##################
@@ -266,154 +395,6 @@ else
 	echo "Exiting..."
 	exit
 fi
-
-###############
-# SCRIPT BODY #
-###############
-
-AppInstall() {
-	if [ "$1" = "" ]; then
-		echo "Your apps:"
-		echo " $(apps)"
-		echo "Your app groups:"
-		echo " $(appGroups)"
-		echo
-		echo "Use this function by running it with the apps you want to install as parameters."
-		return
-	fi
-	for entry in "$@"; do 
-		if ! [[ " ${apps[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
-			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
-			return 1
-		fi
-	done
-	echo "Please confirm you want to install the following:"
-	for entry in "$@"; do 
-		echo " $($entry.display)"
-	done
-	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
-		echo "Aborting AppInstall"
-		return
-	fi
-	echo "Do you want to autofill installing backups?"
-	echo "Type 'n' to prompt for installing backups. 'y' will autofill yes; '-n' will autofill no."
-	declare -i userIn=$(promptYesNo)
-	if [ $userIn -eq -1 ]; then
-		appInstallBackups=-1
-	elif [ $userIn -ge 1 ]; then
-		appInstallBackups=1
-	fi
-	echo
-	echo "AUTOSETUP: Running onInstall first..."
-	onInstall
-	echo "AUTOSETUP: onInstall completed."
-	echo
-	echo "AUTOSETUP: Installing apps..."
-	for entry in "$@"; do
-		$entry.install
-	done
-	appInstallBackups=0
-	echo
-	echo "AUTOSETUP: Finished autosetup install."
-	echo
-	echo "AUTOSETUP: Running onInstallFinish..."
-	onInstallFinish
-	echo "AUTOSETUP: onInstallFinish completed."
-	echo
-	echo "AUTOSETUP: IF ANY APPS FAILED TO INSTALL, THEY WILL BE LISTED BELOW:"
-	for app in "${apps[@]}"; do
-		if [ "$($app.failedInstall)" -eq 1 ]; then
-			echo "$app"
-		fi
-	done
-}
-AppBackup() {
-	return
-}
-
-#if [ "$skipAutosetup" != '1' ]; then
-#	
-#	while true
-#	read -p ": " userIn
-#	do
-#		
-#		if [ "$entry" = 'done' ]; then
-#			echo
-#			echo "Please confirm that you want to $AUTOSETUP_TYPE the following:"
-#			echo
-#			if [ "$AUTOSETUP_TYPE" = 'install' ]; then
-#				for entry in "${setupEntries[@]}"; do
-#					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
-#						echo "$entry: $($entry.apps)"
-#					else
-#						echo "$entry"
-#					fi
-#				done
-#			elif [ "$AUTOSETUP_TYPE" = 'backup' ]; then
-#				for entry in "${setupEntries[@]}"; do
-#					if [[ " ${!appGroups[*]} " =~ " $entry " ]]; then
-#						echo "$entry:"
-#						for app in $($entry.apps); do
-#							echo "  $app:"
-#							echo "$($app.sourcePaths)"
-#						done
-#					else
-#						echo "$entry: $($entry.sourcePaths)"
-#					fi
-#				done
-#			fi
-#			echo
-#			if [ $(promptYesNo "Script will $AUTOSETUP_TYPE everything above. Is this okay?") -ge 1 ]; then
-#				break
-#			else
-#				echo "User is not okay with this"
-#				setupEntries=()
-#				echo "Setup entries cleared."
-#			fi
-#		fi
-#	done
-#	
-#	
-#	echo
-#	if [ "$AUTOSETUP_TYPE" = "install" ]; then
-#		
-#	elif [ "$AUTOSETUP_TYPE" = "backup" ]; then
-#		echo "AUTOSETUP: Running onBackup first..."
-#		onBackup
-#		echo "AUTOSETUP: onBackup completed."
-#		
-#		echo
-#		echo "AUTOSETUP: Backing up apps..."
-#		for entry in "${setupEntries[@]}"; do
-#			$entry.backup
-#		done
-#		echo
-#		echo "AUTOSETUP: Finished autosetup backup."
-#		
-#		echo
-#		echo "AUTOSETUP: Running onBackupFinish..."
-#		onBackupFinish
-#		echo
-#		echo "AUTOSETUP: onBackupFinish completed."
-#		
-#		echo
-#		echo "AUTOSETUP: IF ANY APPS FAILED TO BE BACKED UP, THEY WILL BE LISTED BELOW:"
-#		for app in "${apps[@]}"; do
-#			if [ "$($app.failedBackup)" -eq 1 ]; then
-#				echo "$app:"
-#				echo "$($app.failedBackupSources)"
-#			fi
-#		done
-#		echo
-#		echo "AUTOSETUP: Be sure to double check if all files were backed up properly,"
-#		echo "especially if this is a first-time backup!"
-#	fi
-#	echo
-#
-#	echo "AUTOSETUP: Autosetup finished!"
-#else
-#	echo "AUTOSETUP: Skipping autosetup..."
-#fi
 
 ##############
 # USER INPUT #

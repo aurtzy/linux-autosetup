@@ -40,6 +40,13 @@ AppGroup.display() {
 	done
 	echo ";"
 }
+# Display app backups 
+AppGroup.displayBackups() {
+	echo "AppGroup:"
+	for app in $(AppGroup.apps); do
+		$app.displayBackups
+	done
+}
 
 # Add app to apps field
 AppGroup.add() {

@@ -131,6 +131,11 @@ App.failedBackupSourcesAdd() {
 App.display() {
 	echo -n "App"
 }
+# Display app backups
+App.displayBackups() {
+	echo " App:"
+	echo "$(App.sourcePaths)"
+}
 
 # Install App on call
 # Also reset to original dir in case command used cd
