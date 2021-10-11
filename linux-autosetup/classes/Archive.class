@@ -1,0 +1,135 @@
+# Credit to Maxim Norin https://github.com/mnorin
+# for OOP emulation base from https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
+# Modified by Aurtzy
+
+# Class named "Archive" for bash object
+
+# fields
+declare -Ag fields
+
+# Handles getting/setting fields.
+Archive.field() {
+	if [ "$2" == "=" ]; then
+		fields[$1]=$3
+	else
+		echo ${fields[$1]}
+	fi
+}
+
+# Archive class constructor
+# Params: $1 = install location $2 = archive method (e.g COPY, COMPRESS, ENCRYPT), ${@:3} = files to archive
+Archive.constructor() {
+
+	# File name 
+	Archive.installPath = $1
+	
+	# Backup type
+	if [ ! "$2" ]; then
+		Archive.backupType = $DEFAULT_ARCHIVE_BACKUP_TYPE
+	else
+		Archive.backupType = $2
+	fi
+	
+	# Source paths to be backed up
+	Archive.sourcePathsCount = 0
+	Archive.sourcePathsAdd "${@:3}"
+	
+	Archive.installed = 0
+	Archive.backedUp = 0
+	
+	Archive.failedInstall = 0
+	Archive.failedBackup = 0
+	Archive.failedBackupSourcesCount = 0
+}
+
+# setter/getter methods
+Archive.installPath() {
+	Archive.field installPath "$1" "$2"
+}
+Archive.backupType() {
+	if [[ "$2" != "" && "$2" != 'COPY' && "$2" != 'COMPRESS' && "$2" != 'ENCRYPT' ]]; then
+		echo "Archive: Error: Backup type input $2 was not recognized!"
+		echo "Script will not continue. Please resolve."
+		echo "Exiting..."
+		read
+		exit 1
+	fi
+	Archive.field backupType "$1" "$2"
+}
+Archive.sourcePaths() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.sourcePathsCount) ; i++ )); do
+			Archive.field sourcePath${i}
+		done
+	else
+		if [ "${3: -1}" = '/' ]; then
+			sourcePath=${3::-1}
+		fi
+		Archive.field sourcePath${1} "$2" "$sourcePath"
+	fi
+}
+Archive.sourcePathsCount() {
+	declare -i intParam=$2
+	Archive.field sourcePathsCount "$1" "$intParam"
+}
+Archive.failedBackupSourcesCount() {
+	declare -i intParam=$2
+	Archive.field failedBackupSourcesCount "$1" "$intParam"
+}
+Archive.installed() {
+	declare -i intParam=$2
+	Archive.field installed "$1" "$intParam"
+}
+Archive.backedUp() {
+	declare -i intParam=$2
+	Archive.field backedUp "$1" "$intParam"
+}
+Archive.backupsInstalled() {
+	declare -i intParam=$2
+	Archive.field backupsInstalled "$1" "$intParam"
+}
+Archive.failedInstall() {
+	declare -i intParam=$2
+	Archive.field failedInstall "$1" "$intParam"
+}
+Archive.failedBackup() {
+	declare -i intParam=$2
+	Archive.field failedInstall "$1" "$intParam"
+}
+Archive.failedBackupSources() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.failedBackupSourcesCount) ; i++ )); do
+			Archive.field failedBackupSource${i}
+		done
+	else
+		Archive.field failedBackupSource${1} "$2" "$3"
+	fi
+}
+Archive.sourcePathsAdd() {
+	declare -i i=$(Archive.sourcePathsCount)
+	for sourcePath in "${@}"; do
+		Archive.sourcePaths "$i" = "$sourcePath"
+		i+=1
+	done
+	Archive.sourcePathsCount = $i
+}
+Archive.failedBackupSourcesAdd() {
+	Archive.failedBackup = 1
+	declare -i i=$(Archive.failedBackupSourcesCount)
+	for sourcePath in "${@}"; do
+		Archive.failedBackupSources "$i" = "$sourcePath"
+		i+=1
+	done
+	Archive.failedBackupSourcesCount = $i
+}
+
+# Display archive
+Archive.display() {
+	echo -n "Archive"
+}
+# Display archive backups
+Archive.displayBackups() {
+	echo " Archive:"
+	echo "$(Archive.sourcePaths)"
+}
+

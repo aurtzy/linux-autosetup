@@ -41,12 +41,15 @@ declare HOME="$(eval echo ~${SUDO_USER})"
 # Stores all app names
 declare -ag apps
 
+# Stores all apps with backups
+declare -ag appBackups
+
 # Stores app groups as keys
 # Stores apps separated by spaces as data
 declare -Ag appGroups
 
-# Stores all apps with backups
-declare -ag appBackups
+# Stores all archives
+declare -ag archives
 
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
@@ -74,6 +77,10 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 # Default install command used if one is not specified for app
 # $app is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
+# Where archives go
+declare ARCHIVE_BACKUP_DIR="./archives"
+# Default archive type - "COPY, COMPRESS, ENCRYPT"
+declare DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
 # Where to dump files
 declare DUMP_DIR="./dump"
 
@@ -166,12 +173,34 @@ AppGroup() {
 	. <(sed "s/fields/$fields/g" <(sed "s/AppGroup/$1/g" "$CLASSES_DIR"/AppGroup.class))
 	$1.constructor ${@:2}
 }
-
 # Initialize app groups in appGroups array
 initializeAppGroups() {
 	for appGroup in $(appGroups); do
 		AppGroup $appGroup "${appGroups[$appGroup]}"
 	done
+}
+# Archive constructor caller
+Archive() {
+	if [ "$1" = '' ]; then
+		echo
+		echo "Error: Archive name parameter was empty"
+		echo "Archive names cannot be empty."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
+	elif [[ "$1" =~ [[:blank:]] ]]; then
+		echo
+		echo "Error: Archive name '$1' has whitespaces"
+		echo "Archive names cannot have whitespaces (e.g. spaces, tabs)."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
+	fi
+	fields="archive_$(convertHyphens "$1")_fields"
+	. <(sed "s/fields/$fields/g" <(sed "s/Archive/$1/g" "$CLASSES_DIR"/Archive.class))
+	$1.constructor "$2" "$3" "${@:4}"
+	
+	archives+=("$1")
 }
 
 # Return all apps
@@ -186,6 +215,16 @@ appGroups() {
 appBackups() {
 	for appBackup in "${appBackups[@]}"; do 
 		$appBackup.displayBackups
+	done
+}
+# Return all archives
+archives() {
+	echo "${archives[*]}"
+}
+# Return all archives and their backups
+archiveBackups() {
+	for archive in "${archives[@]}"; do 
+		$archive.displayBackups
 	done
 }
 
@@ -390,6 +429,8 @@ echo "CONFIG_FILE: $CONFIG_FILE"
 echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
 echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
 echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
+echo "ARCHIVE_BACKUP_DIR: $ARCHIVE_BACKUP_DIR"
+echo "DEFAULT_ARCHIVE_BACKUP_TYPE: $DEFAULT_ARCHIVE_BACKUP_TYPE"
 echo "DUMP_DIR: $DUMP_DIR"
 echo
 if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then
