@@ -219,7 +219,7 @@ onBackupFinish() {
 }
 
 # Autosetup installer function for apps
-AppInstall() {
+appInstall() {
 	if [ "$1" = "" ]; then
 		echo "Your apps:"
 		apps
@@ -280,7 +280,7 @@ AppInstall() {
 }
 
 # Autosetup back-uper function for apps
-AppBackup() {
+appBackup() {
 	if [ "$1" = "" ]; then
 		echo "Your app backups:"
 		appBackups
@@ -289,16 +289,21 @@ AppBackup() {
 		appGroups
 		echo
 		echo "Use this function by running it with the apps you want to back up as parameters."
+		echo "If you want to back up everything, pass the parameter 'ALL'."
 		return
 	fi
-	for entry in "$@"; do 
-		if ! [[ " ${appBackups[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
+	declare -a entries=("$@")
+	for entry in "${entries[@]}"; do 
+		if [ "$entry" = 'ALL' ]; then
+			entries=("${appBackups[@]}")
+			break
+		elif ! [[ " ${appBackups[*]} " =~ " $entry " || " ${!appGroups[*]} " =~ " $entry " ]]; then
 			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
 			return 1
 		fi
 	done
 	echo "Please confirm that you want to back up the following:"
-	for entry in "$@"; do 
+	for entry in "${entries[@]}"; do 
 		echo " $($entry.displayBackups)"
 	done
 	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
@@ -311,7 +316,7 @@ AppBackup() {
 	echo "AUTOSETUP: onBackup completed."
 	echo
 	echo "AUTOSETUP: Backing up apps..."
-	for entry in "$@"; do
+	for entry in "${entries[@]}"; do
 		$entry.backup
 	done
 	echo
