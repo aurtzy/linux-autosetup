@@ -20,19 +20,16 @@ Archive.field() {
 # Params: $1 = install location $2 = archive method (e.g COPY, COMPRESS, ENCRYPT), ${@:3} = files to archive
 Archive.constructor() {
 
-	# File name 
-	Archive.installPath = $1
-	
 	# Backup type
-	if [ ! "$2" ]; then
+	if [ ! "$1" ]; then
 		Archive.backupType = $DEFAULT_ARCHIVE_BACKUP_TYPE
 	else
-		Archive.backupType = $2
+		Archive.backupType = $1
 	fi
 	
 	# Source paths to be backed up
 	Archive.sourcePathsCount = 0
-	Archive.sourcePathsAdd "${@:3}"
+	Archive.sourcePathsAdd "${@:2}"
 	
 	Archive.installed = 0
 	Archive.backedUp = 0
@@ -43,9 +40,6 @@ Archive.constructor() {
 }
 
 # setter/getter methods
-Archive.installPath() {
-	Archive.field installPath "$1" "$2"
-}
 Archive.backupType() {
 	if [[ "$2" != "" && "$2" != 'COPY' && "$2" != 'COMPRESS' && "$2" != 'ENCRYPT' ]]; then
 		echo "Archive: Error: Backup type input $2 was not recognized!"
