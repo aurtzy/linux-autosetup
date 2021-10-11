@@ -45,6 +45,9 @@ declare -ag apps
 # Stores apps separated by spaces as data
 declare -Ag appGroups
 
+# Stores all apps with backups
+declare -ag appBackups
+
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
 # Should reset to 0 after every user command or AppGroup install
@@ -143,6 +146,7 @@ App() {
 	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
 	$1.constructor "$2" "$3" "${@:4}"
+	apps+=("$1")
 }
 # App group constructor caller
 # $1=name

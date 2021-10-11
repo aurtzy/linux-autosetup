@@ -44,8 +44,6 @@ App.constructor() {
 	App.failedInstall = 0
 	App.failedBackup = 0
 	App.failedBackupSourcesCount = 0
-	
-	apps+=("App")
 }
 
 # Getter/setter methods
