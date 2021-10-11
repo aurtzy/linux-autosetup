@@ -268,7 +268,6 @@ fi
 ###############
 
 AppInstall() {
-	declare AUTOSETUP_TYPE="install"
 	if [ "$1" = "" ]; then
 		echo "Your apps:"
 		echo " $(apps)"
@@ -325,7 +324,7 @@ AppInstall() {
 	done
 }
 AppBackup() {
-	declare AUTOSETUP_TYPE="backup"
+	return
 }
 
 #if [ "$skipAutosetup" != '1' ]; then
