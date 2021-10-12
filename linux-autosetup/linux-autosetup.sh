@@ -82,11 +82,7 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
 # Where archives go
 declare ARCHIVE_BACKUP_DIR="./archives"
-<<<<<<< HEAD
 # Default archive type - "COPY, COMPRESS, ENCRYPT"
-=======
-# Default archive backup type
->>>>>>> interaction-revamp/dev
 declare DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
 # Where to dump files
 declare DUMP_DIR="./dump"
@@ -230,15 +226,9 @@ appBackups() {
 archives() {
 	echo "${archives[*]}"
 }
-<<<<<<< HEAD
-# Return all archives and their backups
-archiveBackups() {
-	for archive in "${archives[@]}"; do 
-=======
 # Return all archives including their backups
 archiveBackups() {
 	for archive in "${archives[@]}"; do
->>>>>>> interaction-revamp/dev
 		$archive.displayBackups
 	done
 }

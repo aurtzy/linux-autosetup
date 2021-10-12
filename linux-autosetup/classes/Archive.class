@@ -66,13 +66,7 @@ Archive.sourcePathsCount() {
 	declare -i intParam=$2
 	Archive.field sourcePathsCount "$1" "$intParam"
 }
-<<<<<<< HEAD
-Archive.failedBackupSourcesCount() {
-	declare -i intParam=$2
-	Archive.field failedBackupSourcesCount "$1" "$intParam"
-}
-=======
->>>>>>> interaction-revamp/dev
+
 Archive.installed() {
 	declare -i intParam=$2
 	Archive.field installed "$1" "$intParam"
@@ -89,22 +83,6 @@ Archive.failedInstall() {
 	declare -i intParam=$2
 	Archive.field failedInstall "$1" "$intParam"
 }
-<<<<<<< HEAD
-Archive.failedBackup() {
-	declare -i intParam=$2
-	Archive.field failedInstall "$1" "$intParam"
-}
-Archive.failedBackupSources() {
-	if [ "$2" = '' ]; then
-		for (( i=0 ; i < $(Archive.failedBackupSourcesCount) ; i++ )); do
-			Archive.field failedBackupSource${i}
-		done
-	else
-		Archive.field failedBackupSource${1} "$2" "$3"
-	fi
-}
-=======
->>>>>>> interaction-revamp/dev
 Archive.sourcePathsAdd() {
 	declare -i i=$(Archive.sourcePathsCount)
 	for sourcePath in "${@}"; do
@@ -113,16 +91,6 @@ Archive.sourcePathsAdd() {
 	done
 	Archive.sourcePathsCount = $i
 }
-<<<<<<< HEAD
-Archive.failedBackupSourcesAdd() {
-	Archive.failedBackup = 1
-	declare -i i=$(Archive.failedBackupSourcesCount)
-	for sourcePath in "${@}"; do
-		Archive.failedBackupSources "$i" = "$sourcePath"
-		i+=1
-	done
-	Archive.failedBackupSourcesCount = $i
-=======
 Archive.absentBackupSources() {
 	if [ "$2" = '' ]; then
 		for (( i=0 ; i < $(Archive.absentBackupSourcesCount) ; i++ )); do
@@ -144,7 +112,6 @@ Archive.absentBackupSourcesAdd() {
 Archive.absentBackupSourcesCount() {
 	declare -i intParam=$2
 	Archive.field absentBackupSourcesCount "$1" "$intParam"
->>>>>>> interaction-revamp/dev
 }
 
 # Display archive
@@ -157,8 +124,6 @@ Archive.displayBackups() {
 	echo "$(Archive.sourcePaths)"
 }
 
-<<<<<<< HEAD
-=======
 # Install backups from archive
 Archive.install() {
 	
