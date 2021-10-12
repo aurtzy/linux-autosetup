@@ -248,20 +248,6 @@ promptYesNo() {
 	done
 }
 
-# Event functions that are meant to be overwritten in configs
-onInstall() {
-	return
-}
-onBackup() {
-	return
-}
-onInstallFinish() {
-	return
-}
-onBackupFinish() {
-	return
-}
-
 # Autosetup installer function for apps
 appInstall() {
 	if [ "$1" = "" ]; then
@@ -382,6 +368,32 @@ appBackup() {
 	echo "especially if this is a first-time backup!"
 	echo
 	echo "Backup completed."
+}
+
+# Event functions that are meant to be overwritten in configs
+onInstall() {
+	return
+}
+onBackup() {
+	return
+}
+onInstallFinish() {
+	return
+}
+onBackupFinish() {
+	return
+}
+archiveCompress() {
+	
+}
+archiveEncrypt() {
+	
+}
+archiveDecompress() {
+	
+}
+archiveDecrypt() {
+	
 }
 
 ##################
