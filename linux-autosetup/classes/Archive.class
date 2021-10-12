@@ -158,13 +158,15 @@ Archive.backup() {
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
 		"COPY")
-			
+			cp "${existingSources[@]}" "$ARCHIVE_BACKUP_DIR/Archive"
 		"COMPRESS")
-			
+			archiveCompress "$ARCHIVE_BACKUP_DIR/Archive" "${existingSources[@]}"
 		"ENCRYPT")
-			
+			archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive" "${existingSources[@]}"
+		*)
+			echo "Archive: Error: backup type not recognized, archive will not be created"
+			return
 	esac
-		
 	
 	echo "Archive: archive created"
 	Archive.backedUp = 1
