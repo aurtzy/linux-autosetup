@@ -383,17 +383,25 @@ onInstallFinish() {
 onBackupFinish() {
 	return
 }
+onArchiveInstall() {
+	return
+}
+onArchiveBackup() {
+	return
+}
+# $1 = output path, $2 = files to archive
 archiveCompress() {
-	
+	tar -cJvf - "$1.tar.xz" "${@:2}"
 }
 archiveEncrypt() {
-	
+	tar -cJvf - "${@:2}" | gpg --symmetric --cipher-algo aes256 -o "$1.tar.xz.gpg"
 }
+# $1 = archive path
 archiveDecompress() {
-	
+	tar -xJf "$1.tar.xz" -C "$HOME/Downloads"
 }
 archiveDecrypt() {
-	
+	gpg -d "$1.tar.xz.gpg" | tar -xJf - -C "$HOME/Downloads"
 }
 
 ##################
