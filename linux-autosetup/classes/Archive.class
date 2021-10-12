@@ -36,7 +36,7 @@ Archive.constructor() {
 	
 	Archive.failedInstall = 0
 	Archive.failedBackup = 0
-	Archive.failedBackupSourcesCount = 0
+	Archive.absentBackupSourcesCount = 0
 }
 
 # setter/getter methods
@@ -83,6 +83,14 @@ Archive.sourcePathsAdd() {
 	done
 	Archive.sourcePathsCount = $i
 }
+Archive.failedInstall() {
+declare -i intParam=$2
+	Archive.field failedInstall "$1" "$intParam"
+}
+Archive.failedBackup() {
+	declare -i intParam=$2
+	Archive.field failedBackup "$1" "$intParam"
+}
 Archive.absentBackupSources() {
 	if [ "$2" = '' ]; then
 		for (( i=0 ; i < $(Archive.absentBackupSourcesCount) ; i++ )); do
@@ -93,8 +101,7 @@ Archive.absentBackupSources() {
 	fi
 }
 Archive.absentBackupSourcesAdd() {
-	Archive.failedBackup = 1
-	declare -i i=$(Archive.failedBackupSourcesCount)
+	declare -i i=$(Archive.absentBackupSourcesCount)
 	for sourcePath in "${@}"; do
 		Archive.absentBackupSources "$i" = "$sourcePath"
 		i+=1
@@ -132,17 +139,21 @@ Archive.install() {
 	echo "Archive: installing archive backups..."
 	case "$(Archive.backupType)" in
 		"COPY") tar -xvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar";;
-		"COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive";;
-		"ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive";;
+		"COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive.archive";;
+		"ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive.archive";;
 		*)	echo "Archive: Error: backup type not recognized, archive backups will not be installed"
 			return;;
 	esac
+	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
 	
 	echo "Archive: archive backups intalled"
 	Archive.installed = 1
 }
 
 # Back up to archive
+# note: slight loss of name flexibility in exchange for backup type flexibility
+# - Archive name must always be followed by .archive extension in order to avoid incorrect file dumps,
+# - while not having to force the user to assign extra variables for extensions, etc.
 Archive.backup() {
 	echo
 	if [ "$(Archive.backedUp)" -eq 1 ]; then
@@ -153,7 +164,7 @@ Archive.backup() {
 	# Make/dump backup directories wherever needed
 	[ -d "$ARCHIVE_BACKUP_DIR" ] || sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR"
 	dump "INITIALIZE" "archives/Archive"
-	dump "$ARCHIVE_BACKUP_DIR/Archive"*
+	dump "$ARCHIVE_BACKUP_DIR/Archive.archive"*
 	
 	# Keep track of sources that don't exist
 	IFS=$'\n'
@@ -173,11 +184,13 @@ Archive.backup() {
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
 		"COPY") tar -cvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar" "${existingSources[@]}";;
-		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive" "${existingSources[@]}";;
-		"ENCRYPT") archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive" "${existingSources[@]}";;
+		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
+		"ENCRYPT") 
+			archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
 		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
 			return;;
 	esac
+	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
 	
 	echo "Archive: archive created"
 	Archive.backedUp = 1
