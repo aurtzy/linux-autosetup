@@ -155,7 +155,7 @@ App() {
 	fi
 	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
-	$1.constructor "$2" "$3" "${@:4}"
+	$1.constructor "${@:2}"
 	
 	apps+=("$1")
 	for arg in "${@:4}"; do
@@ -201,7 +201,7 @@ Archive() {
 	fi
 	fields="archive_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/Archive/$1/g" "$CLASSES_DIR"/Archive.class))
-	$1.constructor "$2" "$3" "${@:4}"
+	$1.constructor "${@:2}"
 	
 	archives+=("$1")
 }
