@@ -348,8 +348,13 @@ appBackup() {
 printScriptInfo 'more'
 
 # Assign everything in designated config folder
-# to CONFIG_FILES
-declare -a CONFIG_FILES=("$CONFIG_FOLDER/"*)
+# to CONFIG_FILES, excluding directories
+declare -a CONFIG_FILES
+for FILE in "$CONFIG_FOLDER/"* ; do 
+	if [ -f "$FILE" ]; then
+		CONFIG_FILES+=("$FILE")
+	fi
+done
 
 # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
 if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
