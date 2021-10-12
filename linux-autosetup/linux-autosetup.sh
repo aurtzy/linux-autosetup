@@ -51,6 +51,9 @@ declare -Ag appGroups
 # Stores all archives
 declare -ag archives
 
+# Stores all archives
+declare -ag archives
+
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
 # Should reset to 0 after every user command or AppGroup install
@@ -79,7 +82,11 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
 # Where archives go
 declare ARCHIVE_BACKUP_DIR="./archives"
+<<<<<<< HEAD
 # Default archive type - "COPY, COMPRESS, ENCRYPT"
+=======
+# Default archive backup type
+>>>>>>> interaction-revamp/dev
 declare DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
 # Where to dump files
 declare DUMP_DIR="./dump"
@@ -203,6 +210,8 @@ Archive() {
 	archives+=("$1")
 }
 
+# Archive constructor caller
+
 # Return all apps
 apps() {
 	echo "${apps[*]}"
@@ -221,9 +230,15 @@ appBackups() {
 archives() {
 	echo "${archives[*]}"
 }
+<<<<<<< HEAD
 # Return all archives and their backups
 archiveBackups() {
 	for archive in "${archives[@]}"; do 
+=======
+# Return all archives including their backups
+archiveBackups() {
+	for archive in "${archives[@]}"; do
+>>>>>>> interaction-revamp/dev
 		$archive.displayBackups
 	done
 }

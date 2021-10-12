@@ -66,10 +66,13 @@ Archive.sourcePathsCount() {
 	declare -i intParam=$2
 	Archive.field sourcePathsCount "$1" "$intParam"
 }
+<<<<<<< HEAD
 Archive.failedBackupSourcesCount() {
 	declare -i intParam=$2
 	Archive.field failedBackupSourcesCount "$1" "$intParam"
 }
+=======
+>>>>>>> interaction-revamp/dev
 Archive.installed() {
 	declare -i intParam=$2
 	Archive.field installed "$1" "$intParam"
@@ -86,6 +89,7 @@ Archive.failedInstall() {
 	declare -i intParam=$2
 	Archive.field failedInstall "$1" "$intParam"
 }
+<<<<<<< HEAD
 Archive.failedBackup() {
 	declare -i intParam=$2
 	Archive.field failedInstall "$1" "$intParam"
@@ -99,6 +103,8 @@ Archive.failedBackupSources() {
 		Archive.field failedBackupSource${1} "$2" "$3"
 	fi
 }
+=======
+>>>>>>> interaction-revamp/dev
 Archive.sourcePathsAdd() {
 	declare -i i=$(Archive.sourcePathsCount)
 	for sourcePath in "${@}"; do
@@ -107,6 +113,7 @@ Archive.sourcePathsAdd() {
 	done
 	Archive.sourcePathsCount = $i
 }
+<<<<<<< HEAD
 Archive.failedBackupSourcesAdd() {
 	Archive.failedBackup = 1
 	declare -i i=$(Archive.failedBackupSourcesCount)
@@ -115,6 +122,29 @@ Archive.failedBackupSourcesAdd() {
 		i+=1
 	done
 	Archive.failedBackupSourcesCount = $i
+=======
+Archive.absentBackupSources() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.absentBackupSourcesCount) ; i++ )); do
+			Archive.field absentBackupSource${i}
+		done
+	else
+		Archive.field absentBackupSource${1} "$2" "$3"
+	fi
+}
+Archive.absentBackupSourcesAdd() {
+	Archive.failedBackup = 1
+	declare -i i=$(Archive.failedBackupSourcesCount)
+	for sourcePath in "${@}"; do
+		Archive.absentBackupSources "$i" = "$sourcePath"
+		i+=1
+	done
+	Archive.absentBackupSourcesCount = $i
+}
+Archive.absentBackupSourcesCount() {
+	declare -i intParam=$2
+	Archive.field absentBackupSourcesCount "$1" "$intParam"
+>>>>>>> interaction-revamp/dev
 }
 
 # Display archive
@@ -127,3 +157,50 @@ Archive.displayBackups() {
 	echo "$(Archive.sourcePaths)"
 }
 
+<<<<<<< HEAD
+=======
+# Install backups from archive
+Archive.install() {
+	
+}
+
+# Back up to archive
+Archive.backup() {
+	echo
+	if [ "$(Archive.backedUp)" -eq 1 ]; then
+		echo "Archive: Already backed up during this script."
+		return 3
+	fi
+	[ -d "$ARCHIVE_BACKUP_DIR" ] || sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR"
+	dump "INITIALIZE" "archives/Archive"
+	[ -f "$ARCHIVE_BACKUP_DIR/Archive"* ] && dump "$ARCHIVE_BACKUP_DIR/Archive"*
+	
+	# Keep track of sources that don't exist
+	IFS=$'\n'
+	declare -a existingSources
+	for sourcePath in $(Archive.sourcePaths); do
+		if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+			echo "Archive: found $sourcePath"
+			existingSources+=("$sourcePath")
+		else
+			echo "Archive: $sourcePath was not found"
+			Archive.absentBackupSourcesAdd "$sourcePath"
+		fi
+	done
+	unset IFS
+			
+	# Perform archive depending on backupType
+	echo "Archive: creating new archive..."
+	case "$(Archive.backupType)" in
+		"COPY")
+			
+		"COMPRESS")
+			
+		"ENCRYPT")
+			
+	esac
+		
+	
+	echo "Archive: archive created"
+	Archive.backedUp = 1
+}
