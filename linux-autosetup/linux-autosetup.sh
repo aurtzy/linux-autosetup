@@ -249,7 +249,7 @@ promptYesNo() {
 }
 
 # Autosetup installer function for apps
-appInstall() {
+app_install() {
 	if [ "$1" = "" ]; then
 		echo "Your apps:"
 		apps
@@ -310,7 +310,7 @@ appInstall() {
 }
 
 # Autosetup back-uper function for apps
-appBackup() {
+app_backup() {
 	if [ "$1" = "" ]; then
 		echo "Your app backups:"
 		appBackups
@@ -359,7 +359,7 @@ appBackup() {
 	echo "AUTOSETUP: IF ANY APPS FAILED TO BE BACKED UP, THEY WILL BE LISTED BELOW:"
 	for appBackup in "${appBackups[@]}"; do
 		if [ "$($appBackup.failedBackup)" -eq 1 ]; then
-			echo "$appBackup:"
+			echo " $appBackup:"
 			echo "$($appBackup.failedBackupSources)"
 		fi
 	done
@@ -368,6 +368,109 @@ appBackup() {
 	echo "especially if this is a first-time backup!"
 	echo
 	echo "Backup completed."
+}
+
+# Autosetup install archives
+archive_install() {
+	if [ "$1" = "" ]; then
+		echo "Your archives:"
+		archiveBackups
+		echo
+		echo "Use this function by running it with the apps you want to install as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm you want to install the following:"
+	for entry in "$@"; do 
+		echo " $($entry.displayBackups)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo
+	echo "AUTOSETUP: Running onArchiveInstall first..."
+	onArchiveInstall
+	echo "AUTOSETUP: onArchiveInstall completed."
+	echo
+	echo "AUTOSETUP: Installing archives..."
+	for entry in "$@"; do
+		$entry.install
+	done
+	echo
+	echo "AUTOSETUP: Finished autosetup install."
+	echo
+	echo "AUTOSETUP: Running onArchiveInstallFinish..."
+	onArchiveInstallFinish
+	echo "AUTOSETUP: onArchiveInstallFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANY ARCHIVES FAILED TO BE INSTALLED, THEY WILL BE LISTED BELOW:"
+	for archive in "${archives[@]}"; do
+		[ "$($archive.failedInstall)" -e 0 ] || echo "$archive"
+	done
+	echo
+	echo "AUTOSETUP: Installation completed."
+}
+
+# Autosetup create new archives
+archive_backup() {
+	if [ "$1" = "" ]; then
+		echo "Your archives:"
+		archiveBackups
+		echo
+		echo "Use this function by running it with the apps you want to back up as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm you want to back up the following:"
+	for entry in "$@"; do 
+		echo " $($entry.displayBackups)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo
+	echo "AUTOSETUP: Running onArchiveBackup first..."
+	onArchiveInstall
+	echo "AUTOSETUP: onArchiveBackup completed."
+	echo
+	echo "AUTOSETUP: Backing up archives..."
+	for entry in "$@"; do
+		$entry.backup
+	done
+	echo
+	echo "AUTOSETUP: Finished autosetup backup."
+	
+	echo
+	echo "AUTOSETUP: Running onArchiveBackupFinish..."
+	onArchiveInstallFinish
+	echo "AUTOSETUP: onArchiveBackupFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANYTHING FAILED TO BE ARCHIVED, THEY WILL BE LISTED BELOW:"
+	for archive in "${archives[@]}"; do
+		if [ "$($archive.absentBackupSourcesCount)" -gt 0 ]; then
+			echo " $archive:"
+			echo "$($archive.absentBackupSources)"
+		elif [ "$($archive.failedBackup)" -ne 0 ]; then
+			echo " $archive was not archived at all"
+		fi
+	done
+	echo
+	echo "Be sure to double check if all files were archived properly,"
+	echo "especially if this is a first-time backup!"
+	echo
+	echo "AUTOSETUP: Backup completed."
 }
 
 # Event functions that are meant to be overwritten in configs
@@ -389,21 +492,29 @@ onArchiveInstall() {
 onArchiveBackup() {
 	return
 }
+onArchiveInstallFinish() {
+	return
+}
+onArchiveBackupFinish() {
+	return
+}
 # limitation: in order to avoid the wrong archives being dumped, the script requires: .archive to exist after archive name,
 # and output path not be messed with excluding extensions that are not .archive
 # $1 = output path, $2 = files to archive
 archiveCompress() {
-	tar -cJvPf "$1.archive.tar.xz" "${@:2}"
+	tar -cJvPf "$1.tar.xz" "${@:2}"
 }
 archiveEncrypt() {
-	tar -cJvPf - "${@:2}" | gpg --symmetric --cipher-algo aes256 -o "$1.archive.tar.xz.gpg"
+	export GPG_TTY=$(tty)
+	tar -cJvPf - "${@:2}" | gpg --cipher-algo aes256 --pinentry-mode=loopback --symmetric -o "$1.tar.xz.gpg"
 }
 # $1 = archive path
 archiveDecompress() {
-	tar -xJvPf "$1.archive.tar.xz"
+	tar -xJvPf "$1.tar.xz"
 }
 archiveDecrypt() {
-	gpg -d "$1.archive.tar.xz.gpg" | tar -xJvPf -
+	export GPG_TTY=$(tty)
+	gpg --pinentry-mode=loopback -d "$1.tar.xz.gpg" | tar -xJvPf -
 }
 
 ##################
