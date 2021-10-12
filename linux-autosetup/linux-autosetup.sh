@@ -389,19 +389,21 @@ onArchiveInstall() {
 onArchiveBackup() {
 	return
 }
+# limitation: in order to avoid the wrong archives being dumped, the script requires: .archive to exist after archive name,
+# and output path not be messed with excluding extensions that are not .archive
 # $1 = output path, $2 = files to archive
 archiveCompress() {
-	tar -cJvPf "$1.tar.xz" "${@:2}"
+	tar -cJvPf "$1.archive.tar.xz" "${@:2}"
 }
 archiveEncrypt() {
-	tar -cJvPf - "${@:2}" | gpg --symmetric --cipher-algo aes256 -o "$1.tar.xz.gpg"
+	tar -cJvPf - "${@:2}" | gpg --symmetric --cipher-algo aes256 -o "$1.archive.tar.xz.gpg"
 }
 # $1 = archive path
 archiveDecompress() {
-	tar -xJvPf "$1.tar.xz"
+	tar -xJvPf "$1.archive.tar.xz"
 }
 archiveDecrypt() {
-	gpg -d "$1.tar.xz.gpg" | tar -xJvPf -
+	gpg -d "$1.archive.tar.xz.gpg" | tar -xJvPf -
 }
 
 ##################

@@ -75,14 +75,6 @@ Archive.backedUp() {
 	declare -i intParam=$2
 	Archive.field backedUp "$1" "$intParam"
 }
-Archive.backupsInstalled() {
-	declare -i intParam=$2
-	Archive.field backupsInstalled "$1" "$intParam"
-}
-Archive.failedInstall() {
-	declare -i intParam=$2
-	Archive.field failedInstall "$1" "$intParam"
-}
 Archive.sourcePathsAdd() {
 	declare -i i=$(Archive.sourcePathsCount)
 	for sourcePath in "${@}"; do
@@ -126,7 +118,32 @@ Archive.displayBackups() {
 
 # Install backups from archive
 Archive.install() {
+	echo
+	if [ "$(Archive.installed)" -eq 1 ]; then
+		echo "Archive: Already installed during this script."
+		return 3
+	fi
 	
+	# Check if archive exists before proceeding
+	[[ -f "$ARCHIVE_BACKUP_DIR/Archive.archive"* || -d "$ARCHIVE_BACKUP_DIR/Archive.archive"* ]] || (echo "Archive: archive could not be found" && return 1)
+	
+	# Perform archive install depending on backupType
+	# note: this will overwrite stuff if stuff exists with same names!!!
+	echo "Archive: installing archive backups..."
+	case "$(Archive.backupType)" in
+		"COPY")
+			tar -xvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar"
+		"COMPRESS")
+			archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive"
+		"ENCRYPT")
+			archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive"
+		*)
+			echo "Archive: Error: backup type not recognized, archive backups will not be installed"
+			return
+	esac
+	
+	echo "Archive: archive backups intalled"
+	Archive.installed = 1
 }
 
 # Back up to archive
@@ -136,9 +153,11 @@ Archive.backup() {
 		echo "Archive: Already backed up during this script."
 		return 3
 	fi
+	
+	# Make/dump backup directories wherever needed
 	[ -d "$ARCHIVE_BACKUP_DIR" ] || sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR"
 	dump "INITIALIZE" "archives/Archive"
-	[ -f "$ARCHIVE_BACKUP_DIR/Archive"* ] && dump "$ARCHIVE_BACKUP_DIR/Archive"*
+	dump "$ARCHIVE_BACKUP_DIR/Archive"*
 	
 	# Keep track of sources that don't exist
 	IFS=$'\n'
@@ -158,7 +177,7 @@ Archive.backup() {
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
 		"COPY")
-			cp "${existingSources[@]}" "$ARCHIVE_BACKUP_DIR/Archive"
+			tar -cvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar" "${existingSources[@]}"
 		"COMPRESS")
 			archiveCompress "$ARCHIVE_BACKUP_DIR/Archive" "${existingSources[@]}"
 		"ENCRYPT")
