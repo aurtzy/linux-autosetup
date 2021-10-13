@@ -17,13 +17,12 @@ DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 # APPLICATIONS #
 ################
 
-ffProfile="$HOME/.mozilla/firefox/PROFILE"
-thProfile="$HOME/.thunderbird/PROFILE"
-
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
 # Essentials
+ffProfile="$HOME/.mozilla/firefox/firefox.al-default"
 App firefox "firefox.installBackups" "" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
+thProfile="$HOME/.thunderbird/thunderbird.al-default"
 App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App flatpak
 App ffmpeg
