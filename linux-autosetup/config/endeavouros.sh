@@ -90,14 +90,6 @@ App clamtk
 ######################
 
 appGroups=(
-	[ToBackup]="
-		firefox
-		thunderbird
-		easyeffects
-		redshift
-		nvidia-1660ti
-		keyboard-center
-	"
 	[Essentials]="
 		firefox
 		thunderbird
@@ -144,15 +136,11 @@ appGroups=(
 	"
 )
 
+Archive test "ENCRYPT" "$HOME/Downloads/a" "$HOME/Downloads/test.sh"
+
 onInstall() {
 	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu
 }
-onBackup() {
-	return
-}
 onInstallFinish() {
 	$yay --noanswerclean --noanswerdiff --noansweredit --noanswerupgrade
-}
-onBackupFinish() {
-	return
 }

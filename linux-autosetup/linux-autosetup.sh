@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="v1.0.0"
+version="v1.1.0-alpha"
 
 # Print information about the script,
 # including version # and copyright
@@ -41,12 +41,18 @@ declare HOME="$(eval echo ~${SUDO_USER})"
 # Stores all app names
 declare -ag apps
 
+# Stores all apps with backups
+declare -ag appBackups
+
 # Stores app groups as keys
 # Stores apps separated by spaces as data
 declare -Ag appGroups
 
-# Stores all apps with backups
-declare -ag appBackups
+# Stores all archives
+declare -ag archives
+
+# Stores all archives
+declare -ag archives
 
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
@@ -74,6 +80,10 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 # Default install command used if one is not specified for app
 # $app is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
+# Where archives go
+declare ARCHIVE_BACKUP_DIR="./archives"
+# Default archive type - "COPY, COMPRESS, ENCRYPT"
+declare DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
 # Where to dump files
 declare DUMP_DIR="./dump"
 
@@ -145,7 +155,7 @@ App() {
 	fi
 	fields="app_$(convertHyphens "$1")_fields"
 	. <(sed "s/fields/$fields/g" <(sed "s/App/$1/g" "$CLASSES_DIR"/App.class))
-	$1.constructor "$2" "$3" "${@:4}"
+	$1.constructor "${@:2}"
 	
 	apps+=("$1")
 	for arg in "${@:4}"; do
@@ -166,13 +176,37 @@ AppGroup() {
 	. <(sed "s/fields/$fields/g" <(sed "s/AppGroup/$1/g" "$CLASSES_DIR"/AppGroup.class))
 	$1.constructor ${@:2}
 }
-
 # Initialize app groups in appGroups array
 initializeAppGroups() {
 	for appGroup in $(appGroups); do
 		AppGroup $appGroup "${appGroups[$appGroup]}"
 	done
 }
+# Archive constructor caller
+Archive() {
+	if [ "$1" = '' ]; then
+		echo
+		echo "Error: Archive name parameter was empty"
+		echo "Archive names cannot be empty."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
+	elif [[ "$1" =~ [[:blank:]] ]]; then
+		echo
+		echo "Error: Archive name '$1' has whitespaces"
+		echo "Archive names cannot have whitespaces (e.g. spaces, tabs)."
+		echo "Please check your config file and resolve the issue."
+		echo "Exiting..."
+		exit 1
+	fi
+	fields="archive_$(convertHyphens "$1")_fields"
+	. <(sed "s/fields/$fields/g" <(sed "s/Archive/$1/g" "$CLASSES_DIR"/Archive.class))
+	$1.constructor "${@:2}"
+	
+	archives+=("$1")
+}
+
+# Archive constructor caller
 
 # Return all apps
 apps() {
@@ -186,6 +220,16 @@ appGroups() {
 appBackups() {
 	for appBackup in "${appBackups[@]}"; do 
 		$appBackup.displayBackups
+	done
+}
+# Return all archives
+archives() {
+	echo "${archives[*]}"
+}
+# Return all archives including their backups
+archiveBackups() {
+	for archive in "${archives[@]}"; do
+		$archive.displayBackups
 	done
 }
 
@@ -204,22 +248,8 @@ promptYesNo() {
 	done
 }
 
-# Event functions that are meant to be overwritten in configs
-onInstall() {
-	return
-}
-onBackup() {
-	return
-}
-onInstallFinish() {
-	return
-}
-onBackupFinish() {
-	return
-}
-
 # Autosetup installer function for apps
-appInstall() {
+app_install() {
 	if [ "$1" = "" ]; then
 		echo "Your apps:"
 		apps
@@ -280,7 +310,7 @@ appInstall() {
 }
 
 # Autosetup back-uper function for apps
-appBackup() {
+app_backup() {
 	if [ "$1" = "" ]; then
 		echo "Your app backups:"
 		appBackups
@@ -329,7 +359,7 @@ appBackup() {
 	echo "AUTOSETUP: IF ANY APPS FAILED TO BE BACKED UP, THEY WILL BE LISTED BELOW:"
 	for appBackup in "${appBackups[@]}"; do
 		if [ "$($appBackup.failedBackup)" -eq 1 ]; then
-			echo "$appBackup:"
+			echo " $appBackup:"
 			echo "$($appBackup.failedBackupSources)"
 		fi
 	done
@@ -338,6 +368,153 @@ appBackup() {
 	echo "especially if this is a first-time backup!"
 	echo
 	echo "Backup completed."
+}
+
+# Autosetup install archives
+archive_install() {
+	if [ "$1" = "" ]; then
+		echo "Your archives:"
+		archiveBackups
+		echo
+		echo "Use this function by running it with the apps you want to install as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm you want to install the following:"
+	for entry in "$@"; do 
+		echo " $($entry.displayBackups)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo
+	echo "AUTOSETUP: Running onArchiveInstall first..."
+	onArchiveInstall
+	echo "AUTOSETUP: onArchiveInstall completed."
+	echo
+	echo "AUTOSETUP: Installing archives..."
+	for entry in "$@"; do
+		$entry.install
+	done
+	echo
+	echo "AUTOSETUP: Finished autosetup install."
+	echo
+	echo "AUTOSETUP: Running onArchiveInstallFinish..."
+	onArchiveInstallFinish
+	echo "AUTOSETUP: onArchiveInstallFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANY ARCHIVES FAILED TO BE INSTALLED, THEY WILL BE LISTED BELOW:"
+	for archive in "${archives[@]}"; do
+		[ "$($archive.failedInstall)" -e 0 ] || echo "$archive"
+	done
+	echo
+	echo "AUTOSETUP: Installation completed."
+}
+
+# Autosetup create new archives
+archive_backup() {
+	if [ "$1" = "" ]; then
+		echo "Your archives:"
+		archiveBackups
+		echo
+		echo "Use this function by running it with the apps you want to back up as parameters."
+		return
+	fi
+	for entry in "$@"; do 
+		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
+			return 1
+		fi
+	done
+	echo "Please confirm you want to back up the following:"
+	for entry in "$@"; do 
+		echo " $($entry.displayBackups)"
+	done
+	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
+		echo "Aborting"
+		return
+	fi
+	echo
+	echo "AUTOSETUP: Running onArchiveBackup first..."
+	onArchiveInstall
+	echo "AUTOSETUP: onArchiveBackup completed."
+	echo
+	echo "AUTOSETUP: Backing up archives..."
+	for entry in "$@"; do
+		$entry.backup
+	done
+	echo
+	echo "AUTOSETUP: Finished autosetup backup."
+	
+	echo
+	echo "AUTOSETUP: Running onArchiveBackupFinish..."
+	onArchiveInstallFinish
+	echo "AUTOSETUP: onArchiveBackupFinish completed."
+	echo
+	echo "AUTOSETUP: IF ANYTHING FAILED TO BE ARCHIVED, THEY WILL BE LISTED BELOW:"
+	for archive in "${archives[@]}"; do
+		if [ "$($archive.absentBackupSourcesCount)" -gt 0 ]; then
+			echo " $archive:"
+			echo "$($archive.absentBackupSources)"
+		elif [ "$($archive.failedBackup)" -ne 0 ]; then
+			echo " $archive was not archived at all"
+		fi
+	done
+	echo
+	echo "Be sure to double check if all files were archived properly,"
+	echo "especially if this is a first-time backup!"
+	echo
+	echo "AUTOSETUP: Backup completed."
+}
+
+# Event functions that are meant to be overwritten in configs
+onInstall() {
+	return
+}
+onBackup() {
+	return
+}
+onInstallFinish() {
+	return
+}
+onBackupFinish() {
+	return
+}
+onArchiveInstall() {
+	return
+}
+onArchiveBackup() {
+	return
+}
+onArchiveInstallFinish() {
+	return
+}
+onArchiveBackupFinish() {
+	return
+}
+# limitation: in order to avoid the wrong archives being dumped, the script requires: .archive to exist after archive name,
+# and output path not be messed with excluding extensions that are not .archive
+# $1 = output path, $2 = files to archive
+archiveCompress() {
+	tar -cJvPf "$1.tar.xz" "${@:2}"
+}
+archiveEncrypt() {
+	export GPG_TTY=$(tty)
+	tar -cJvPf - "${@:2}" | gpg --cipher-algo aes256 --pinentry-mode=loopback --symmetric -o "$1.tar.xz.gpg"
+}
+# $1 = archive path
+archiveDecompress() {
+	tar -xJvPf "$1.tar.xz"
+}
+archiveDecrypt() {
+	export GPG_TTY=$(tty)
+	gpg --pinentry-mode=loopback -d "$1.tar.xz.gpg" | tar -xJvPf -
 }
 
 ##################
@@ -395,6 +572,8 @@ echo "CONFIG_FILE: $CONFIG_FILE"
 echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
 echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
 echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
+echo "ARCHIVE_BACKUP_DIR: $ARCHIVE_BACKUP_DIR"
+echo "DEFAULT_ARCHIVE_BACKUP_TYPE: $DEFAULT_ARCHIVE_BACKUP_TYPE"
 echo "DUMP_DIR: $DUMP_DIR"
 echo
 if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then

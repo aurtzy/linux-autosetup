@@ -1,0 +1,197 @@
+# Credit to Maxim Norin https://github.com/mnorin
+# for OOP emulation base from https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
+# Modified by Aurtzy
+
+# Class named "Archive" for bash object
+
+# fields
+declare -Ag fields
+
+# Handles getting/setting fields.
+Archive.field() {
+	if [ "$2" == "=" ]; then
+		fields[$1]=$3
+	else
+		echo ${fields[$1]}
+	fi
+}
+
+# Archive class constructor
+# Params: $1 = install location $2 = archive method (e.g COPY, COMPRESS, ENCRYPT), ${@:3} = files to archive
+Archive.constructor() {
+
+	# Backup type
+	if [ ! "$1" ]; then
+		Archive.backupType = $DEFAULT_ARCHIVE_BACKUP_TYPE
+	else
+		Archive.backupType = $1
+	fi
+	
+	# Source paths to be backed up
+	Archive.sourcePathsCount = 0
+	Archive.sourcePathsAdd "${@:2}"
+	
+	Archive.installed = 0
+	Archive.backedUp = 0
+	
+	Archive.failedInstall = 0
+	Archive.failedBackup = 0
+	Archive.absentBackupSourcesCount = 0
+}
+
+# setter/getter methods
+Archive.backupType() {
+	if [[ "$2" != "" && "$2" != 'COPY' && "$2" != 'COMPRESS' && "$2" != 'ENCRYPT' ]]; then
+		echo "Archive: Error: Backup type input $2 was not recognized!"
+		echo "Script will not continue. Please resolve."
+		echo "Exiting..."
+		read
+		exit 1
+	fi
+	Archive.field backupType "$1" "$2"
+}
+Archive.sourcePaths() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.sourcePathsCount) ; i++ )); do
+			Archive.field sourcePath${i}
+		done
+	else
+		if [ "${3: -1}" = '/' ]; then
+			sourcePath=${3::-1}
+		fi
+		Archive.field sourcePath${1} "$2" "$sourcePath"
+	fi
+}
+Archive.sourcePathsCount() {
+	declare -i intParam=$2
+	Archive.field sourcePathsCount "$1" "$intParam"
+}
+
+Archive.installed() {
+	declare -i intParam=$2
+	Archive.field installed "$1" "$intParam"
+}
+Archive.backedUp() {
+	declare -i intParam=$2
+	Archive.field backedUp "$1" "$intParam"
+}
+Archive.sourcePathsAdd() {
+	declare -i i=$(Archive.sourcePathsCount)
+	for sourcePath in "${@}"; do
+		Archive.sourcePaths "$i" = "$sourcePath"
+		i+=1
+	done
+	Archive.sourcePathsCount = $i
+}
+Archive.failedInstall() {
+declare -i intParam=$2
+	Archive.field failedInstall "$1" "$intParam"
+}
+Archive.failedBackup() {
+	declare -i intParam=$2
+	Archive.field failedBackup "$1" "$intParam"
+}
+Archive.absentBackupSources() {
+	if [ "$2" = '' ]; then
+		for (( i=0 ; i < $(Archive.absentBackupSourcesCount) ; i++ )); do
+			Archive.field absentBackupSource${i}
+		done
+	else
+		Archive.field absentBackupSource${1} "$2" "$3"
+	fi
+}
+Archive.absentBackupSourcesAdd() {
+	declare -i i=$(Archive.absentBackupSourcesCount)
+	for sourcePath in "${@}"; do
+		Archive.absentBackupSources "$i" = "$sourcePath"
+		i+=1
+	done
+	Archive.absentBackupSourcesCount = $i
+}
+Archive.absentBackupSourcesCount() {
+	declare -i intParam=$2
+	Archive.field absentBackupSourcesCount "$1" "$intParam"
+}
+
+# Display archive
+Archive.display() {
+	echo -n "Archive"
+}
+# Display archive backups
+Archive.displayBackups() {
+	echo " Archive:"
+	echo "$(Archive.sourcePaths)"
+}
+
+# Install backups from archive
+Archive.install() {
+	echo
+	if [ "$(Archive.installed)" -eq 1 ]; then
+		echo "Archive: Already installed during this script."
+		return 3
+	fi
+	
+	# Check if archive exists before proceeding
+	[[ -f "$ARCHIVE_BACKUP_DIR/Archive.archive"* || -d "$ARCHIVE_BACKUP_DIR/Archive.archive"* ]] || (echo "Archive: archive could not be found" && return 1)
+	
+	# Perform archive install depending on backupType
+	# note: this will overwrite stuff if stuff exists with same names!!!
+	echo "Archive: installing archive backups..."
+	case "$(Archive.backupType)" in
+		"COPY") tar -xvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar";;
+		"COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive.archive";;
+		"ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive.archive";;
+		*)	echo "Archive: Error: backup type not recognized, archive backups will not be installed"
+			return;;
+	esac
+	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
+	
+	echo "Archive: archive backups intalled"
+	Archive.installed = 1
+}
+
+# Back up to archive
+# note: slight loss of name flexibility in exchange for backup type flexibility
+# - Archive name must always be followed by .archive extension in order to avoid incorrect file dumps,
+# - while not having to force the user to assign extra variables for extensions, etc.
+Archive.backup() {
+	echo
+	if [ "$(Archive.backedUp)" -eq 1 ]; then
+		echo "Archive: Already backed up during this script."
+		return 3
+	fi
+	
+	# Make/dump backup directories wherever needed
+	[ -d "$ARCHIVE_BACKUP_DIR" ] || sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR"
+	dump "INITIALIZE" "archives/Archive"
+	dump "$ARCHIVE_BACKUP_DIR/Archive.archive"*
+	
+	# Keep track of sources that don't exist
+	IFS=$'\n'
+	declare -a existingSources
+	for sourcePath in $(Archive.sourcePaths); do
+		if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+			echo "Archive: found $sourcePath"
+			existingSources+=("$sourcePath")
+		else
+			echo "Archive: $sourcePath was not found"
+			Archive.absentBackupSourcesAdd "$sourcePath"
+		fi
+	done
+	unset IFS
+			
+	# Perform archive depending on backupType
+	echo "Archive: creating new archive..."
+	case "$(Archive.backupType)" in
+		"COPY") tar -cvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar" "${existingSources[@]}";;
+		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
+		"ENCRYPT") 
+			archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
+		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
+			return;;
+	esac
+	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
+	
+	echo "Archive: archive created"
+	Archive.backedUp = 1
+}
