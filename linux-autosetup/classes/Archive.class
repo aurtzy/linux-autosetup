@@ -154,6 +154,7 @@ Archive.install() {
 # note: slight loss of name flexibility in exchange for backup type flexibility
 # - Archive name must always be followed by .archive extension in order to avoid incorrect file dumps,
 # - while not having to force the user to assign extra variables for extensions, etc.
+# - Possible issue if user decides to have two files w/ same Archive.archive name. Solution: don't do dat
 Archive.backup() {
 	echo
 	if [ "$(Archive.backedUp)" -eq 1 ]; then
@@ -161,10 +162,15 @@ Archive.backup() {
 		return 3
 	fi
 	
-	# Make/dump backup directories wherever needed
-	[ -d "$ARCHIVE_BACKUP_DIR" ] || sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR"
-	dump "INITIALIZE" "archives/Archive"
-	dump "$ARCHIVE_BACKUP_DIR/Archive.archive"*
+	# Make archive dir if it doesn't exist
+	[ -d "$ARCHIVE_BACKUP_DIR" ] || (sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR")
+	archive=$(echo "$ARCHIVE_BACKUP_DIR/Archive.archive"*)
+	#  Dump if backup exists
+	if [[ -f "$archive" || -d "$archive" ]]; then
+		echo "Archive: found old archive. dumping..."
+		dump "INITIALIZE" "archives/Archive"
+		dump "$archive" "archives/Archive"
+	fi
 	
 	# Keep track of sources that don't exist
 	IFS=$'\n'
