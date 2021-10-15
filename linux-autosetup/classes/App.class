@@ -190,11 +190,8 @@ App.installBackups() {
 		sourceDir="${sourcePath%"/"*}"
 		echo
 		echo "App: Installing $sourcePath"
-		sudo -u $SUDO_USER mkdir -p "$sourceDir"
-		if [ "$?" -ne 0 ]; then
-			echo "Elevating permissions for mkdir to work..."
-			mkdir -p "$sourceDir"
-		fi
+		# Discover or create source dir
+		[ -d "$sourceDir" ] || (sudo -u $SUDO_USER mkdir -p "$sourceDir" || mkdir -p "$sourceDir")
 		cp -a "$backupDir/$source" "$sourceDir"
 		if [ $? -ne 0 ]; then
 			echo "App: Error: $source could not be installed."
@@ -217,16 +214,8 @@ App.backup() {
 		return
 	else
 		backupDir="$APP_BACKUP_DIR/App"
-		if [ ! -d "$backupDir" ]; then
-			echo "App: Backup directory not found. Making one for you..."
-			sudo -u $SUDO_USER mkdir -p "$backupDir"
-			if [ "$?" -ne 0 ]; then
-				echo "Elevating permissions for mkdir to work..."
-				mkdir -p "$backupDir"
-			fi
-		else
-			dump "INITIALIZE" "App"
-		fi
+		# Discover/create backup dir or dump dir
+		([ -d "$backupDir" ] && dump "INITIALIZE" "App") || (sudo -u $SUDO_USER mkdir -p "$backupDir" || mkdir -p "$backupDir")
 		IFS=$'\n'
 		for sourcePath in $(App.sourcePaths); do
 			echo
