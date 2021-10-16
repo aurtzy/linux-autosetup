@@ -62,7 +62,6 @@ AppGroup.add() {
 }
 
 # Install AppGroup on call
-# Also reset to original dir in case command used cd
 AppGroup.install() {
 	echo
 	echo

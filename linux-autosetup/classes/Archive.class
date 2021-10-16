@@ -132,7 +132,7 @@ Archive.install() {
 	fi
 	
 	# Check if archive exists before proceeding
-	[[ -f "$ARCHIVE_BACKUP_DIR/Archive.archive"* || -d "$ARCHIVE_BACKUP_DIR/Archive.archive"* ]] || (echo "Archive: archive could not be found" && return 1)
+	([ -f "$ARCHIVE_BACKUP_DIR/Archive.archive"* ] || [ -d "$ARCHIVE_BACKUP_DIR/Archive.archive"* ]) || (echo "Archive: archive could not be found" && return 1)
 	
 	# Perform archive install depending on backupType
 	# note: this will overwrite stuff if stuff exists with same names!!!

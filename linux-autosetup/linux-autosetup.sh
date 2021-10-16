@@ -40,27 +40,22 @@ declare HOME="$(eval echo ~${SUDO_USER})"
 
 # Stores all app names
 declare -ag apps
-
 # Stores all apps with backups
 declare -ag appBackups
-
 # Stores app groups as keys
 # Stores apps separated by spaces as data
 declare -Ag appGroups
-
-# Stores all archives
-declare -ag archives
-
-# Stores all archives
-declare -ag archives
-
+# String used to substitute app names
+declare app='$app'
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
 # Should reset to 0 after every user command or AppGroup install
 declare -i appInstallBackups=0
 
-# String used to substitute app names
-declare app='$app'
+# Stores all archives
+declare -ag archives
+# Stores all archives
+declare -Ag archiveGroups
 
 ##########################
 # CONFIGURABLE VARIABLES #
@@ -205,8 +200,23 @@ Archive() {
 	
 	archives+=("$1")
 }
-
-# Archive constructor caller
+# Archive group constructor caller
+# $1=name
+ArchiveGroup() {
+	if [ "$1" = '' ]; then
+		echo "Error: ArchiveGroup name parameter was empty."
+		return
+	fi
+	fields="archiveGroup_$(convertHyphens "$1")_fields"
+	. <(sed "s/fields/$fields/g" <(sed "s/ArchiveGroup/$1/g" "$CLASSES_DIR"/ArchiveGroup.class))
+	$1.constructor ${@:2}
+}
+# Initialize archive groups in archiveGroups array
+initializeArchiveGroups() {
+	for archiveGroup in $(archiveGroups); do
+		ArchiveGroup $archiveGroup "${archiveGroups[$archiveGroup]}"
+	done
+}
 
 # Return all apps
 apps() {
@@ -231,6 +241,9 @@ archiveBackups() {
 	for archive in "${archives[@]}"; do
 		$archive.displayBackups
 	done
+}
+archiveGroups() {
+	echo "${!archiveGroups[*]}"
 }
 
 # Prompt user to input yes/no
@@ -376,6 +389,9 @@ archive_install() {
 		echo "Your archives:"
 		archiveBackups
 		echo
+		echo "Your archive groups:"
+		archiveGroups
+		echo
 		echo "Use this function by running it with the apps you want to install as parameters."
 		return
 	fi
@@ -423,17 +439,25 @@ archive_backup() {
 		echo "Your archives:"
 		archiveBackups
 		echo
+		echo "Your archive groups:"
+		archiveGroups
+		echo
 		echo "Use this function by running it with the apps you want to back up as parameters."
+		echo "If you want to archive everything, pass the parameter 'ALL'."
 		return
 	fi
-	for entry in "$@"; do 
-		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+	declare -a entries=("$@")
+	for entry in "${entries[@]}"; do 
+		if [ "$entry" = 'ALL' ]; then
+			entries=("${archives[@]}")
+			break
+		elif ! [[ " ${archives[*]} " =~ " $entry " || " ${!archiveGroups[*]} " =~ " $entry " ]]; then
 			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
 			return 1
 		fi
 	done
 	echo "Please confirm you want to back up the following:"
-	for entry in "$@"; do 
+	for entry in "${entries[@]}"; do 
 		echo " $($entry.displayBackups)"
 	done
 	if [ ! $(promptYesNo "Does this look alright?") -ge 1 ]; then
@@ -446,7 +470,7 @@ archive_backup() {
 	echo "AUTOSETUP: onArchiveBackup completed."
 	echo
 	echo "AUTOSETUP: Backing up archives..."
-	for entry in "$@"; do
+	for entry in "${entries[@]}"; do
 		$entry.backup
 	done
 	echo
@@ -560,6 +584,7 @@ echo
 echo "Initializing objects..."
 . "$CONFIG_FILE"
 initializeAppGroups
+initializeArchiveGroups
 echo "All objects successfully initialized."
 
 # Before starting script, ask user if the variables
