@@ -138,7 +138,7 @@ Archive.install() {
 	# note: this will overwrite stuff if stuff exists with same names!!!
 	echo "Archive: installing archive backups..."
 	case "$(Archive.backupType)" in
-		"COPY") tar -xvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar";;
+		"COPY") archiveDecopy "$ARCHIVE_BACKUP_DIR/Archive.archive";;
 		"COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive.archive";;
 		"ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive.archive";;
 		*)	echo "Archive: Error: backup type not recognized, archive backups will not be installed"
@@ -189,10 +189,9 @@ Archive.backup() {
 	# Perform archive depending on backupType
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
-		"COPY") tar -cvPf "$ARCHIVE_BACKUP_DIR/Archive.archive.tar" "${existingSources[@]}";;
+		"COPY") archiveCopy "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
 		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
-		"ENCRYPT") 
-			archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
+		"ENCRYPT") archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
 		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
 			return;;
 	esac
