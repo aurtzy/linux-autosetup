@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="v1.1.0-beta"
+version="v1.1.0-alpha"
 
 # Print information about the script,
 # including version # and copyright
