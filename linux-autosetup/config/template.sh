@@ -8,9 +8,9 @@
 
 DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
 
-ARCHIVE_BACKUP_DIR="./archives"
+# ARCHIVE_BACKUP_DIR="./archives"
 
-DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
+# DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
 
 # DUMP_DIR="./dump"
 

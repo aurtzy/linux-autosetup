@@ -1,17 +1,25 @@
+
+declare drive2="/run/media/$SUDO_USER/Stuff"
+declare driveBackup="/run/media/$SUDO_USER/Backup"
+
 ##########################
 # CONFIGURABLE VARIABLES #
 ##########################
 
 # DEFAULT_APP_BACKUP_TYPE="COPY"
 
-APP_BACKUP_DIR="../app-backups"
+APP_BACKUP_DIR="$HOME/Backups/applications"
 
 yay="sudo -u $SUDO_USER yay"
 flatpak="sudo -u $SUDO_USER flatpak"
 
 DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 
-# DUMP_DIR="./dump"
+ARCHIVE_BACKUP_DIR="$driveBackup/"
+
+DEFAULT_ARCHIVE_BACKUP_TYPE="COMPRESS"
+
+DUMP_DIR="$HOME/DUMP_linux-autosetup+"
 
 ################
 # APPLICATIONS #
@@ -26,7 +34,6 @@ thProfile="$HOME/.thunderbird/thunderbird.al-default"
 App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
 App flatpak
 App ffmpeg
-App redshift "" "" "$HOME/.config/redshift.conf"
 
 # Extras
 App discord "flatpak install com.discordapp.Discord"
@@ -50,88 +57,76 @@ lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjp
 sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
 ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 \
 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
-
-# Gaming - nvidia 1660ti
+# 1660ti
 App nvidia-driver "$yay nvidia-installer-dkms"
 App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
 App remove-tlp "$yay -R tlp"
 App gwe #greenwithenvy
 
-# Gaming - peripherals apps
+# peripherals
 App piper
 App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
 App keyboard-center "" "" "$HOME/.config/keyboard-center"
 
-# Dev tools
-App github-desktop-bin
+# Softwares
+ # Dev tools
 App eclipse-ecj
 App intellij-idea-community-edition
 App jdk-openjdk
-
-# Content-creation - Video making
+ # Video-making
 App obs-studio
 App kdenlive
 App losslesscut-bin
-
-# Content-creation - Image editors
+ # Image-editors
 App gimp
 App krita
 
-# Dependencies
+# Misc
+App redshift "" "" "$HOME/.config/redshift.conf"
+App clamtk
+ # Dependencies
 App rust
 App linux-headers
 
-# Misc
-App clamtk
 
 ######################
 # APPLICATION GROUPS #
 ######################
 
 appGroups=(
-	[Essentials]="
+	[Main-Desktop]="
+		remove-tlp
+		Essentials
+		Pipewire
+		Nvidia-1660ti
+		Gaming
+	"
+	[Base]="
 		firefox
 		thunderbird
 		flatpak
 		ffmpeg
-	"
-	[Extras]="
 		discord
 		quodlibet
-		gifski
+	"
+	[Extra-Tools]="
 		youtube-dl
+		gifski
 	"
 	[Pipewire]="
 		pipewire
 		easyeffects
 	"
-	[G-main]="
+	[Gaming]="
 		gamemode
 		steam
 		lutris
-	"
-	[G-periph]="
 		piper
 		keyboard-center
 	"
-	[G-All]="
-		G-main
-		G-periph
+	[Nvidia-1660ti]="
+		nvidia-driver
 		nvidia-1660ti
-	"
-	[Dev]="
-		github-desktop-bin
-		intellij-idea-community-edition
-		jdk-openjdk
-	"
-	[C-Video]="
-		obs-studio
-		kdenlive
-		losslesscut-bin
-	"
-	[C-Image]="
-		gimp
-		krita
 	"
 )
 
@@ -140,14 +135,19 @@ appGroups=(
 ############
 # Archive "archive_name" "backupType:COPY,COMPRESS,ENCRYPT" "path/to/files/to/archive" "more/files/and/etc"
 
-Archive stuff "COPY" "$HOME/Downloads/stuff"
+Archive main-files "ENCRYPT" "$HOME/"{Backups,Workspace}
+Archive school "COMPRESS" "$drive2/school"
+Archive media "COPY" "$drive2/media" #beeg, no include in archive group
 
 ##################
 # ARCHIVE GROUPS #
 ##################
 
 archiveGroups=(
-	
+	[Main-Desktop]="
+		main-files
+		school
+	"
 )
 
 ###################
