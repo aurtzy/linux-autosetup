@@ -82,12 +82,18 @@ onArchiveInstallFinish() {
 onArchiveBackupFinish() {
 	return
 }
+archiveCopy() {
+	tar -cvPf "$1.tar" "${@:2}"
+}
 archiveCompress() {
 	tar -cJvPf "$1.tar.xz" "${@:2}"
 }
 archiveEncrypt() {
 	export GPG_TTY=$(tty)
 	tar -cJvPf - "${@:2}" | gpg --cipher-algo aes256 --pinentry-mode=loopback --symmetric -o "$1.tar.xz.gpg"
+}
+archiveDecopy() {
+	tar -xvPf "$1.tar" "${@:2}"
 }
 archiveDecompress() {
 	tar -xJvPf "$1.tar.xz"

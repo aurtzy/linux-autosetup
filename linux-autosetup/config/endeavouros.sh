@@ -138,14 +138,21 @@ appGroups=(
 ############
 # ARCHIVES #
 ############
+# Archive "archive_name" "backupType:COPY,COMPRESS,ENCRYPT" "path/to/files/to/archive" "more/files/and/etc"
 
-
+Archive stuff "COPY" "$HOME/Downloads/stuff"
 
 ##################
 # ARCHIVE GROUPS #
 ##################
 
+archiveGroups=(
+	
+)
 
+###################
+# EVENT FUNCTIONS #
+###################
 
 onInstall() {
 	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu
