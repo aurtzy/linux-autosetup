@@ -1,5 +1,6 @@
+*This readme was written for v1.0.0 and is currently being updated, so some things may be out-of-date.*
 # Linux-autosetup
-Linux-autosetup is a script that uses Bash to semi-automate installing and backing up applications to reduce downtime from pains like forgetting to install some apps (including backups associated with them) or looking through directories using crude text documents to back up files. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.  
+Linux-autosetup is a Bash script that attempts to alleviate and ease installation and backup processes through the use of config files, reducing downtime from pains like forgetting to install apps and backups on fresh installs or backing up files by following crude text documents. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.
 
 ## Contents  
 - [Requirements](#requirements)  
@@ -104,7 +105,7 @@ Here are some commands that may be of interest:
 - ```App.installBackups``` installs only the backups from the specified app.  
 - ```App.backup``` or ```AppGroup.backup``` perform backups.  
 
-*App and AppGroup are substituted with app and app group names, respectively.*
+*App and AppGroup are substituted with app and app group names, respectively.*  
 
-# Mentions
-Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277
+#
+*Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277*
