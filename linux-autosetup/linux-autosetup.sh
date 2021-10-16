@@ -97,7 +97,7 @@ dump() {
 	if [ "$1" = 'INITIALIZE' ]; then
 		echo "dump(): Initializing $dumpName dump directory"
 		declare -i i=1
-		while [[ -d "$DUMP_DIR/$dumpName/$i" ]]
+		while [ -d "$DUMP_DIR/$dumpName/$i" ]
 		do
 			echo "dump(): $DUMP_DIR/$dumpName/$i already exists."
 			i+=1
@@ -110,7 +110,7 @@ dump() {
 			echo "Elevating permissions for mkdir to work..."
 			mkdir -p "$DUMP_DIR/$dumpName/$i"
 		fi
-	elif [[ -d "$path" || -f "$path" ]]; then
+	elif [ -e "$path" ]; then
 		declare -i i=1
 		while [ -d "$DUMP_DIR/$dumpName/$i" ]
 		do

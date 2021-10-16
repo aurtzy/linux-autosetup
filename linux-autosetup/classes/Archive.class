@@ -166,7 +166,7 @@ Archive.backup() {
 	[ -d "$ARCHIVE_BACKUP_DIR" ] || (sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR")
 	archive=$(echo "$ARCHIVE_BACKUP_DIR/Archive.archive"*)
 	#  Dump if backup exists
-	if [[ -f "$archive" || -d "$archive" ]]; then
+	if [ -e "$archive" ]; then
 		echo "Archive: found old archive. dumping..."
 		dump "INITIALIZE" "archives/Archive"
 		dump "$archive" "archives/Archive"
@@ -176,7 +176,7 @@ Archive.backup() {
 	IFS=$'\n'
 	declare -a existingSources
 	for sourcePath in $(Archive.sourcePaths); do
-		if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+		if [ -e "$sourcePath" ]; then
 			echo "Archive: found $sourcePath"
 			existingSources+=("$sourcePath")
 		else

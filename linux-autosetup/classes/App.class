@@ -223,11 +223,11 @@ App.backup() {
 			sourceDir="${sourcePath%"/"*}"
 			
 			# Check if sourcePath exists
-			if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
+			if [ -e "$sourcePath" ]; then
 				echo "App: Found: $sourcePath"
 				
 				# Dump any old backup
-				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
+				if [ -e "$backupDir/$source" ]; then
 					echo "App: Old backup found. Dumping..."
 					dump "$backupDir/$source" "App"
 					echo "App: Dumped old $source"
