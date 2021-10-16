@@ -50,7 +50,7 @@ declare app='$app'
 # "Booleans": -1=false/no, 0=unset, 1=true/yes
 # Whether app backups should also be installed - 0 = always ask
 # Should reset to 0 after every user command or AppGroup install
-declare -i appInstallBackups=0
+declare -ig appInstallBackups=0
 
 # Stores all archives
 declare -ag archives
