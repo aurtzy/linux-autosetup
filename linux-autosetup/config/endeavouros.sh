@@ -94,7 +94,7 @@ App linux-headers
 ######################
 
 appGroups=(
-	[Main-Desktop]="
+	[All-Desktop]="
 		remove-tlp
 		Base-Apps
 		Pipewire
@@ -144,7 +144,7 @@ Archive media "COPY" "$drive2/media" #beeg, no include in archive group
 ##################
 
 archiveGroups=(
-	[Main-Desktop]="
+	[Main-Archives]="
 		main-files
 		school
 	"
