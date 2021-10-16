@@ -196,7 +196,7 @@ Archive.backup() {
 		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
 			return;;
 	esac
-	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
+	[ "$?" -eq 0 ] || (Archive.failedBackup = 1 && return 1)
 	
 	echo "Archive: archive created"
 	Archive.backedUp = 1

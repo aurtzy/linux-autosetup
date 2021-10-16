@@ -98,7 +98,7 @@ App.failedInstall() {
 }
 App.failedBackup() {
 	declare -i intParam=$2
-	App.field failedInstall "$1" "$intParam"
+	App.field failedBackup "$1" "$intParam"
 }
 App.failedBackupSources() {
 	if [ "$2" = '' ]; then
