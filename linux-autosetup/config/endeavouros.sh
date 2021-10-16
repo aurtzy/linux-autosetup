@@ -135,7 +135,17 @@ appGroups=(
 	"
 )
 
-Archive test "ENCRYPT" "$HOME/Downloads/a" "$HOME/Downloads/test.sh"
+############
+# ARCHIVES #
+############
+
+
+
+##################
+# ARCHIVE GROUPS #
+##################
+
+
 
 onInstall() {
 	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu

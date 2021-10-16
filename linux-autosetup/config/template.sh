@@ -40,6 +40,18 @@ appGroups=(
 
 
 
+##################
+# ARCHIVE GROUPS #
+##################
+
+archiveGroups=(
+	[Template]="
+		archive1
+		archive2
+		archive3
+	"
+)
+
 ###################
 # EVENT FUNCTIONS #
 ###################
