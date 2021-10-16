@@ -26,12 +26,6 @@ AppGroup.constructor() {
 AppGroup.apps() {
 	AppGroup.field apps "$1" "$2"
 }
-AppGroup.sourcePaths() {
-	for object in $(AppGroup.apps); do
-		$object.sourcePaths
-	done
-}
-
 # Display apps; allows for recursive displaying of apps in app groups
 AppGroup.display() {
 	echo -n "AppGroup:"
