@@ -537,7 +537,7 @@ archiveEncrypt() {
 }
 # $1 = archive path
 archiveDecopy() {
-	tar -xvPf "$1.tar" "${@:2}"
+	tar -xvPf "$1.tar"
 }
 archiveDecompress() {
 	tar -xJvPf "$1.tar.xz"
