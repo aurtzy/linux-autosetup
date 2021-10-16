@@ -96,12 +96,12 @@ App linux-headers
 appGroups=(
 	[Main-Desktop]="
 		remove-tlp
-		Essentials
+		Base-Apps
 		Pipewire
 		Nvidia-1660ti
 		Gaming
 	"
-	[Base]="
+	[Base-Apps]="
 		firefox
 		thunderbird
 		flatpak
