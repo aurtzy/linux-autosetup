@@ -466,7 +466,7 @@ archive_backup() {
 	fi
 	echo
 	echo "AUTOSETUP: Running onArchiveBackup first..."
-	onArchiveInstall
+	onArchiveBackup
 	echo "AUTOSETUP: onArchiveBackup completed."
 	echo
 	echo "AUTOSETUP: Backing up archives..."
@@ -478,7 +478,7 @@ archive_backup() {
 	
 	echo
 	echo "AUTOSETUP: Running onArchiveBackupFinish..."
-	onArchiveInstallFinish
+	onArchiveBackupFinish
 	echo "AUTOSETUP: onArchiveBackupFinish completed."
 	echo
 	echo "AUTOSETUP: IF ANYTHING FAILED TO BE ARCHIVED, THEY WILL BE LISTED BELOW:"
