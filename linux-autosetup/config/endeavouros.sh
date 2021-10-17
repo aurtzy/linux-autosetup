@@ -15,7 +15,7 @@ flatpak="sudo -u $SUDO_USER flatpak"
 
 DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 
-ARCHIVE_BACKUP_DIR="$driveBackup/"
+ARCHIVE_BACKUP_DIR="../"
 
 DEFAULT_ARCHIVE_BACKUP_TYPE="COMPRESS"
 
