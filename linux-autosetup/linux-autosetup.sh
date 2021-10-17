@@ -434,7 +434,7 @@ archive_install() {
 		return
 	fi
 	for entry in "$@"; do 
-		if ! [[ " ${archives[*]} " =~ " $entry " ]]; then
+		if ! [[ " ${archives[*]} " =~ " $entry " || " ${!archiveGroups[*]} " =~ " $entry " ]]; then
 			echo "Error: $entry could not be found. Perhaps it was spelled incorrectly or does not exist?"
 			return 1
 		fi

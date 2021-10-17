@@ -40,6 +40,7 @@ App.constructor() {
 	
 	App.installed = 0
 	App.backedUp = 0
+	App.backupsInstalled = 0
 	
 	App.failedInstall = 0
 	App.failedBackup = 0
@@ -143,7 +144,7 @@ App.install() {
 	echo
 	if [ $(App.installed) -eq 1 ]; then
 		echo "App: Already installed during this script."
-		return 3
+		return 0
 	fi
 	echo "App: Installing..."
 	eval $(App.installCommand)
