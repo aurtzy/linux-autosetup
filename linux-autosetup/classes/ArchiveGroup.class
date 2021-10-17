@@ -70,13 +70,6 @@ ArchiveGroup.install() {
 		$archive.install
 	done
 	echo
-	echo "If any archives failed to install from this archive group, they will be listed below:"
-	for archive in $(ArchiveGroup.archives); do
-		if [ $($archive.failedInstall) -eq 1 ]; then
-			echo $archive
-		fi
-	done
-	echo
 	echo "ArchiveGroup: Installation completed!"
 }
 
@@ -87,16 +80,6 @@ ArchiveGroup.backup() {
 	echo "ArchiveGroup: Creating archives from archive group..."
 	for archive in $(ArchiveGroup.archives); do
 		$archive.backup
-	done
-	echo
-	echo "If any apps failed to be backed up from this app group, they will be listed below:"
-	for archive in $(ArchiveGroup.archives); do
-		if [ "$($archive.absentBackupSourcesCount)" -gt 0 ]; then
-			echo " $archive:"
-			echo "$($archive.absentBackupSources)"
-		elif [ "$($archive.failedBackup)" -ne 0 ]; then
-			echo " $archive was not archived at all"
-		fi
 	done
 	echo
 	echo "ArchiveGroup: Backup completed!"
