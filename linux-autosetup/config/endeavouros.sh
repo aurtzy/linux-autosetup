@@ -8,7 +8,7 @@ declare driveBackup="/run/media/$SUDO_USER/Backup"
 
 # DEFAULT_APP_BACKUP_TYPE="COPY"
 
-APP_BACKUP_DIR="$HOME/Backups/applications"
+APP_BACKUP_DIR="$HOME/Backups/apps"
 
 yay="sudo -u $SUDO_USER yay"
 flatpak="sudo -u $SUDO_USER flatpak"
@@ -19,7 +19,7 @@ ARCHIVE_BACKUP_DIR="$driveBackup/"
 
 DEFAULT_ARCHIVE_BACKUP_TYPE="COMPRESS"
 
-DUMP_DIR="$HOME/DUMP_linux-autosetup+"
+DUMP_DIR="$HOME/DUMP_linux-autosetup"
 
 ################
 # APPLICATIONS #
