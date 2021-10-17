@@ -15,7 +15,7 @@ flatpak="sudo -u $SUDO_USER flatpak"
 
 DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 
-ARCHIVE_BACKUP_DIR="$driveBackup/"
+ARCHIVE_BACKUP_DIR="../"
 
 DEFAULT_ARCHIVE_BACKUP_TYPE="COMPRESS"
 
@@ -36,14 +36,14 @@ App flatpak
 App ffmpeg
 
 # Extras
-App discord "flatpak install com.discordapp.Discord"
+App discord "$flatpak install com.discordapp.Discord"
 App soundux
 App quodlibet
 App gifski "rust.install && cargo install gifski"
 App youtube-dl
 
 # Pipewire setup
-App pipewire "$DEFAULT_APP_INSTALL_COMMAND; $yay -R pulseaudio-jack; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
+App pipewire "$yay -R pulseaudio-jack; $DEFAULT_APP_INSTALL_COMMAND; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
 App pipewire-pulse
 App easyeffects "" "" "$HOME/.config/easyeffects"
 
@@ -58,7 +58,7 @@ sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcryp
 ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 \
 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
 # 1660ti
-App nvidia-driver "$yay nvidia-installer-dkms"
+App nvidia-driver "nvidia-installer-dkms"
 App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
 App remove-tlp "$yay -R tlp"
 App gwe #greenwithenvy
