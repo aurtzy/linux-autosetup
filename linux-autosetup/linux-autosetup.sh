@@ -1,11 +1,8 @@
 #!/bin/bash
+# *** https://stackoverflow.com/questions/8455991/elegant-way-for-verbose-mode-in-scripts
 version="v1.1.1-alpha"
 
-version="v1.1.0-beta"
-
-# Print information about the script,
-# including version # and copyright
-# Pass 'less' param to print shortened vers.
+# Print information about the script, like copyright or help
 printScriptInfo() {
 	echo
 	echo "Linux-Autosetup, version $version"
