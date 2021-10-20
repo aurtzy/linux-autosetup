@@ -1,4 +1,5 @@
 #!/bin/bash
+version="v1.1.1-alpha"
 
 version="v1.1.0-beta"
 
