@@ -300,6 +300,70 @@ promptYesNo() {
 	done
 }
 
+init_config() {
+    # Assign everything in designated config folder
+    # to CONFIG_FILES, excluding directories
+    declare -a CONFIG_FILES
+    for FILE in "$CONFIG_FOLDER/"* ; do
+        if [ -f "$FILE" ]; then
+            CONFIG_FILES+=("$FILE")
+        fi
+    done
+
+    # Choose CONFIG_FILE - if there's only one in the array, then automatically choose
+    if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
+        while true; do
+            echo
+            echo "Which config file do you want to use?"
+            for i in "${!CONFIG_FILES[@]}"; do
+                echo "$i ${CONFIG_FILES[$i]##*"/"}"
+            done
+            read -p "Enter the index of the config file: " userIn
+            if [[ -z "$userIn" || "$userIn" > 'a' ]]; then
+                continue
+            fi
+            declare -i i="$userIn"
+            if [[ $i -ge 0 && $i -lt ${#CONFIG_FILES[@]} ]]; then
+                declare CONFIG_FILE="${CONFIG_FILES[$i]}"
+                break
+            fi
+        done
+    else
+        CONFIG_FILE="${CONFIG_FILES[0]}"
+    fi
+
+    # Import CONFIG_FILE & initialize objects
+    echo
+    echo "Initializing objects..."
+    . "$CONFIG_FILE"
+    initializeAppGroups
+    initializeArchiveGroups
+
+    # Before starting script, ask user if the variables
+    # that have been set are okay with them. Then, proceed.
+    echo
+    echo "**Please double-check the variables that have been set.**"
+    echo "**Directories will be created only when needed.**"
+    echo
+    echo "CONFIG_FILE: $CONFIG_FILE"
+    echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
+    echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
+    echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
+    echo "ARCHIVE_BACKUP_DIR: $ARCHIVE_BACKUP_DIR"
+    echo "DEFAULT_ARCHIVE_BACKUP_TYPE: $DEFAULT_ARCHIVE_BACKUP_TYPE"
+    echo "DUMP_DIR: $DUMP_DIR"
+    echo
+    if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then
+        echo "User is okay with these settings."
+        echo "Continuing..."
+    else
+        echo "User is not okay with these settings."
+        echo "Exiting..."
+        exit
+    fi
+}
+
+
 # Autosetup installer function for apps
 app_install() {
 	if [ "$1" = "" ]; then
@@ -593,67 +657,7 @@ archiveDecrypt() {
 # Print basic copyright information
 printScriptInfo 'more'
 
-# Assign everything in designated config folder
-# to CONFIG_FILES, excluding directories
-declare -a CONFIG_FILES
-for FILE in "$CONFIG_FOLDER/"* ; do 
-	if [ -f "$FILE" ]; then
-		CONFIG_FILES+=("$FILE")
-	fi
-done
-
-# Choose CONFIG_FILE - if there's only one in the array, then automatically choose
-if [ ${#CONFIG_FILES[@]} -gt 1 ]; then
-	while true; do
-		echo
-		echo "Which config file do you want to use?"
-		for i in "${!CONFIG_FILES[@]}"; do
-			echo "$i ${CONFIG_FILES[$i]##*"/"}"
-		done
-		read -p "Enter the index of the config file: " userIn
-		if [[ -z "$userIn" || "$userIn" > 'a' ]]; then
-			continue
-		fi
-		declare -i i="$userIn"
-		if [[ $i -ge 0 && $i -lt ${#CONFIG_FILES[@]} ]]; then
-			declare CONFIG_FILE="${CONFIG_FILES[$i]}"
-			break
-		fi
-	done
-else
-	CONFIG_FILE="${CONFIG_FILES[0]}"
-fi
-
-# Import CONFIG_FILE & initialize objects
-echo
-echo "Initializing objects..."
-. "$CONFIG_FILE"
-initializeAppGroups
-initializeArchiveGroups
-echo "All objects successfully initialized."
-
-# Before starting script, ask user if the variables
-# that have been set are okay with them. Then, proceed.
-echo
-echo "**Please double-check the variables that have been set.**"
-echo "**Directories will be created only when needed.**"
-echo
-echo "CONFIG_FILE: $CONFIG_FILE"
-echo "APP_BACKUP_DIR: $APP_BACKUP_DIR"
-echo "DEFAULT_APP_INSTALL_COMMAND: $DEFAULT_APP_INSTALL_COMMAND"
-echo "DEFAULT_APP_BACKUP_TYPE: $DEFAULT_APP_BACKUP_TYPE"
-echo "ARCHIVE_BACKUP_DIR: $ARCHIVE_BACKUP_DIR"
-echo "DEFAULT_ARCHIVE_BACKUP_TYPE: $DEFAULT_ARCHIVE_BACKUP_TYPE"
-echo "DUMP_DIR: $DUMP_DIR"
-echo
-if [[ $(promptYesNo "Are you okay with these settings?") -ge 1 ]]; then
-	echo "User is okay with these settings."
-	echo "Continuing..."
-else
-	echo "User is not okay with these settings."
-	echo "Exiting..."
-	exit
-fi
+init_config
 
 ##############
 # USER INPUT #
