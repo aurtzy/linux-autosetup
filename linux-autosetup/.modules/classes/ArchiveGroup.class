@@ -26,22 +26,15 @@ ArchiveGroup.constructor() {
 ArchiveGroup.archives() {
 	ArchiveGroup.field archives "$1" "$2"
 }
-# Display archives; allows for recursive displaying of archives in archive groups
-ArchiveGroup.display() {
-	echo -n "ArchiveGroup:"
+# Display archive group info
+ArchiveGroup.info() {
+	echo "ARCHIVE GROUP NAME:"
+	echo "    ArchiveGroup"
+	echo "ARCHIVE LIST:"
 	for archive in $(ArchiveGroup.archives); do
-		echo -n " $($archive.display)"
-	done
-	echo ";"
-}
-# Display archive backups 
-ArchiveGroup.displayBackups() {
-	echo "ArchiveGroup:"
-	for archive in $(ArchiveGroup.archives); do
-		$archive.displayBackups
+		echo "    $archive"
 	done
 }
-
 # Add app to apps field
 ArchiveGroup.add() {
 	for object in "${@}"; do

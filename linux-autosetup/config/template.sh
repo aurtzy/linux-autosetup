@@ -6,6 +6,8 @@
 
 # APP_BACKUP_DIR="./app-backups"
 
+# APP_INSTALL_BACKUPS=""
+
 DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
 
 # ARCHIVE_BACKUP_DIR="./archives"
@@ -58,46 +60,59 @@ archiveGroups=(
 # Completely optional, and do not have to be included 
 # (script has fallback defaults which this shows for reference)
 
-onInstall() {
+onInstallApps() {
 	return
 }
-onBackup() {
+
+onInstallAppsFinish() {
 	return
 }
-onInstallFinish() {
+
+onBackupApps() {
 	return
 }
-onBackupFinish() {
+
+onBackupAppsFinish() {
 	return
 }
-onArchiveInstall() {
+
+onInstallArchives() {
 	return
 }
-onArchiveBackup() {
+
+onInstallArchivesFinish() {
 	return
 }
-onArchiveInstallFinish() {
+
+onBackupArchives() {
 	return
 }
-onArchiveBackupFinish() {
+
+onBackupArchivesFinish() {
 	return
 }
+
 archiveCopy() {
 	tar -cvPf "$1.tar" "${@:2}"
 }
+
 archiveCompress() {
 	tar -cJvPf "$1.tar.xz" "${@:2}"
 }
+
 archiveEncrypt() {
 	export GPG_TTY=$(tty)
 	tar -cJvPf - "${@:2}" | gpg --cipher-algo aes256 --pinentry-mode=loopback --symmetric -o "$1.tar.xz.gpg"
 }
+
 archiveDecopy() {
 	tar -xvPf "$1.tar"
 }
+
 archiveDecompress() {
 	tar -xJvPf "$1.tar.xz"
 }
+
 archiveDecrypt() {
 	export GPG_TTY=$(tty)
 	gpg --pinentry-mode=loopback -d "$1.tar.xz.gpg" | tar -xJvPf -

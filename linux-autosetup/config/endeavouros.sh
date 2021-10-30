@@ -2,6 +2,9 @@
 declare drive2="/run/media/$SUDO_USER/Stuff"
 declare driveBackup="/run/media/$SUDO_USER/Backup"
 
+yay="sudo -u $SUDO_USER yay"
+flatpak="sudo -u $SUDO_USER flatpak"
+
 ##########################
 # CONFIGURABLE VARIABLES #
 ##########################
@@ -10,8 +13,7 @@ declare driveBackup="/run/media/$SUDO_USER/Backup"
 
 APP_BACKUP_DIR="$HOME/Backups/apps"
 
-yay="sudo -u $SUDO_USER yay"
-flatpak="sudo -u $SUDO_USER flatpak"
+#APP_INSTALL_BACKUPS=1
 
 DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
 
@@ -154,9 +156,9 @@ archiveGroups=(
 # EVENT FUNCTIONS #
 ###################
 
-onInstall() {
+onInstallApps() {
 	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu
 }
-onInstallFinish() {
+onInstallAppsFinish() {
 	$yay --noanswerclean --noanswerdiff --noansweredit --noanswerupgrade
 }

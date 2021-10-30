@@ -100,15 +100,3 @@ appGroups=(
 	"
 )
 
-onInstall() {
-	return
-}
-onBackup() {
-	return
-}
-onInstallFinish() {
-	return
-}
-onBackupFinish() {
-	return
-}

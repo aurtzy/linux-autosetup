@@ -113,14 +113,18 @@ Archive.absentBackupSourcesCount() {
 	Archive.field absentBackupSourcesCount "$1" "$intParam"
 }
 
-# Display archive
-Archive.display() {
-	echo -n "Archive"
-}
-# Display archive backups
-Archive.displayBackups() {
-	echo " Archive:"
-	echo "$(Archive.sourcePaths)"
+# Display archive info
+Archive.info() {
+	echo "ARCHIVE NAME:"
+	echo "    Archive"
+	echo "BACKUP TYPE:"
+	echo "    $(Archive.backupType)"
+	echo "SOURCES:"
+	IFS=$'\n'
+	for sourcePath in $(Archive.sourcePaths); do
+		echo "    $sourcePath"
+	done
+	unset IFS
 }
 
 # Install backups from archive

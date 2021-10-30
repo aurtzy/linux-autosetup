@@ -128,14 +128,22 @@ App.failedBackupSourcesAdd() {
 	App.failedBackupSourcesCount = $i
 }
 
-# Display app
-App.display() {
-	echo -n "App"
-}
-# Display app backups
-App.displayBackups() {
-	echo " App:"
-	echo "$(App.sourcePaths)"
+# Display app info
+App.info() {
+	echo "APP NAME:"
+	echo "    App"
+	echo "BACKUP TYPE:"
+	echo "    $(App.backupType)"
+	echo "BACKUPS:"
+	if [ "$(App.sourcePathsCount)" -eq 0 ]; then
+		echo "    none"
+	else
+		IFS=$'\n'
+		for sourcePath in $(App.sourcePaths); do
+			echo "    $sourcePath"
+		done
+		unset IFS
+	fi
 }
 
 # Install App on call
@@ -162,21 +170,19 @@ App.install() {
 			echo "App: Backups already installed."
 			return
 		fi
-		if [ $appInstallBackups -eq 1 ]; then
-			App.installBackups
-		elif [ $appInstallBackups -eq 0 ]; then
-			declare -i userIn=$(promptYesNo "Would you like to install them? This will replace existing files.")
-			if [ $userIn -eq 1 ]; then
-				App.installBackups
-			elif [ $userIn -eq 2 ]; then
-				appInstallBackups=1
-				App.installBackups
-			elif [ $userIn -eq -1 ]; then
-				appInstallBackups=-1
-			fi
-		else
-			echo "App: Backups will not be installed."
-		fi
+		case "$APP_INSTALL_BACKUPS" in
+			1) App.installBackups;;
+			"-1") echo "App: Skipping backup install.";;
+			*)
+				echo "Do you want to install backups for App?"
+				while true; do
+					read -p "[y/n]: " userIn
+					case "$userIn" in
+						y) App.installBackups;;
+						n) echo "App: Backups will not be installed.";;
+					esac
+				done;;
+		esac
 	fi
 	
 	App.installed = 1
