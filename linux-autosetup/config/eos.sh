@@ -1,3 +1,4 @@
+# ENDEAVOUROS CONFIG FILE
 
 declare drive2="/run/media/$SUDO_USER/Stuff"
 declare driveBackup="/run/media/$SUDO_USER/Backup"
@@ -15,7 +16,7 @@ APP_BACKUP_DIR="$HOME/Backups/apps"
 
 #APP_INSTALL_BACKUPS=1
 
-DEFAULT_APP_INSTALL_COMMAND="$yay -S --noconfirm $app"
+DEFAULT_APP_INSTALL_COMMAND="$yay -S $app"
 
 ARCHIVE_BACKUP_DIR="../"
 
@@ -96,39 +97,32 @@ App linux-headers
 ######################
 
 appGroups=(
-	[All-Desktop]="
-		remove-tlp
-		Base-Apps
-		Pipewire
-		Nvidia-1660ti
-		Gaming
-	"
 	[Base-Apps]="
 		firefox
 		thunderbird
 		flatpak
-		ffmpeg
 		discord
+		ffmpeg
 		quodlibet
-	"
-	[Extra-Tools]="
 		youtube-dl
-		gifski
-	"
-	[Pipewire]="
+
 		pipewire
 		easyeffects
+	"
+	[Main-Desktop-Apps]="
+		remove-tlp
+		nvidia-driver
+		nvidia-1660ti
+		Base-Apps
+		gifski
+		piper
+		keyboard-center
+		Gaming
 	"
 	[Gaming]="
 		gamemode
 		steam
 		lutris
-		piper
-		keyboard-center
-	"
-	[Nvidia-1660ti]="
-		nvidia-driver
-		nvidia-1660ti
 	"
 )
 
@@ -158,6 +152,4 @@ archiveGroups=(
 
 onInstallApps() {
 	$yay
-}
-onInstallAppsFinish() {
 }
