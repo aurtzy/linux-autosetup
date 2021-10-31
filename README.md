@@ -6,7 +6,7 @@ Linux-autosetup is a Bash script that attempts to alleviate and ease installatio
 - A Linux distribution
 
 # Documentation
-You can find documentation on how to use this script on the [wiki](/wiki).
+You can find documentation on how to download and use this script on the [wiki](https://github.com/aurtzy/linux-autosetup/wiki).
 
 #
 *Credit to Maxim Norin (https://github.com/mnorin) for their OOP emulation in Bash initially found here: https://stackoverflow.com/questions/36771080/creating-classes-and-objects-using-bash-scripting#comment115718570_40981277*
