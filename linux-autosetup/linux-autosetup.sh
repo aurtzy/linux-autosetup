@@ -48,10 +48,12 @@ declare DEFAULT_APP_BACKUP_TYPE="COPY"
 # Default install command used if one is not specified for app
 # $app is substituted for app name
 declare DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in configuration file. $app will not be installed until this is done."
+
 # Where archives go
 declare ARCHIVE_BACKUP_DIR="./archives"
 # Default archive type - "COPY, COMPRESS, ENCRYPT"
 declare DEFAULT_ARCHIVE_BACKUP_TYPE="COPY"
+
 # Where to dump files
 declare DUMP_DIR="./dump"
 

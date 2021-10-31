@@ -19,7 +19,7 @@ DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in c
 ################
 # APPLICATIONS #
 ################
-# App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/files/to/backup" "more/files/and/etc"
+# App "app_name" "install_command" "backup_type:COPY,HARDLINK" "backup_path1" "backup_path2" ...
 
 
 
@@ -28,7 +28,7 @@ DEFAULT_APP_INSTALL_COMMAND="echo User must set DEFAULT_APP_INSTALL_COMMAND in c
 ######################
 
 appGroups=(
-	[Template]="
+	[app_group_name1]="
 		app1
 		app2
 		app3
@@ -38,7 +38,7 @@ appGroups=(
 ############
 # ARCHIVES #
 ############
-# Archive "archive_name" "backupType:COPY,COMPRESS,ENCRYPT" "path/to/files/to/archive" "more/files/and/etc"
+# Archive "archive_name" "backup_type:COPY,COMPRESS,ENCRYPT" "backup_path1" "backup_path2" ...
 
 
 
@@ -47,7 +47,7 @@ appGroups=(
 ##################
 
 archiveGroups=(
-	[Template]="
+	[archive_group_name1]="
 		archive1
 		archive2
 		archive3

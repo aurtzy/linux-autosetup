@@ -2,8 +2,8 @@
 declare drive2="/run/media/$SUDO_USER/Stuff"
 declare driveBackup="/run/media/$SUDO_USER/Backup"
 
-yay="sudo -u $SUDO_USER yay"
-flatpak="sudo -u $SUDO_USER flatpak"
+yay="sudo -u $SUDO_USER yay --noconfirm"
+flatpak="sudo -u $SUDO_USER flatpak -y --noninteractive"
 
 ##########################
 # CONFIGURABLE VARIABLES #
@@ -157,8 +157,7 @@ archiveGroups=(
 ###################
 
 onInstallApps() {
-	$yay --useask --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu
+	$yay
 }
 onInstallAppsFinish() {
-	$yay --noanswerclean --noanswerdiff --noansweredit --noanswerupgrade
 }
