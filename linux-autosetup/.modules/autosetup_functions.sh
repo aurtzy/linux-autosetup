@@ -2,6 +2,21 @@
 autosetup-install() {
 	getEntries
 
+	if [ "$ENTRIES_ARCHIVES" ]; then
+		echo "Beginning install for archives..."
+		echo "Running onInstallArchives"
+		onInstallArchives
+		echo "Installing archives"
+		install "${ENTRIES_ARCHIVES[@]}"
+		echo "Running onInstallArchivesFinish"
+		onInstallArchivesFinish
+		echo
+		echo "Checking for failed installs"
+		for archive in "${archives[@]}"; do
+			[ "$($archive.failedInstall)" -eq 0 ] || echo "$archive"
+		done
+	fi
+	echo
 	if [ "$ENTRIES_APPS" ]; then
 		echo "Beginning install for apps..."
 		echo "Running onInstallApps"
@@ -32,22 +47,6 @@ autosetup-install() {
 			[ "$($app.failedInstall)" -eq 0 ] || echo "$app"
 		done
 	fi
-	echo
-	if [ "$ENTRIES_ARCHIVES" ]; then
-		echo "Beginning install for archives..."
-		echo "Running onInstallArchives"
-		onInstallArchives
-		echo "Installing archives"
-		install "${ENTRIES_ARCHIVES[@]}"
-		echo "Running onInstallArchivesFinish"
-		onInstallArchivesFinish
-		echo
-		echo "Checking for failed installs"
-		for archive in "${archives[@]}"; do
-			[ "$($archive.failedInstall)" -eq 0 ] || echo "$archive"
-		done
-	fi
-
 }
 
 autosetup-backup() {
