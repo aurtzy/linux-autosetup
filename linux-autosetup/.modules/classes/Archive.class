@@ -176,26 +176,30 @@ Archive.backup() {
 		dump "$archive" "archives/Archive"
 	fi
 	
-	# Keep track of sources that don't exist
+	# Keep track of absent backup sources and bail if any are absent
 	IFS=$'\n'
-	declare -a existingSources
+	declare -a sources
 	for sourcePath in $(Archive.sourcePaths); do
 		if [ -e "$sourcePath" ]; then
 			echo "Archive: found $sourcePath"
-			existingSources+=("$sourcePath")
+			sources+=("$sourcePath")
 		else
 			echo "Archive: $sourcePath was not found"
 			Archive.absentBackupSourcesAdd "$sourcePath"
 		fi
 	done
 	unset IFS
-			
+	if [ "$(Archive.absentBackupSourcesCount)" -gt 0 ]; then
+		Archive.failedBackup = 1
+		return
+	fi
+
 	# Perform archive depending on backupType
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
-		"COPY") archiveCopy "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
-		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
-		"ENCRYPT") archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${existingSources[@]}";;
+		"COPY") archiveCopy "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
+		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
+		"ENCRYPT") archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
 		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
 			return;;
 	esac

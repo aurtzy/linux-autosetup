@@ -82,10 +82,10 @@ autosetup-backup() {
 		echo "Checking for failed archives"
 		for archive in "${archives[@]}"; do
 			if [ "$($archive.absentBackupSourcesCount)" -gt 0 ]; then
-				echo "    $archive:"
+				echo "    $archive, missing source(s); existing archives are untouched:"
 				echo "$($archive.absentBackupSources)"
 			elif [ "$($archive.failedBackup)" -ne 0 ]; then
-				echo "    $archive was not archived at all"
+				echo "    $archive: An error occured while trying to create archive."
 			fi
 		done
 	fi
