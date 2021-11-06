@@ -180,9 +180,18 @@ Archive.backup() {
 	done
 	unset IFS
 	if [ "$(Archive.absentBackupSourcesCount)" -gt 0 ]; then
-		echo "Archive: aborting backup"
-		Archive.failedBackup = 1
-		return
+		echo "Archive: Error: the following source(s) was not found:"
+		Archive.absentBackupSources
+		echo "Do you want to [a]bort the script, [s]kip this archive, [c]ontinue archiving, or attempt to resolve the issue before [t]rying again? The current backup will remain if either of the first two are chosen."
+		while true; do
+			read -p "[a/s/c/t]: " userIn
+			case "$userIn" in
+				a*) echo "Archive: aborting archive"; exit 1;;
+				s*) echo "Archive: skipping" Archive.failedBackup = 1; return;;
+				c*) echo "Archive: continuing archive" Archive.failedBackup = 1; break;;
+				t*) echo "Archive: trying again" Archive.backup; return $?;;
+			esac
+		done
 	fi
 
 	# Perform archive depending on backupType and return if failed

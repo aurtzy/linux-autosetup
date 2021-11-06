@@ -219,9 +219,11 @@ App.backup() {
 	elif [ "$(App.sourcePaths)" = '' ]; then
 		echo "App: no sourcePaths specified for App."
 		return
+	elif [ "$(App.failedBackup)" -eq 1 ]; then
+		echo "App: skipping; backup previously failed."
 	fi
 
-	# Find sources and keep track of absent sources; bail if any are found
+	# Find sources and keep track of absent sources; if exist, then prompt user to handle
 	declare -a sources
 	IFS=$'\n'
 	for sourcePath in $(App.sourcePaths); do
@@ -235,9 +237,18 @@ App.backup() {
 	done
 	unset IFS
 	if [ "$(App.absentBackupSourcesCount)" -gt 0 ]; then
-		echo "App: aborting backup"
-		App.failedBackup = 1
-		return
+		echo "App: Error: the following source(s) was not found:"
+		App.absentBackupSources
+		echo "Do you want to [a]bort the script, [s]kip this app, [c]ontinue backing up, or attempt to resolve the issue before [t]rying again? The current backup will remain if either of the first two are chosen."
+		while true; do
+			read -p "[a/s/c/t]: " userIn
+			case "$userIn" in
+				a*) echo "App: aborting backup"; exit 1;;
+				s*) echo "App: skipping" App.failedBackup = 1; return;;
+				c*) echo "App: continuing backup" App.failedBackup = 1; break;;
+				t*) echo "App: trying again" App.backup; return $?;;
+			esac
+		done
 	fi
 
 	# Perform backup depending on backupType and return if failed
