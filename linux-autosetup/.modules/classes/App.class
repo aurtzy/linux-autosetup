@@ -258,7 +258,7 @@ App.backup() {
 
 	# Dump if old backups exist and move new backups to APP_BACKUP_DIR/App
 	declare -a backups=("$TMP_DIR/"*)
-	declare -a oldBackups("$backupDir/"*)
+	declare -a oldBackups=("$backupDir/"*)
 	if [ -e "$oldBackups" ]; then
 		echo "App: found at least one existing backup. dumping..."
 		dumpTo "App" "${oldBackups[@]}"

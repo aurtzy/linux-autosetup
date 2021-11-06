@@ -202,13 +202,13 @@ Archive.backup() {
 	[ -d "$ARCHIVE_BACKUP_DIR" ] || mkdir "$ARCHIVE_BACKUP_DIR"
 
 	# Dump if old archive exists and move new archive to ARCHIVE_BACKUP_DIR
-	declare -a archive=("$TMP_DIR/Archive.archive"*)
-	declare -a oldArchive=("$ARCHIVE_BACKUP_DIR/Archive.archive"*)
-	if [ -e "$oldArchive" ]; then
+	declare -a backup=("$TMP_DIR/Archive.archive"*)
+	declare -a oldBackup=("$ARCHIVE_BACKUP_DIR/Archive.archive"*)
+	if [ -e "$oldBackup" ]; then
 		echo "Archive: found old archive. dumping..."
-		dumpTo "archives/Archive" "$oldArchive"
+		dumpTo "archives/Archive" "$oldBackup"
 	fi
-	mv "$archive" "$ARCHIVE_BACKUP_DIR"
+	mv "$backup" "$ARCHIVE_BACKUP_DIR"
 	
 	echo "Archive: archive created"
 	Archive.backedUp = 1

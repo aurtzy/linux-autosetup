@@ -1,4 +1,4 @@
-
+echo hi
 autosetup-install() {
 	getEntries
 
@@ -10,11 +10,6 @@ autosetup-install() {
 		install "${ENTRIES_ARCHIVES[@]}"
 		echo "Running onInstallArchivesFinish"
 		onInstallArchivesFinish
-		echo
-		echo "Checking for failed installs"
-		for archive in "${archives[@]}"; do
-			[ "$($archive.failedInstall)" -eq 0 ] || echo "$archive"
-		done
 	fi
 	echo
 	if [ "$ENTRIES_APPS" ]; then
@@ -41,8 +36,16 @@ autosetup-install() {
 		install "${ENTRIES_APPS[@]}"
 		echo "Running onInstallAppsFinish"
 		onInstallAppsFinish
-		echo
-		echo "Checking for failed installs"
+	fi
+	echo
+	if [ "$ENTRIES_ARCHIVES" ]; then
+		echo "Checking for failed archive installs"
+		for archive in "${archives[@]}"; do
+			[ "$($archive.failedInstall)" -eq 0 ] || echo "$archive"
+		done
+	fi
+	if [ "$ENTRIES_APPS" ]; then
+		echo "Checking for failed app installs"
 		for app in "${apps[@]}"; do
 			[ "$($app.failedInstall)" -eq 0 ] || echo "$app"
 		done
@@ -60,16 +63,6 @@ autosetup-backup() {
 		backup "${ENTRIES_APPS}"
 		echo "Running onBackupAppsFinish"
 		onBackupAppsFinish
-		echo
-		echo "Checking for failed back-ups"
-		for appBackup in "${appBackups[@]}"; do
-			if [ "$($appBackup.absentBackupSourcesCount)" -gt 0 ]; then
-				echo "    $appBackup, missing source(s); any existing $appBackup backups are untouched:"
-				echo "$($appBackup.absentBackupSources)"
-			elif [ "$($appBackup.failedBackup)" -ne 0 ]; then
-				echo "    $appBackup: An error occured while trying to perform backup."
-			fi
-		done
 	fi
 	echo
 	if [ "$ENTRIES_ARCHIVES" ]; then
@@ -80,7 +73,20 @@ autosetup-backup() {
 		backup "${ENTRIES_ARCHIVES[@]}"
 		echo "Running onBackupArchivesFinish"
 		onBackupArchivesFinish
-		echo
+	fi
+	echo
+	if [ "$ENTRIES_APPS" ]; then
+		echo "Checking for failed back-ups"
+		for appBackup in "${appBackups[@]}"; do
+			if [ "$($appBackup.absentBackupSourcesCount)" -gt 0 ]; then
+				echo "    $appBackup, missing source(s); any existing $appBackup backups are untouched:"
+				echo "$($appBackup.absentBackupSources)"
+			elif [ "$($appBackup.failedBackup)" -ne 0 ]; then
+				echo "    $appBackup: An error occured while trying to perform backup."
+			fi
+		done
+	fi
+	if [ "$ENTRIES_ARCHIVES" ]; then
 		echo "Checking for failed archives"
 		for archive in "${archives[@]}"; do
 			if [ "$($archive.absentBackupSourcesCount)" -gt 0 ]; then
@@ -211,7 +217,9 @@ getEntries() {
 				esac;;
 			add)
 				for toAdd in "${@:2}"; do
-					if isValidEntry "$toAdd"; then
+					if [[ " ${ENTRIES[@]} " =~ " $toAdd " ]]; then
+						echo "$toAdd already exists; skipping"
+					elif isValidEntry "$toAdd"; then
 						ENTRIES+=("$toAdd")
 						echo "Adding $toAdd"
 					else

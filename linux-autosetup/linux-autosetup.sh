@@ -231,7 +231,7 @@ debug() {
 	done
 }
 
-case $MODE in
+case "$MODE" in
 	DEBUG) debug;;
 	INSTALL) autosetup-install;;
 	BACKUP) autosetup-backup;;
