@@ -188,7 +188,7 @@ Archive.backup() {
 			case "$userIn" in
 				a*) echo "Archive: aborting archive"; exit 1;;
 				s*) echo "Archive: skipping" Archive.failedBackup = 1; return;;
-				c*) echo "Archive: continuing archive" Archive.failedBackup = 1; break;;
+				c*) echo "Archive: continuing archive"; break;;
 				t*) echo "Archive: trying again" Archive.backup; return $?;;
 			esac
 		done
