@@ -14,7 +14,7 @@ flatpak="sudo -u $SUDO_USER flatpak -y --noninteractive"
 
 APP_BACKUP_DIR="$HOME/Backups/apps"
 
-#APP_INSTALL_BACKUPS=1
+APP_INSTALL_BACKUPS=1
 
 DEFAULT_APP_INSTALL_COMMAND="$yay -S $app"
 
