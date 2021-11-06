@@ -34,7 +34,7 @@ DUMP_DIR="$HOME/DUMP_linux-autosetup"
 ffProfile="$HOME/.mozilla/firefox/firefox.al-default"
 App firefox "firefox.installBackups" "" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
 thProfile="$HOME/.thunderbird/thunderbird.al-default"
-App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js}
+App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js,pubring.gpg,revocations.txt,secring.gpg}
 App flatpak
 App ffmpeg
 
