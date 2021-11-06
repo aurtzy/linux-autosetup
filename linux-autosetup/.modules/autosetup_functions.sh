@@ -1,4 +1,5 @@
-echo hi
+# AUTOSETUP FUNCTIONS
+
 autosetup-install() {
 	getEntries
 
