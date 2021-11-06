@@ -43,8 +43,8 @@ App youtube-dl
 
 # Main desktop apps
  # nvidia
-App nvidia-driver "nvidia-installer-dkms"
-App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
+App nvidia-driver "linux-headers.install; nvidia-installer-dkms"
+App nvidia-1660ti "nvidia-driver.install; nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
 App gwe # greenwithenvy
  # peripherals
 App piper
@@ -109,7 +109,6 @@ appGroups=(
 	"
 	[Main-Desktop-Apps]="
 		remove-tlp
-		nvidia-driver
 		nvidia-1660ti
 		Base-Apps
 		gifski
@@ -121,6 +120,7 @@ appGroups=(
 		gamemode
 		steam
 		lutris
+		protonup-git
 	"
 )
 
