@@ -1,6 +1,6 @@
 #!/bin/bash
 # *** https://stackoverflow.com/questions/8455991/elegant-way-for-verbose-mode-in-scripts
-version="v2.0.0-rc-1"
+version="v2.0.0-rc-2"
 
 #########################
 # VARIABLE DECLARATIONS #
@@ -37,6 +37,8 @@ declare SCRIPT_WORKING_DIR="$(pwd)"
 declare CONFIG_FOLDER="./config"
 # Where modules are stored; e.g classes, event functions
 declare MODULES_DIR="./.modules"
+# Where backups will be created first - avoids possibility of bad dumps if backup commands fail somehow
+declare TMP_DIR="/tmp/linux-autosetup"
 
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
@@ -173,42 +175,36 @@ init_modules() {
 	. "$MODULES_DIR/init_config.sh"
 }
 
+mkdir() {
+	sudo -u "$SUDO_USER" mkdir -p "$1" || mkdir -p "$1"
+}
+
 # Dumps file/folder into $DUMP_DIR
 # Dump must be initialized before using in a function.
 # $1 = path to file(s) $2 = dump name to be dumped
 # Special case: if $1 = "INITIALIZE,"
 # create new dump folder iteration with $2 as $dumpName
-dump() {
-	declare path="$1"
-	declare dumpName="$2"
-	if [ "$1" = 'INITIALIZE' ]; then
-		echo "dump(): Initializing $dumpName dump directory"
-		declare -i i=1
-		while [ -d "$DUMP_DIR/$dumpName/$i" ]
-		do
-			echo "dump(): $DUMP_DIR/$dumpName/$i already exists."
-			i+=1
-			echo "dump(): Trying $DUMP_DIR/$dumpName/$i..."
-		done
-		echo "dump(): Dump initialized at $DUMP_DIR/$dumpName/$i"
+dumpTo() {
+	declare dumpPath="$DUMP_DIR/$1"
+	declare -a paths=("${@:2}")
 
-		sudo -u $SUDO_USER mkdir -p "$DUMP_DIR/$dumpName/$i"
-		if [ "$?" -ne 0 ]; then
-			echo "Elevating permissions for mkdir to work..."
-			mkdir -p "$DUMP_DIR/$dumpName/$i"
+	echo "dump(): Initializing $dumpName dump directory"
+	declare -i i=1
+	while [ -d "$dumpPath/$i" ]
+	do
+		echo "dump(): $dumpPath/$i already exists."
+		i+=1
+		echo "dump(): Trying $dumpPath/$i..."
+	done
+	mkdir "$dumpPath/$i" && echo "dump(): Dump initialized at $dumpPath/$i"
+
+	for path in "${paths[@]}"; do
+		if [ -e "$path" ]; then
+			mv "$path" "$dumpPath/$i"
+		else
+			echo "dump(): Error: $path was not found"
 		fi
-	elif [ -e "$path" ]; then
-		declare -i i=1
-		while [ -d "$DUMP_DIR/$dumpName/$i" ]
-		do
-			i+=1
-			continue
-		done
-		i=i-1
-		mv "$path" "$DUMP_DIR/$dumpName/$i"
-	else
-		echo "dump(): Error: $path was not found"
-	fi
+	done
 }
 
 ########

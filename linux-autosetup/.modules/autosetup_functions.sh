@@ -63,9 +63,11 @@ autosetup-backup() {
 		echo
 		echo "Checking for failed back-ups"
 		for appBackup in "${appBackups[@]}"; do
-			if [ "$($appBackup.failedBackup)" -eq 1 ]; then
-				echo "    $appBackup:"
-				echo "$($appBackup.failedBackupSources)"
+			if [ "$($appBackup.absentBackupSourcesCount)" -gt 0 ]; then
+				echo "    $appBackup, missing source(s); any existing $appBackup backups are untouched:"
+				echo "$($appBackup.absentBackupSources)"
+			elif [ "$($appBackup.failedBackup)" -ne 0 ]; then
+				echo "    $appBackup: An error occured while trying to perform backup."
 			fi
 		done
 	fi

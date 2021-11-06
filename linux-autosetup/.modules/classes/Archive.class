@@ -162,23 +162,13 @@ Archive.install() {
 Archive.backup() {
 	echo
 	if [ "$(Archive.backedUp)" -eq 1 ]; then
-		echo "Archive: Already backed up during this script."
+		echo "Archive: already backed up during this script."
 		return 3
 	fi
 	
-	# Make archive dir if it doesn't exist
-	[ -d "$ARCHIVE_BACKUP_DIR" ] || (sudo -u "$SUDO_USER" mkdir -p "$ARCHIVE_BACKUP_DIR" || mkdir -p "$ARCHIVE_BACKUP_DIR")
-	archive=$(echo "$ARCHIVE_BACKUP_DIR/Archive.archive"*)
-	#  Dump if backup exists
-	if [ -e "$archive" ]; then
-		echo "Archive: found old archive. dumping..."
-		dump "INITIALIZE" "archives/Archive"
-		dump "$archive" "archives/Archive"
-	fi
-	
-	# Keep track of absent backup sources and bail if any are absent
-	IFS=$'\n'
+	# Find sources and keep track of absent sources; bail if any are found
 	declare -a sources
+	IFS=$'\n'
 	for sourcePath in $(Archive.sourcePaths); do
 		if [ -e "$sourcePath" ]; then
 			echo "Archive: found $sourcePath"
@@ -190,20 +180,35 @@ Archive.backup() {
 	done
 	unset IFS
 	if [ "$(Archive.absentBackupSourcesCount)" -gt 0 ]; then
+		echo "Archive: aborting backup"
 		Archive.failedBackup = 1
 		return
 	fi
 
-	# Perform archive depending on backupType
+	# Perform archive depending on backupType and return if failed
+	echo "Setting up $TMP_DIR"
+	[ -e "$TMP_DIR" ] && rm -r "$TMP_DIR"
+	mkdir "$TMP_DIR"
 	echo "Archive: creating new archive..."
 	case "$(Archive.backupType)" in
-		"COPY") archiveCopy "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
-		"COMPRESS") archiveCompress "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
-		"ENCRYPT") archiveEncrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" "${sources[@]}";;
-		*)	echo "Archive: Error: backup type not recognized, archive will not be created"
-			return;;
+		"COPY") archiveCopy "$TMP_DIR/Archive.archive" "${sources[@]}";;
+		"COMPRESS") archiveCompress "$TMP_DIR/Archive.archive" "${sources[@]}";;
+		"ENCRYPT") archiveEncrypt "$TMP_DIR/Archive.archive" "${sources[@]}";;
+		*) echo "Archive: Error: backup type not recognized, archive will not be created"; return 1;;
 	esac
-	[ "$?" -eq 0 ] || (Archive.failedBackup = 1 && return 1)
+	[ "$?" -ne 0 ] && Archive.failedBackup = 1 && return 1
+
+	# Make archive dir if it doesn't exist
+	[ -d "$ARCHIVE_BACKUP_DIR" ] || mkdir "$ARCHIVE_BACKUP_DIR"
+
+	# Dump if old archive exists and move new archive to ARCHIVE_BACKUP_DIR
+	declare -a archive=("$TMP_DIR/Archive.archive"*)
+	declare -a oldArchive=("$ARCHIVE_BACKUP_DIR/Archive.archive"*)
+	if [ -e "$oldArchive" ]; then
+		echo "Archive: found old archive. dumping..."
+		dumpTo "archives/Archive" "$oldArchive"
+	fi
+	mv "$archive" "$ARCHIVE_BACKUP_DIR"
 	
 	echo "Archive: archive created"
 	Archive.backedUp = 1
