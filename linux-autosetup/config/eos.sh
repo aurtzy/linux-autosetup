@@ -30,23 +30,31 @@ DUMP_DIR="$HOME/DUMP_linux-autosetup"
 
 # App "appname" "one-liner custom install command" "backupType:COPY,HARDLINK" "path/to/dir/or/folder/to/backup" "other/path/to/backup"
 
-# Essentials
+# Base apps
 ffProfile="$HOME/.mozilla/firefox/firefox.al-default"
 App firefox "firefox.installBackups" "" "$ffProfile/"{bookmarkbackups,xulstore.json,prefs.js,extensions,containers.json,search.json.mozlz4} "$ffProfile/storage/default/"
 thProfile="$HOME/.thunderbird/thunderbird.al-default"
 App thunderbird "" "" "$thProfile/"{abook.sqlite,cert9.db,history.sqlite,key4.db,logins.json,prefs.js,pubring.gpg,revocations.txt,secring.gpg}
 App flatpak
-App ffmpeg
-
-# Extras
 App discord "$flatpak install com.discordapp.Discord"
-App soundux
+App ffmpeg
 App quodlibet
-App gifski "rust.install && cargo install gifski"
 App youtube-dl
 
-# Pipewire setup
-App pipewire "$yay -R pulseaudio-jack; $DEFAULT_APP_INSTALL_COMMAND; pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
+# Main desktop apps
+ # nvidia
+App nvidia-driver "nvidia-installer-dkms"
+App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
+App gwe # greenwithenvy
+ # peripherals
+App piper
+App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
+App keyboard-center "" "" "$HOME/.config/keyboard-center"
+ # etc
+App remove-tlp "$yay -R tlp"
+
+# Pipewire
+App pipewire "pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
 App pipewire-pulse
 App easyeffects "" "" "$HOME/.config/easyeffects"
 
@@ -60,34 +68,24 @@ lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjp
 sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
 ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 \
 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
-# 1660ti
-App nvidia-driver "nvidia-installer-dkms"
-App nvidia-1660ti "nvidia-1660ti.installBackups && systemctl enable nvidia-tdp.timer && systemctl start nvidia-tdp.service; remove-tlp.install" "" "/etc/systemd/system/nvidia-tdp."{service,timer}
-App remove-tlp "$yay -R tlp"
-App gwe #greenwithenvy
-
-# peripherals
-App piper
-App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
-App keyboard-center "" "" "$HOME/.config/keyboard-center"
 
 # Softwares
- # Dev tools
+ # devving tools
 App eclipse-ecj
 App intellij-idea-community-edition
 App jdk-openjdk
- # Video-making
+ # video/image editing
 App obs-studio
 App kdenlive
 App losslesscut-bin
- # Image-editors
 App gimp
 App krita
-
-# Misc
+App gifski "rust.install && cargo install gifski"
+ # misc
 App redshift "" "" "$HOME/.config/redshift.conf"
 App clamtk
- # Dependencies
+
+# Dependencies/library stuff
 App rust
 App linux-headers
 
