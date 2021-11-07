@@ -245,7 +245,7 @@ App.backup() {
 			case "$userIn" in
 				a*) echo "App: aborting backup"; exit 1;;
 				s*) echo "App: skipping" App.failedBackup = 1; return;;
-				c*) echo "App: continuing backup" App.failedBackup = 1; break;;
+				c*) echo "App: continuing backup"; break;;
 				t*) echo "App: trying again" App.backup; return $?;;
 			esac
 		done
