@@ -40,12 +40,11 @@ App.constructor() {
 	
 	App.installed = 0
 	App.backedUp = 0
+	App.backupsInstalled = 0
 	
 	App.failedInstall = 0
 	App.failedBackup = 0
-	App.failedBackupSourcesCount = 0
-	
-	apps+=("App")
+	App.absentBackupSourcesCount = 0
 }
 
 # Getter/setter methods
@@ -78,9 +77,9 @@ App.sourcePathsCount() {
 	declare -i intParam=$2
 	App.field sourcePathsCount "$1" "$intParam"
 }
-App.failedBackupSourcesCount() {
+App.absentBackupSourcesCount() {
 	declare -i intParam=$2
-	App.field failedBackupSourcesCount "$1" "$intParam"
+	App.field absentBackupSourcesCount "$1" "$intParam"
 }
 App.installed() {
 	declare -i intParam=$2
@@ -100,15 +99,15 @@ App.failedInstall() {
 }
 App.failedBackup() {
 	declare -i intParam=$2
-	App.field failedInstall "$1" "$intParam"
+	App.field failedBackup "$1" "$intParam"
 }
-App.failedBackupSources() {
+App.absentBackupSources() {
 	if [ "$2" = '' ]; then
-		for (( i=0 ; i < $(App.failedBackupSourcesCount) ; i++ )); do
-			App.field failedBackupSource${i}
+		for (( i=0 ; i < $(App.absentBackupSourcesCount) ; i++ )); do
+			App.field absentBackupSource${i}
 		done
 	else
-		App.field failedBackupSource${1} "$2" "$3"
+		App.field absentBackupSource${1} "$2" "$3"
 	fi
 }
 App.sourcePathsAdd() {
@@ -119,14 +118,32 @@ App.sourcePathsAdd() {
 	done
 	App.sourcePathsCount = $i
 }
-App.failedBackupSourcesAdd() {
+App.absentBackupSourcesAdd() {
 	App.failedBackup = 1
-	declare -i i=$(App.failedBackupSourcesCount)
+	declare -i i=$(App.absentBackupSourcesCount)
 	for sourcePath in "${@}"; do
-		App.failedBackupSources "$i" = "$sourcePath"
+		App.absentBackupSources "$i" = "$sourcePath"
 		i+=1
 	done
-	App.failedBackupSourcesCount = $i
+	App.absentBackupSourcesCount = $i
+}
+
+# Display app info
+App.info() {
+	echo "APP NAME:"
+	echo "    App"
+	echo "BACKUP TYPE:"
+	echo "    $(App.backupType)"
+	echo "BACKUPS:"
+	if [ "$(App.sourcePathsCount)" -eq 0 ]; then
+		echo "    none"
+	else
+		IFS=$'\n'
+		for sourcePath in $(App.sourcePaths); do
+			echo "    $sourcePath"
+		done
+		unset IFS
+	fi
 }
 
 # Install App on call
@@ -135,7 +152,7 @@ App.install() {
 	echo
 	if [ $(App.installed) -eq 1 ]; then
 		echo "App: Already installed during this script."
-		return 3
+		return 0
 	fi
 	echo "App: Installing..."
 	eval $(App.installCommand)
@@ -153,24 +170,23 @@ App.install() {
 			echo "App: Backups already installed."
 			return
 		fi
-		if [ $appInstallBackups -eq 1 ]; then
-			App.installBackups
-		elif [ $appInstallBackups -eq 0 ]; then
-			declare -i userIn=$(promptYesNo "Would you like to install them? This will replace existing files.")
-			if [ $userIn -eq 1 ]; then
-				App.installBackups
-			elif [ $userIn -eq 2 ]; then
-				appInstallBackups=1
-				App.installBackups
-			elif [ $userIn -eq -1 ]; then
-				appInstallBackups=-1
-			fi
-		else
-			echo "App: Backups will not be installed."
-		fi
+		case "$APP_INSTALL_BACKUPS" in
+			1) App.installBackups;;
+			"-1") echo "App: Skipping backup install.";;
+			*)
+				echo "Do you want to install backups for App?"
+				while true; do
+					read -p "[y/n]: " userIn
+					case "$userIn" in
+						y) App.installBackups;;
+						n) echo "App: Backups will not be installed.";;
+					esac
+				done;;
+		esac
 	fi
 	
 	App.installed = 1
+	App.failedInstall = 0
 }
 
 App.installBackups() {
@@ -181,11 +197,8 @@ App.installBackups() {
 		sourceDir="${sourcePath%"/"*}"
 		echo
 		echo "App: Installing $sourcePath"
-		sudo -u $SUDO_USER mkdir -p "$sourceDir"
-		if [ "$?" -ne 0 ]; then
-			echo "Elevating permissions for mkdir to work..."
-			mkdir -p "$sourceDir"
-		fi
+		# Discover or create source dir
+		[ -d "$sourceDir" ] || mkdir "$sourceDir"
 		cp -a "$backupDir/$source" "$sourceDir"
 		if [ $? -ne 0 ]; then
 			echo "App: Error: $source could not be installed."
@@ -201,60 +214,69 @@ App.installBackups() {
 App.backup() {
 	echo
 	if [ "$(App.backedUp)" -eq 1 ]; then
-		echo "App: Already backed up during this script."
+		echo "App: already backed up during this script."
 		return 3
 	elif [ "$(App.sourcePaths)" = '' ]; then
-		echo "App: No sourcePaths specified for App."
+		echo "App: no sourcePaths specified for App."
 		return
-	else
-		backupDir="$APP_BACKUP_DIR/App"
-		if [ ! -d "$backupDir" ]; then
-			echo "App: Backup directory not found. Making one for you..."
-			sudo -u $SUDO_USER mkdir -p "$backupDir"
-			if [ "$?" -ne 0 ]; then
-				echo "Elevating permissions for mkdir to work..."
-				mkdir -p "$backupDir"
-			fi
-		else
-			dump "INITIALIZE" "App"
-		fi
-		IFS=$'\n'
-		for sourcePath in $(App.sourcePaths); do
-			echo
-			source="${sourcePath##*"/"}"
-			sourceDir="${sourcePath%"/"*}"
-			
-			# Check if sourcePath exists
-			if [[ -f "$sourcePath" || -d "$sourcePath" ]]; then
-				echo "App: Found: $sourcePath"
-				
-				# Dump any old backup
-				if [[ -f "$backupDir/$source" || -d "$backupDir/$source" ]]; then
-					echo "App: Old backup found. Dumping..."
-					dump "$backupDir/$source" "App"
-					echo "App: Dumped old $source"
-				fi
-				
-				# PERFORM BACKUP
-				echo "App: Performing backup..."
-				if [ "$(App.backupType)" = "COPY" ]; then
-					cp -a "$sourcePath" "$backupDir/$source"
-					echo "App: Copied $sourcePath"
-				elif [ "$(App.backupType)" = "HARDLINK" ]; then
-					cp -al "$sourcePath" "$backupDir/$source"
-					echo "App: Hard-linked $sourcePath"
-				else
-					echo "App: Error: Backup type $(App.backupType) not recognized."
-				fi
-			else
-				echo "App: Error: Could not find $sourcePath"
-				App.failedBackupSourcesAdd $sourcePath
-				continue
-			fi
-		done
-		unset IFS
-		echo "App: Backup completed."
+	elif [ "$(App.failedBackup)" -eq 1 ]; then
+		echo "App: skipping; backup previously failed."
 	fi
+
+	# Find sources and keep track of absent sources; if exist, then prompt user to handle
+	declare -a sources
+	IFS=$'\n'
+	for sourcePath in $(App.sourcePaths); do
+		if [ -e "$sourcePath" ]; then
+			echo "App: found $sourcePath"
+			sources+=("$sourcePath")
+		else
+			echo "App: $sourcePath was not found"
+			App.absentBackupSourcesAdd "$sourcePath"
+		fi
+	done
+	unset IFS
+	if [ "$(App.absentBackupSourcesCount)" -gt 0 ]; then
+		echo "App: Error: the following source(s) was not found:"
+		App.absentBackupSources
+		echo "Do you want to [a]bort the script, [s]kip this app, [c]ontinue backing up, or attempt to resolve the issue before [t]rying again? The current backup will remain if either of the first two are chosen."
+		while true; do
+			read -p "[a/s/c/t]: " userIn
+			case "$userIn" in
+				a*) echo "App: aborting backup"; exit 1;;
+				s*) echo "App: skipping" App.failedBackup = 1; return;;
+				c*) echo "App: continuing backup"; break;;
+				t*) echo "App: trying again" App.backup; return $?;;
+			esac
+		done
+	fi
+
+	# Perform backup depending on backupType and return if failed
+	echo "Setting up $TMP_DIR"
+	[ -e "$TMP_DIR" ] && rm -r "$TMP_DIR"
+	mkdir "$TMP_DIR"
+	echo "App: performing backup..."
+	declare backupDir="$APP_BACKUP_DIR/App"
+	case "$(App.backupType)" in
+		COPY) cp -a "${sources[@]}" "$TMP_DIR"; echo "App: copied sources";;
+		HARDLINK) cp -al "${sources[@]}" "$TMP_DIR"; echo "App: hard-linked sources";;
+		*) echo "App: Error: backup type not recognized, app will not be created"; return 1;;
+	esac
+	[ "$?" -ne 0 ] && App.failedBackup = 1 && return 1
+
+	# Make backup dir if it doesn't exist
+	[ -d "$APP_BACKUP_DIR" ] || mkdir "$APP_BACKUP_DIR"
+
+	# Dump if old backups exist and move new backups to APP_BACKUP_DIR/App
+	declare -a backups=("$TMP_DIR/"*)
+	declare -a oldBackups=("$backupDir/"*)
+	if [ -e "$oldBackups" ]; then
+		echo "App: found at least one existing backup. dumping..."
+		dumpTo "App" "${oldBackups[@]}"
+	fi
+	mv "${backups[@]}" "$backupDir"
+
+	echo "App: backup completed."
 	App.backedUp = 1
 }
 

@@ -26,9 +26,13 @@ AppGroup.constructor() {
 AppGroup.apps() {
 	AppGroup.field apps "$1" "$2"
 }
-AppGroup.sourcePaths() {
-	for object in $(AppGroup.apps); do
-		$object.sourcePaths
+# Display app group info
+AppGroup.info() {
+	echo "APP GROUP NAME:"
+	echo "    AppGroup"
+	echo "APP LIST:"
+	for app in $(AppGroup.apps); do
+		echo "    $app"
 	done
 }
 
@@ -52,7 +56,6 @@ AppGroup.add() {
 }
 
 # Install AppGroup on call
-# Also reset to original dir in case command used cd
 AppGroup.install() {
 	echo
 	echo
@@ -60,13 +63,6 @@ AppGroup.install() {
 	echo "Use -y/-n if you want to autofill prompts for backup installs."
 	for app in $(AppGroup.apps); do
 		$app.install
-	done
-	echo
-	echo "If any apps failed to install from this app group, they will be listed below:"
-	for app in $(AppGroup.apps); do
-		if [ $($app.failedInstall) -eq 1 ]; then
-			echo $app
-		fi
 	done
 	echo
 	echo "AppGroup: Installation completed!"
@@ -80,14 +76,6 @@ AppGroup.backup() {
 	for app in $(AppGroup.apps)
 	do
 		$app.backup
-	done
-	echo
-	echo "If any apps failed to be backed up from this app group, they will be listed below:"
-	for app in $(AppGroup.apps); do
-		if [ "$($app.failedBackup)" -eq 1 ]; then
-			echo "$app:"
-			echo "$($app.failedBackupSources)"
-		fi
 	done
 	echo
 	echo "AppGroup: Backup completed!"
