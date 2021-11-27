@@ -46,8 +46,7 @@ archiveCompress() {
 }
 
 archiveEncrypt() {
-	export GPG_TTY=$(tty)
-	tar -cJvPf - "${@:2}" | gpg --cipher-algo aes256 --pinentry-mode=loopback --symmetric -o "$1.tar.xz.gpg"
+	tar -cJvPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 }
 
 
@@ -62,6 +61,5 @@ archiveDecompress() {
 }
 
 archiveDecrypt() {
-	export GPG_TTY=$(tty)
-	gpg --pinentry-mode=loopback -d "$1.tar.xz.gpg" | tar -xJvPf -
+	openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xJvPf -
 }
