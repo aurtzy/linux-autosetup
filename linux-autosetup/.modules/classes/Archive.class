@@ -141,14 +141,22 @@ Archive.install() {
 	# Perform archive install depending on backupType
 	# note: this will overwrite stuff if stuff exists with same names!!!
 	echo "Archive: installing archive backups..."
-	case "$(Archive.backupType)" in
-		"COPY") archiveDecopy "$ARCHIVE_BACKUP_DIR/Archive.archive";;
-		"COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive.archive";;
-		"ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive.archive";;
-		*)	echo "Archive: Error: backup type not recognized, archive backups will not be installed"
-			return;;
-	esac
-	[ "$?" -eq 0 ] || (Archive.failedInstall = 1 && return 1)
+	while true; do
+        case "$(Archive.backupType)" in
+            "COPY") archiveDecopy "$ARCHIVE_BACKUP_DIR/Archive.archive" && break;;
+            "COMPRESS") archiveDecompress "$ARCHIVE_BACKUP_DIR/Archive.archive" && break;;
+            "ENCRYPT") archiveDecrypt "$ARCHIVE_BACKUP_DIR/Archive.archive" && break;;
+            *) echo "Archive: Error: backup type not recognized, archive backups will not be installed"; return 1;;
+        esac
+        echo "Archive: Error: something went wrong. Would you like to try installing this archive again?"
+        while true; do
+            read -p "[y/n]: " userIn
+            case "$userIn" in
+                y*) break;;
+                n*) echo "skipping" Archive.failedInstall = 1 && return 1;;
+            esac
+        done
+    done
 	
 	echo "Archive: archive backups intalled"
 	Archive.installed = 1
@@ -199,13 +207,22 @@ Archive.backup() {
 	[ -e "$TMP_DIR" ] && rm -r "$TMP_DIR"
 	mkdir "$TMP_DIR"
 	echo "Archive: creating new archive..."
-	case "$(Archive.backupType)" in
-		"COPY") archiveCopy "$TMP_DIR/Archive.archive" "${sources[@]}";;
-		"COMPRESS") archiveCompress "$TMP_DIR/Archive.archive" "${sources[@]}";;
-		"ENCRYPT") archiveEncrypt "$TMP_DIR/Archive.archive" "${sources[@]}";;
-		*) echo "Archive: Error: backup type not recognized, archive will not be created"; return 1;;
-	esac
-	[ "$?" -ne 0 ] && Archive.failedBackup = 1 && return 1
+	while true; do
+        case "$(Archive.backupType)" in
+            "COPY") archiveCopy "$TMP_DIR/Archive.archive" "${sources[@]}" && break;;
+            "COMPRESS") archiveCompress "$TMP_DIR/Archive.archive" "${sources[@]}" && break;;
+            "ENCRYPT") archiveEncrypt "$TMP_DIR/Archive.archive" "${sources[@]}" && break;;
+            *) echo "Archive: Error: backup type not recognized, archive will not be created"; return 1;;
+        esac
+        echo "Archive: Error: something went wrong. Would you like to try creating an archive again?"
+        while true; do
+            read -p "[y/n]: " userIn
+            case "$userIn" in
+                y*) break;;
+                n*) Archive.failedBackup = 1; return 1;;
+            esac
+        done
+    done
 
 	# Make archive dir if it doesn't exist
 	[ -d "$ARCHIVE_BACKUP_DIR" ] || mkdir "$ARCHIVE_BACKUP_DIR"
