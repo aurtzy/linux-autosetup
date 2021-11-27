@@ -101,7 +101,7 @@ archiveCompress() {
 }
 
 archiveEncrypt() {
-	tar -cJvPf - "${@:2}" | openssl enc -e -aes-256-cbc -pbkdf2 -salt -out "$1.tar.xz.enc"
+	tar -cJvPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 }
 
 archiveDecopy() {
@@ -113,5 +113,5 @@ archiveDecompress() {
 }
 
 archiveDecrypt() {
-	openssl enc -d -aes-256-cbc -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xJvPf -
+	openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xJvPf -
 }
