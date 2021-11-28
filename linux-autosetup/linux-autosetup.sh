@@ -1,6 +1,6 @@
 #!/bin/bash
 # *** https://stackoverflow.com/questions/8455991/elegant-way-for-verbose-mode-in-scripts
-version="v2.0.0-rc1"
+version="v2.0.0-rc2"
 
 #########################
 # VARIABLE DECLARATIONS #
