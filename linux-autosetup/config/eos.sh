@@ -102,7 +102,6 @@ appGroups=(
 		easyeffects
 	"
 	[Main-Desktop-Apps]="
-		remove-tlp
 		nvidia-1660ti
 		Base-Apps
 		gifski
