@@ -1,7 +1,8 @@
 # ENDEAVOUROS CONFIG FILE
 
-declare drive2="/run/media/$SUDO_USER/Stuff"
-declare driveBackup="/run/media/$SUDO_USER/Backup"
+declare driveFiles="/run/media/$SUDO_USER/driveFiles"
+declare driveBackup="/run/media/$SUDO_USER/driveBackup"
+declare usbFiles="/run/media/$SUDO_USER/usbFiles/"
 
 yay="sudo -u $SUDO_USER yay --noconfirm"
 flatpak="sudo -u $SUDO_USER flatpak -y --noninteractive"
@@ -50,8 +51,6 @@ App gwe # greenwithenvy
 App piper
 App g910-gkeys-git "$DEFAULT_APP_INSTALL_COMMAND && g910-gkeys.installBackups && systemctl enable g910-gkeys.service" "" "/etc/g910-gkeys/config.json"
 App keyboard-center "" "" "$HOME/.config/keyboard-center"
- # etc
-App remove-tlp "$yay -R tlp"
 
 # Pipewire
 App pipewire "pipewire-pulse.install; systemctl start --user pipewire-pulse.service"
@@ -62,12 +61,7 @@ App easyeffects "" "" "$HOME/.config/easyeffects"
 App gamemode
 App steam
 App protonup-git
-App lutris "$DEFAULT_APP_INSTALL_COMMAND; pacman -S --needed wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls \
-mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error \
-lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo \
-sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
-ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 \
-lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
+App lutris
 
 # Softwares
  # devving tools
@@ -108,7 +102,6 @@ appGroups=(
 		easyeffects
 	"
 	[Main-Desktop-Apps]="
-		remove-tlp
 		nvidia-1660ti
 		Base-Apps
 		gifski
@@ -130,8 +123,8 @@ appGroups=(
 # Archive "archive_name" "backupType:COPY,COMPRESS,ENCRYPT" "path/to/files/to/archive" "more/files/and/etc"
 
 Archive main-files "ENCRYPT" "$HOME/"{Backups,Workspace}
-Archive school "COMPRESS" "$drive2/school"
-Archive media "COPY" "$drive2/media" #beeg, no include in archive group
+Archive school "COMPRESS" "$usbFiles/school"
+Archive media "COPY" "$driveFiles/media" #beeg, no include in archive group
 
 ##################
 # ARCHIVE GROUPS #
