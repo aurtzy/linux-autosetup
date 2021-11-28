@@ -235,10 +235,12 @@ App.backup() {
 		fi
 	done
 	unset IFS
-	if [ "$(App.absentBackupSourcesCount)" -gt 0 ]; then
+	if [ "$BACKUP_ERROR_HANDLING" = 1 ]; then
+        echo "App: ignoring any absent sources"
+	elif [ "$(App.absentBackupSourcesCount)" -gt 0 ]; then
 		echo "App: Error: the following source(s) was not found:"
 		App.absentBackupSources
-		[ "$SKIP_ERRORS" = 1 ] && return 1
+		[ "$BACKUP_ERROR_HANDLING" = 2 ] && return 1
 		echo "Do you want to [a]bort the script, [s]kip this app, [c]ontinue backing up, or attempt to resolve the issue before [t]rying again? The current backup will remain if either of the first two are chosen."
 		while true; do
 			read -p "[a/s/c/t]: " userIn
