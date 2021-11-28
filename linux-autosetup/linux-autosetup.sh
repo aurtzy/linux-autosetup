@@ -39,6 +39,8 @@ declare CONFIG_FOLDER="./config"
 declare MODULES_DIR="./.modules"
 # Where backups will be created first - avoids possibility of bad dumps if backup commands fail somehow
 declare TMP_DIR="/tmp/linux-autosetup"
+# Determines whether errors should prompt users to fix: "1" = true, "0" = false
+declare SKIP_ERRORS="0"
 
 # Where application backups go
 declare APP_BACKUP_DIR="./app-backups"
