@@ -10,5 +10,5 @@ if __name__ == '__main__':
         'a': 'hi'
     }
     print('%s, %s' % (thing.get('a'), thing.get('b')))
-    pack1.install()
     print(Pack.packs)
+    print(pack1.install())

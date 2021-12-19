@@ -26,7 +26,7 @@ def run(cmd: str) -> int:
     Run cmd param in shell with appropriate permissions
 
     :param cmd: Command(s) to run in shell
-    :return: Return code after running last command in cmd
+    :return: return_code value after running last command in cmd
     """
     if cmd is None:
         raise Exception('cmd argument is type NoneType')
