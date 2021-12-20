@@ -76,11 +76,11 @@ class Pack:
 
             IGNORE : Ignore errors and continue working on pack.
 
-            ABORT : Abort and skip this pack.
+            SKIP : Abort and skip this pack.
             """
             PROMPT = 1
             IGNORE = 2
-            ABORT = 3
+            SKIP = 3
 
         app_install_cmd: str = None
         custom_install_cmd: str = None
