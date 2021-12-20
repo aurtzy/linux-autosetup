@@ -144,6 +144,13 @@ class Pack:
         }
         Pack.packs.append(self)
 
+    def backup_sources_exist(self) -> (bool, list[str]):
+        """
+
+        :return: (True, None) if all backup sources exist. Otherwise, return (False, nonexistent sources)
+        """
+        return True, []
+
     def install(self, runner: Runner) -> bool:
         """
         Install pack, running any existing install_cmd and installing backups to appropriate paths
@@ -169,11 +176,3 @@ class Pack:
         :return: True if backup completed successfully; False otherwise
         """
         return True
-
-    def backup_sources_exist(self) -> (bool, list[str]):
-        """
-
-        :return: (True, None) if all backup sources exist. If they do not, return (False, nonexistent sources)
-        """
-        return True, []
-
