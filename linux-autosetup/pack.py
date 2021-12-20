@@ -68,19 +68,19 @@ class Pack:
             }
         }
 
-        class BackupErrorsHandle(Enum):
+        class ErrorHandling(Enum):
             """
-            Determines how backup errors should be handled.
+            Determines how errors should be handled.
 
-            PROMPT : Prompt users to handle errors
+            PROMPT : Prompt users with options to handle errors.
 
-            IGNORE : Ignore errors and continue with backup
+            IGNORE : Ignore errors and continue working on pack.
 
-            ABORT : Abort and skip backups that have errors
+            ABORT : Abort and skip this pack.
             """
             PROMPT = 1
             IGNORE = 2
-            SKIP = 3
+            ABORT = 3
 
         app_install_cmd: str = None
         custom_install_cmd: str = None
@@ -88,14 +88,14 @@ class Pack:
         backup_paths: list[str] = None
         backup_type: str = None
         backup_keep: int = None
-        backup_errors_handle: BackupErrorsHandle = None
+        error_handling: ErrorHandling = None
         dump_dir: str = None
         tmp_dir: str = None
 
         def __init__(self, app_install_cmd: str = None,
                      custom_install_cmd: str = None, custom_backup_cmd: dict[str, str] = None,
                      backup_paths: list[str] = None, backup_type: str = None,
-                     backup_keep: int = None, backup_errors_handle: BackupErrorsHandle = None,
+                     backup_keep: int = None, error_handling: ErrorHandling = None,
                      dump_dir: str = None, tmp_dir: str = None):
             if app_install_cmd:
                 self.app_install_cmd = app_install_cmd
@@ -113,8 +113,8 @@ class Pack:
                 if backup_keep < 0:
                     raise Exception('You may not have %s (backup_keep) backups.' % backup_keep)
                 self.backup_keep = backup_keep
-            if backup_errors_handle:
-                self.backup_errors_handle = backup_errors_handle
+            if error_handling:
+                self.error_handling = error_handling
             if dump_dir:
                 self.dump_dir = dump_dir
             if tmp_dir:
@@ -159,6 +159,7 @@ class Pack:
             return_code = runner.run('echo THY COMMAND SHALL BE EXECUTED')
         if return_code != 0 and return_code is not None:
             return False
+
         return True
 
     def backup(self, runner: Runner) -> bool:
