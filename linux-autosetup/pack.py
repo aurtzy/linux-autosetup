@@ -147,7 +147,7 @@ class Pack:
     def backup_sources_exist(self) -> (bool, list[str]):
         """
 
-        :return: (True, None) if all backup sources exist. Otherwise, return (False, nonexistent sources)
+        :return: (True, []) if all backup sources exist. Otherwise, return (False, nonexistent sources)
         """
         return True, []
 
