@@ -1,3 +1,4 @@
+import typing
 from enum import Enum
 from runner import Runner
 
@@ -92,6 +93,9 @@ class Pack:
         dump_dir: str = None
         tmp_dir: str = None
 
+        labels: list[str] = ['app_install_cmd', 'custom_install_cmd', 'custom_backup_cmd', 'backup_paths',
+                             'backup_type', 'backup_keep', 'error_handling', 'dump_dir', 'tmp_dir']
+
         def __init__(self, app_install_cmd: str = None,
                      custom_install_cmd: str = None, custom_backup_cmd: dict[str, str] = None,
                      backup_paths: list[str] = None, backup_type: str = None,
@@ -120,7 +124,14 @@ class Pack:
             if tmp_dir:
                 self.tmp_dir = tmp_dir
 
+
+        def __str__(self):
+            all_vars: dict[str, typing.Any] = vars(self)
+            return '\n'.join(list(map(lambda key: '%s: %s' % (str(key), str(vars(self)[key])), self.labels)))
+
     packs = []
+
+    labels = ['apps', 'backup_sources']
 
     def __init__(self, name: str, apps: list[str] = None, backup_sources: list[str] = None, settings: Settings = None):
         """
@@ -176,3 +187,21 @@ class Pack:
         :return: True if backup completed successfully; False otherwise
         """
         return True
+
+    def __str__(self) -> str:
+        """
+        Returns a string with the format:
+            pack_name: $name
+            backup_sources: $backup_sources
+            settings:
+                $settings
+
+        $var represents str(var), where var is the label.
+        """
+        rtn_str = 'Pack name: %s\n' % self.name
+        all_vars = vars(self)
+        return 'Pack name: %s\n%s\n\t%s' % (
+            self.name,
+            '\n'.join(list(map(lambda key: '%s: %s' % (str(key), str(all_vars[key])), self.labels))),
+            str(self.settings).replace('\n', '\n\t')
+        )
