@@ -142,7 +142,7 @@ class Pack:
 
         self.settings: Pack.Settings = self.global_settings
         if settings is not None:
-            self.settings.update(settings.__dict__)
+            self.settings.update(settings.copy())
 
         if self.settings['backup_type']:
             if settings['backup_type'] not in Predefined.backup_types.keys():
