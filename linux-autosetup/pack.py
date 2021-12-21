@@ -3,10 +3,45 @@ from enum import Enum
 from runner import Runner
 
 
+class Predefined:
+    backup_types: dict[object, dict[str, str]] = {
+        None: {
+            'CREATE': '',
+            'EXTRACT': ''
+        },
+        'COPY': {
+            'CREATE': 'COMMAND',
+            'EXTRACT': 'COMMAND'
+        },
+        'COMPRESS': {
+            'CREATE': 'COMMAND',
+            'EXTRACT': 'COMMAND'
+        },
+        'ENCRYPT': {
+            'CREATE': 'COMMAND',
+            'EXTRACT': 'COMMAND'
+        }
+    }
+
+    class ErrorHandling(Enum):
+        """
+        Determines how errors should be handled.
+
+        PROMPT : Prompt users with options to handle errors.
+
+        IGNORE : Ignore errors and continue working on pack.
+
+        SKIP : Abort and skip the pack.
+        """
+        PROMPT = 1
+        IGNORE = 2
+        SKIP = 3
+
+
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
-    class Settings:
+    class Settings(TypedDict):
         """
         Configurable global settings for packs, which can be overridden in instances.
 
@@ -53,108 +88,87 @@ class Pack:
             tmp_dir : str
                 Temporary directory for creating backups.
         """
+        app_install_cmd: str
+        custom_install_cmd: str
+        custom_backup_cmd: dict[str, str]
+        backup_paths: list[str]
+        backup_type: object
+        backup_keep: int
+        error_handling: Predefined.ErrorHandling
+        dump_dir: str
+        tmp_dir: str
 
-        backup_types: dict[str, dict[str, str]] = {
-            None: {
-                'CREATE': '',
-                'EXTRACT': ''
-            },
-            'COPY': {
-                'CREATE': 'COMMAND',
-                'EXTRACT': 'COMMAND'
-            },
-            'COMPRESS': {
-                'CREATE': 'COMMAND',
-                'EXTRACT': 'COMMAND'
-            },
-            'ENCRYPT': {
-                'CREATE': 'COMMAND',
-                'EXTRACT': 'COMMAND'
-            }
-        }
-
-        class ErrorHandling(Enum):
-            """
-            Determines how errors should be handled.
-
-            PROMPT : Prompt users with options to handle errors.
-
-            IGNORE : Ignore errors and continue working on pack.
-
-            SKIP : Abort and skip this pack.
-            """
-            PROMPT = 1
-            IGNORE = 2
-            SKIP = 3
-
-        app_install_cmd: str = None
-        custom_install_cmd: str = None
-        custom_backup_cmd: dict[str, str] = None
-        backup_paths: list[str] = None
-        backup_type: str = None
-        backup_keep: int = None
-        error_handling: ErrorHandling = None
-        dump_dir: str = None
-        tmp_dir: str = None
-
-        labels: list[str] = ['app_install_cmd', 'custom_install_cmd', 'custom_backup_cmd', 'backup_paths',
-                             'backup_type', 'backup_keep', 'error_handling', 'dump_dir', 'tmp_dir']
-
-        def __init__(self, app_install_cmd: str = None,
-                     custom_install_cmd: str = None, custom_backup_cmd: dict[str, str] = None,
-                     backup_paths: list[str] = None, backup_type: str = None,
-                     backup_keep: int = None, error_handling: ErrorHandling = None,
-                     dump_dir: str = None, tmp_dir: str = None):
-            if app_install_cmd:
-                self.app_install_cmd = app_install_cmd
-            if custom_install_cmd:
-                self.custom_install_cmd = custom_install_cmd
-            if custom_backup_cmd:
-                self.custom_backup_cmd = custom_backup_cmd
-            if backup_paths:
-                self.backup_paths = backup_paths
-            if backup_type:
-                if backup_type not in self.backup_types:
-                    raise Exception('Unable to find backup_type "%s".' % backup_type)
-                self.backup_type = backup_type
-            if backup_keep:
-                if backup_keep < 0:
-                    raise Exception('You may not have %s (backup_keep) backups.' % backup_keep)
-                self.backup_keep = backup_keep
-            if error_handling:
-                self.error_handling = error_handling
-            if dump_dir:
-                self.dump_dir = dump_dir
-            if tmp_dir:
-                self.tmp_dir = tmp_dir
-
-        def __str__(self):
-            all_vars: dict[str, object] = vars(self)
-            return '\n'.join(list(map(lambda key: '%s: %s' % (str(key), str(vars(self)[key])), self.labels)))
+        # def __init__(self, app_install_cmd: str = None,
+        #              custom_install_cmd: str = None, custom_backup_cmd: dict[str, str] = None,
+        #              backup_paths: list[str] = None, backup_type: str = None,
+        #              backup_keep: int = None, error_handling: ErrorHandling = None,
+        #              dump_dir: str = None, tmp_dir: str = None):
+        #     if app_install_cmd:
+        #         self.app_install_cmd = app_install_cmd
+        #     if custom_install_cmd:
+        #         self.custom_install_cmd = custom_install_cmd
+        #     if custom_backup_cmd:
+        #         self.custom_backup_cmd = custom_backup_cmd
+        #     if backup_paths:
+        #         self.backup_paths = backup_paths
+        #     if backup_type:
+        #         if backup_type not in self.backup_types:
+        #             raise Exception('Unable to find backup_type "%s".' % backup_type)
+        #         self.backup_type = backup_type
+        #     if backup_keep:
+        #         if backup_keep < 0:
+        #             raise Exception('You may not have %s (backup_keep) backups.' % backup_keep)
+        #         self.backup_keep = backup_keep
+        #     if error_handling:
+        #         self.error_handling = error_handling
+        #     if dump_dir:
+        #         self.dump_dir = dump_dir
+        #     if tmp_dir:
+        #         self.tmp_dir = tmp_dir
 
     packs = []
 
-    labels = ['apps', 'backup_sources']
+    global_settings: Settings = Settings(
+        app_install_cmd='',
+        custom_install_cmd='',
+        custom_backup_cmd={
+            'CREATE': '',
+            'EXTRACT': ''
+        },
+        backup_paths=[],
+        backup_type=None,
+        backup_keep=1,
+        error_handling=Predefined.ErrorHandling.PROMPT,
+        dump_dir='./dump',
+        tmp_dir='./tmp'
+    )
 
-    def __init__(self, name: str, apps: list[str] = None, backup_sources: list[str] = None, settings: Settings = None):
+    def __init__(self, pack_name: str, apps: list[str] = None,
+                 backup_sources: list[str] = None,
+                 settings: Settings = None):
         """
-        :param name: str Name of the pack.
-        :param apps: list[str] Apps that are substituted in app_install_cmd.
-        :param backup_sources: list[str] Paths to back up, substituted in backup_cmd.
-        :param settings: Settings
+        Will perform checking on some settings and throw an error if an invalid value is found.
+
+        :param name: str                    Name of the pack.
+        :param apps: list[str]              Apps that are substituted in app_install_cmd.
+        :param backup_sources: list[str]    Paths to back up, substituted in backup_cmd.
+        :param settings: Settings           Dictionary of settings.
         """
-        self.name = name
+        self.pack_name = pack_name
         self.apps = apps if apps else []
         self.backup_sources = backup_sources if backup_sources else []
-        self.settings = settings if settings is not None else self.Settings()
+
+        self.settings: Pack.Settings = self.global_settings.copy() # TEMP: change to initialize each value explicitly to avoid unnoticed errors (i hope)
+        if settings:
+            self.settings.update(settings)
 
         self.substitutions: dict[str, str] = {
             'apps': self.apps,
             'backup_sources': self.backup_sources,
-            'app_install_cmd': self.settings.app_install_cmd,
-            'create_backup_cmd': self.settings.backup_types[self.settings.backup_type]['CREATE'],
-            'extract_backup_cmd': self.settings.backup_types[self.settings.backup_type]['EXTRACT'],
-            'backup_paths': ' '.join(self.settings.backup_paths)
+            'app_install_cmd': self.settings['app_install_cmd'],
+            'create_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['CREATE'],
+            'extract_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['EXTRACT'],
+            'backup_paths': ' '.join(self.settings['backup_paths'])
         }
         Pack.packs.append(self)
 
@@ -172,7 +186,7 @@ class Pack:
         :return: True if install completed successfully; False otherwise
         """
         return_code = None
-        if self.settings.custom_install_cmd:
+        if self.settings['custom_install_cmd']:
             # perform substitution
             return_code = runner.run('echo thy command shall be executed')
         elif len(self.apps) == 0:
@@ -195,16 +209,17 @@ class Pack:
         """
         Returns a string with the format:
             pack_name: $name
+            apps: $apps
             backup_sources: $backup_sources
-            settings:
+            Settings:
                 $settings
 
         $var represents str(var), where var is the label.
         """
-        rtn_str = 'Pack name: %s\n' % self.name
-        all_vars = vars(self)
-        return 'Pack name: %s\n%s\n\t%s' % (
-            self.name,
-            '\n'.join(list(map(lambda key: '%s: %s' % (str(key), str(all_vars[key])), self.labels))),
-            str(self.settings).replace('\n', '\n\t')
+        return 'pack_name: %s\napps: %s\nbackup_sources: %s\nSettings:\n%s' % (
+            self.pack_name,
+            self.apps,
+            self.backup_sources,
+            '\n'.join(list(map(lambda pair: '    %s: %s' % (pair[0], pair[1] if pair[1] else 'None'),
+                               self.settings.items())))
         )
