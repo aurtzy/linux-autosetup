@@ -48,6 +48,9 @@ class Predefined:
         IGNORE = 2
         SKIP = 3
 
+        def __str__(self):
+            return self.name
+
 
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
@@ -153,7 +156,8 @@ class Pack:
             'app_install_cmd': self.settings['app_install_cmd'],
             'create_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['CREATE'],
             'extract_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['EXTRACT'],
-            'backup_paths': '' if self.settings['backup_paths'] is None else ' '.join(list(self.settings['backup_paths']))
+            'backup_paths': '' if self.settings['backup_paths'] is None else
+                            ' '.join(list(self.settings['backup_paths']))
         }
         if substitutions:
             self.substitutions.update(substitutions)
