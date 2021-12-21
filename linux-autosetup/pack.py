@@ -5,6 +5,16 @@ from runner import Runner
 
 
 class Predefined:
+    """
+    Holds predefined defaults.
+
+    backup_types: dict[str, dict[str, str]]
+        Holds all types of backup methods, including their 'CREATE' and 'EXTRACT' commands.
+        Can be modified and added to.
+
+    ErrorHandling: class(Enum)
+        Enum class that denotes how errors should be handled.
+    """
     backup_types: dict[object, dict[str, str]] = {
         None: {
             'CREATE': '',
@@ -50,10 +60,6 @@ class Pack:
 
         All global settings should be set prior to creating any Pack objects.
 
-        backup_types: dict[str, dict[str, str]]
-            Holds all types of backups, including their 'CREATE' and 'EXTRACT' commands.
-            Can be modified and added to.
-
         SETTINGS:
             app_install_cmd : str
                 Default install command used when apps in pack exist. May require formatting.
@@ -80,14 +86,13 @@ class Pack:
             backup_keep : int
                 Must be a natural number. Denotes how many old backups should be kept.
 
-            backup_errors_handle : BackupErrorsHandle
-                Determines how backup errors should be handled.
-
             dump_dir : str
                 Directory to dump old backups to when exceeding backup_keep.
 
             tmp_dir : str
                 Temporary directory for creating backups.
+
+
         """
         app_install_cmd: typing.Union[str, None]
         custom_install_cmd: typing.Union[str, None]
@@ -95,9 +100,9 @@ class Pack:
         backup_paths: typing.Union[list[str], None]
         backup_type: typing.Union[str, None]
         backup_keep: typing.Union[int, None]
-        error_handling: typing.Union[Predefined.ErrorHandling, None]
         dump_dir: typing.Union[str, None]
         tmp_dir: typing.Union[str, None]
+        error_handling: Predefined.ErrorHandling
 
     packs = []
 
@@ -108,9 +113,9 @@ class Pack:
         backup_paths=None,
         backup_type=None,
         backup_keep=None,
-        error_handling=Predefined.ErrorHandling.PROMPT,
         dump_dir='./dump',
-        tmp_dir='./tmp'
+        tmp_dir='./tmp',
+        error_handling=Predefined.ErrorHandling.PROMPT
     )
 
     def __init__(self, pack_name: str, apps: list[str] = None,
