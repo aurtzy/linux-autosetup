@@ -16,10 +16,6 @@ class Predefined:
         Enum class that denotes how errors should be handled.
     """
     backup_types: dict[object, dict[str, str]] = {
-        None: {
-            'CREATE': '',
-            'EXTRACT': ''
-        },
         'COPY': {
             'CREATE': 'COMMAND',
             'EXTRACT': 'COMMAND'
@@ -96,32 +92,34 @@ class Pack:
 
 
         """
-        app_install_cmd: typing.Union[str, None]
-        custom_install_cmd: typing.Union[str, None]
-        custom_backup_cmd: typing.Union[dict[str, str], None]
-        backup_paths: typing.Union[list[str], None]
-        backup_type: typing.Union[str, None]
-        backup_keep: typing.Union[int, None]
-        dump_dir: typing.Union[str, None]
-        tmp_dir: typing.Union[str, None]
+        install_cmd: typing.Union[str]
+        create_backup_cmd: str
+        extract_backup_cmd: str
+        backup_paths: list[str]
+        backup_type: str
+        backup_keep: int
+        dump_dir: str
+        tmp_dir: str
         error_handling: Predefined.ErrorHandling
 
     packs = []
 
     global_settings: Settings = Settings(
-        app_install_cmd=None,
-        custom_install_cmd=None,
-        custom_backup_cmd=None,
-        backup_paths=None,
-        backup_type=None,
-        backup_keep=None,
+        install_cmd='',
+        create_backup_cmd='',
+        extract_backup_cmd='',
+        backup_paths=[],
+        backup_type='COPY',
+        backup_keep=0,
         dump_dir='./dump',
         tmp_dir='./tmp',
         error_handling=Predefined.ErrorHandling.PROMPT
     )
 
+    placeholder_str = '$%s$'
+
     def __init__(self, pack_name: str, apps: list[str] = None, backup_sources: list[str] = None,
-                 settings: Settings = None, substitutions: dict[str, str] = None):
+                 enable_backups: bool = True, settings: Settings = None, substitutions: dict[str, str] = None):
         """
         Will perform checking on some settings and throw an error if an invalid value is found.
 
@@ -130,35 +128,48 @@ class Pack:
         :param pack_name: str                   Name of the pack.
         :param apps: list[str]                  App names assigned to this pack meant to be paired with installing.
         :param backup_sources: list[str]        Paths assigned to this pack which denote backup sources.
+        :param enable_backups: bool             Enables/disables backup functionalities.
         :param settings: Settings               Dictionary of pack-specific settings to set locally.
                                                 If a key-value pair is present, override the global setting.
         :param substitutions: dict[str, str]    Dictionary of keywords that can be used to substitute strings.
         """
-        self.pack_name = pack_name
-        self.apps = apps if apps else []
-        self.backup_sources = backup_sources if backup_sources else []
+        self.pack_name: str = pack_name
+        self.apps: list[str] = apps if apps else []
+        self.backup_sources: list[str] = backup_sources if backup_sources else []
+        self.enable_backups: bool = enable_backups
 
         self.settings: Pack.Settings = self.global_settings
         if settings is not None:
             self.settings.update(settings.copy())
 
-        if self.settings['backup_type']:
-            if settings['backup_type'] not in Predefined.backup_types.keys():
-                raise Exception('Unable to find backup_type "%s".' % settings['backup_type'])
-        if self.settings['backup_keep'] and self.settings['backup_keep'] < 0:
+        if self.settings['backup_type'] not in Predefined.backup_types.keys():
+            raise Exception('Unable to find backup_type "%s".' % settings['backup_type'])
+        if self.settings['backup_keep'] < 0:
             raise Exception('Having %s backups is not allowed.' % settings['backup_keep'])
 
         self.substitutions: dict[str, str] = {
             'apps': ' '.join(self.apps),
             'backup_sources': ' '.join(self.backup_sources),
-            'app_install_cmd': self.settings['app_install_cmd'],
+            'install_cmd': self.settings['install_cmd'] if self.settings['install_cmd'] else '',
             'create_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['CREATE'],
             'extract_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['EXTRACT'],
-            'backup_paths': '' if self.settings['backup_paths'] is None else
-                            ' '.join(list(self.settings['backup_paths']))
+            'backup_paths': ' '.join(list(self.settings['backup_paths'])) if self.settings['backup_paths'] else ''
+
         }
         if substitutions:
             self.substitutions.update(substitutions)
+        for key, val in self.substitutions.items():
+            old_value = ''
+            while old_value != val:
+                old_value = val
+                self.substitutions[key] = self.substitute(val)
+                if self.placeholder_str % key in val:
+                    raise Exception('Script will loop infinitely trying to substitute %s.' % key)
+
+        for key, val in self.settings.items():
+            if isinstance(val, str):
+                print(val)
+                self.settings[key] = self.substitute(val)
 
         Pack.packs.append(self)
 
@@ -168,11 +179,8 @@ class Pack:
 
         Uses $var$ in order to find keywords.
         """
-        string_old = None
-        while string_old != string:
-            string_old = string
-            for var, replacement in self.substitutions.items():
-                string.replace('$%s$' % var, self.substitutions[var])
+        for var, replacement in self.substitutions.items():
+            string = string.replace(self.placeholder_str % var, replacement)
         return string
 
     def backup_sources_exist(self) -> (bool, list[str]):
@@ -189,7 +197,7 @@ class Pack:
         :return: True if install completed successfully; False otherwise
         """
         return_code = None
-        if self.settings['custom_install_cmd']:
+        if self.settings['install_cmd']:
             # perform substitution
             return_code = runner.run('echo thy command shall be executed')
         elif len(self.apps) == 0:
