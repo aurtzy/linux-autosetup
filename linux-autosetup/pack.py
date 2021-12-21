@@ -165,12 +165,16 @@ class Pack:
         Pack.packs.append(self)
 
     def substitute(self, string: str) -> str:
-        """Perform substitution on a given string using the substitutions dictionary."""
+        """
+        Perform substitution on a given string using the substitutions dictionary.
+
+        Uses $var$ in order to find keywords.
+        """
         def get_vars():
             for nxt in self.substitutions:
                 yield nxt
         for var in get_vars():
-            string.replace(var, self.substitutions[var])
+            string.replace('$%s$' % var, self.substitutions[var])
         return string
 
     def backup_sources_exist(self) -> (bool, list[str]):
