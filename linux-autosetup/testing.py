@@ -1,6 +1,6 @@
 from enum import Enum
 from runner import Runner
-from pack import Pack
+from pack import Pack, Predefined
 
 
 class Test:
@@ -19,7 +19,8 @@ if __name__ == '__main__':
     print(test)
     print(Test)
 
-    # print(Pack.global_settings.items())
+    print(Pack.global_settings.items())
     pack1 = Pack('PACK_NAME', ['app1', 'app2'])
     print(pack1)
+    print(Predefined.ErrorHandling.PROMPT)
 

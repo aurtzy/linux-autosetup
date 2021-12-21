@@ -1,3 +1,4 @@
+import typing
 from typing import TypedDict
 from enum import Enum
 from runner import Runner
@@ -41,7 +42,7 @@ class Predefined:
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
-    class Settings(TypedDict):
+    class Settings(TypedDict, total=False):
         """
         Configurable global settings for packs, which can be overridden in instances.
 
@@ -88,56 +89,25 @@ class Pack:
             tmp_dir : str
                 Temporary directory for creating backups.
         """
-        app_install_cmd: str
-        custom_install_cmd: str
-        custom_backup_cmd: dict[str, str]
-        backup_paths: list[str]
-        backup_type: object
-        backup_keep: int
-        error_handling: Predefined.ErrorHandling
-        dump_dir: str
-        tmp_dir: str
-
-        # def __init__(self, app_install_cmd: str = None,
-        #              custom_install_cmd: str = None, custom_backup_cmd: dict[str, str] = None,
-        #              backup_paths: list[str] = None, backup_type: str = None,
-        #              backup_keep: int = None, error_handling: ErrorHandling = None,
-        #              dump_dir: str = None, tmp_dir: str = None):
-        #     if app_install_cmd:
-        #         self.app_install_cmd = app_install_cmd
-        #     if custom_install_cmd:
-        #         self.custom_install_cmd = custom_install_cmd
-        #     if custom_backup_cmd:
-        #         self.custom_backup_cmd = custom_backup_cmd
-        #     if backup_paths:
-        #         self.backup_paths = backup_paths
-        #     if backup_type:
-        #         if backup_type not in self.backup_types:
-        #             raise Exception('Unable to find backup_type "%s".' % backup_type)
-        #         self.backup_type = backup_type
-        #     if backup_keep:
-        #         if backup_keep < 0:
-        #             raise Exception('You may not have %s (backup_keep) backups.' % backup_keep)
-        #         self.backup_keep = backup_keep
-        #     if error_handling:
-        #         self.error_handling = error_handling
-        #     if dump_dir:
-        #         self.dump_dir = dump_dir
-        #     if tmp_dir:
-        #         self.tmp_dir = tmp_dir
+        app_install_cmd: typing.Union[str, None]
+        custom_install_cmd: typing.Union[str, None]
+        custom_backup_cmd: typing.Union[dict[str, str], None]
+        backup_paths: typing.Union[list[str], None]
+        backup_type: typing.Union[str, None]
+        backup_keep: typing.Union[int, None]
+        error_handling: typing.Union[Predefined.ErrorHandling, None]
+        dump_dir: typing.Union[str, None]
+        tmp_dir: typing.Union[str, None]
 
     packs = []
 
     global_settings: Settings = Settings(
-        app_install_cmd='',
-        custom_install_cmd='',
-        custom_backup_cmd={
-            'CREATE': '',
-            'EXTRACT': ''
-        },
-        backup_paths=[],
+        app_install_cmd=None,
+        custom_install_cmd=None,
+        custom_backup_cmd=None,
+        backup_paths=None,
         backup_type=None,
-        backup_keep=1,
+        backup_keep=None,
         error_handling=Predefined.ErrorHandling.PROMPT,
         dump_dir='./dump',
         tmp_dir='./tmp'
@@ -145,22 +115,32 @@ class Pack:
 
     def __init__(self, pack_name: str, apps: list[str] = None,
                  backup_sources: list[str] = None,
-                 settings: Settings = None):
+                 settings: Settings = None,
+                 substitutions: dict[str, str] = None):
         """
         Will perform checking on some settings and throw an error if an invalid value is found.
 
-        :param name: str                    Name of the pack.
-        :param apps: list[str]              Apps that are substituted in app_install_cmd.
-        :param backup_sources: list[str]    Paths to back up, substituted in backup_cmd.
-        :param settings: Settings           Dictionary of settings.
+        Initialize 'substitutions' dictionary, which can be used to
+
+        :param pack_name: str               Name of the pack.
+        :param apps: list[str]              App names assigned to this pack meant to be paired with installing.
+        :param backup_sources: list[str]    Paths assigned to this pack which denote backup sources.
+        :param settings: Settings           Dictionary of pack-specific settings to set locally.
+                                            If a key-value pair is present, override the global setting.
         """
         self.pack_name = pack_name
         self.apps = apps if apps else []
         self.backup_sources = backup_sources if backup_sources else []
 
-        self.settings: Pack.Settings = self.global_settings.copy() # TEMP: change to initialize each value explicitly to avoid unnoticed errors (i hope)
-        if settings:
-            self.settings.update(settings)
+        self.settings: Pack.Settings = self.global_settings
+        if settings is not None:
+            self.settings.update(settings.__dict__)
+
+        if self.settings['backup_type']:
+            if settings['backup_type'] not in Predefined.backup_types.keys():
+                raise Exception('Unable to find backup_type "%s".' % settings['backup_type'])
+        if self.settings['backup_keep'] and self.settings['backup_keep'] < 0:
+            raise Exception('Having %s backups is not allowed.' % settings['backup_keep'])
 
         self.substitutions: dict[str, str] = {
             'apps': self.apps,
@@ -168,8 +148,11 @@ class Pack:
             'app_install_cmd': self.settings['app_install_cmd'],
             'create_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['CREATE'],
             'extract_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['EXTRACT'],
-            'backup_paths': ' '.join(self.settings['backup_paths'])
+            'backup_paths': '' if self.settings['backup_paths'] is None else ' '.join(list(self.settings['backup_paths']))
         }
+        if substitutions:
+            self.substitutions.update(substitutions)
+
         Pack.packs.append(self)
 
     def backup_sources_exist(self) -> (bool, list[str]):
@@ -220,6 +203,6 @@ class Pack:
             self.pack_name,
             self.apps,
             self.backup_sources,
-            '\n'.join(list(map(lambda pair: '    %s: %s' % (pair[0], pair[1] if pair[1] else 'None'),
+            '\n'.join(list(map(lambda pair: '    %s: %s' % (pair[0], pair[1]),
                                self.settings.items())))
         )
