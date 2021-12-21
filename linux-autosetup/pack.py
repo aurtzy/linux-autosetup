@@ -1,4 +1,4 @@
-import typing
+from typing import TypedDict
 from enum import Enum
 from runner import Runner
 
@@ -55,6 +55,10 @@ class Pack:
         """
 
         backup_types: dict[str, dict[str, str]] = {
+            None: {
+                'CREATE': '',
+                'EXTRACT': ''
+            },
             'COPY': {
                 'CREATE': 'COMMAND',
                 'EXTRACT': 'COMMAND'
@@ -124,9 +128,8 @@ class Pack:
             if tmp_dir:
                 self.tmp_dir = tmp_dir
 
-
         def __str__(self):
-            all_vars: dict[str, typing.Any] = vars(self)
+            all_vars: dict[str, object] = vars(self)
             return '\n'.join(list(map(lambda key: '%s: %s' % (str(key), str(vars(self)[key])), self.labels)))
 
     packs = []
