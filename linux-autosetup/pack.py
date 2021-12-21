@@ -151,8 +151,8 @@ class Pack:
             raise Exception('Having %s backups is not allowed.' % settings['backup_keep'])
 
         self.substitutions: dict[str, str] = {
-            'apps': self.apps,
-            'backup_sources': self.backup_sources,
+            'apps': ' '.join(self.apps),
+            'backup_sources': ' '.join(self.backup_sources),
             'app_install_cmd': self.settings['app_install_cmd'],
             'create_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['CREATE'],
             'extract_backup_cmd': Predefined.backup_types[self.settings['backup_type']]['EXTRACT'],
@@ -163,6 +163,15 @@ class Pack:
             self.substitutions.update(substitutions)
 
         Pack.packs.append(self)
+
+    def substitute(self, string: str) -> str:
+        """Perform substitution on a given string using the substitutions dictionary."""
+        def get_vars():
+            for nxt in self.substitutions:
+                yield nxt
+        for var in get_vars():
+            string.replace(var, self.substitutions[var])
+        return string
 
     def backup_sources_exist(self) -> (bool, list[str]):
         """
