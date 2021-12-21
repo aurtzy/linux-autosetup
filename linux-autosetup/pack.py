@@ -120,10 +120,8 @@ class Pack:
         error_handling=Predefined.ErrorHandling.PROMPT
     )
 
-    def __init__(self, pack_name: str, apps: list[str] = None,
-                 backup_sources: list[str] = None,
-                 settings: Settings = None,
-                 substitutions: dict[str, str] = None):
+    def __init__(self, pack_name: str, apps: list[str] = None, backup_sources: list[str] = None,
+                 settings: Settings = None, substitutions: dict[str, str] = None):
         """
         Will perform checking on some settings and throw an error if an invalid value is found.
 
@@ -170,11 +168,11 @@ class Pack:
 
         Uses $var$ in order to find keywords.
         """
-        def get_vars():
-            for nxt in self.substitutions:
-                yield nxt
-        for var in get_vars():
-            string.replace('$%s$' % var, self.substitutions[var])
+        string_old = None
+        while string_old != string:
+            string_old = string
+            for var, replacement in self.substitutions.items():
+                string.replace('$%s$' % var, self.substitutions[var])
         return string
 
     def backup_sources_exist(self) -> (bool, list[str]):
