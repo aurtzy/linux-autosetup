@@ -11,6 +11,7 @@ class Predefined:
     backup_types: dict[str, dict[str, str]]
         Holds all types of backup methods, including their 'CREATE' and 'EXTRACT' commands.
         Can be modified and added to.
+        Will be run through substitution.
 
     ErrorHandling: class(Enum)
         Enum class that denotes how errors should be handled.
@@ -59,10 +60,6 @@ class Pack:
         """
         Configurable global settings for packs, which can be overridden in instances.
 
-        Certain strings - mainly commands - are unformatted, and are not injected with substitutions.
-
-        All global settings should be set prior to creating any Pack objects.
-
         SETTINGS:
             app_install_cmd : str
                 Default install command used when apps in pack exist. May require formatting.
@@ -71,15 +68,18 @@ class Pack:
                 More flexible string commands that allow for substitution of other commands like app_install_cmd
 
                 custom_install_cmd : str
-                    When exists, will run in place of app_install_cmd. May require formatting.
+                    When exists, will run in place of app_install_cmd.
+                    Will be run through substitution.
 
                 custom_backup_cmd : dict[str, str]
-                    When exists, are run in place of normal backup commands. May require formatting.
+                    When exists, are run in place of normal backup commands.
+                    Will be run through substitution.
 
             backup_paths : list[str]
                 List of paths to back up. This should take in already formatted path strings that work in a shell.
                 backup_paths[0] will be used as the target path for moving a created backup from tmp_dir,
                 so it is recommended that backup_paths[0] be on the same partition as tmp_dir.
+                Will be run through substitution.
 
             backup_type : str
                 A key to backup_types. Indicates what type of backup is performed,
@@ -130,11 +130,12 @@ class Pack:
 
         Initialize 'substitutions' dictionary, which can be used to
 
-        :param pack_name: str               Name of the pack.
-        :param apps: list[str]              App names assigned to this pack meant to be paired with installing.
-        :param backup_sources: list[str]    Paths assigned to this pack which denote backup sources.
-        :param settings: Settings           Dictionary of pack-specific settings to set locally.
-                                            If a key-value pair is present, override the global setting.
+        :param pack_name: str                   Name of the pack.
+        :param apps: list[str]                  App names assigned to this pack meant to be paired with installing.
+        :param backup_sources: list[str]        Paths assigned to this pack which denote backup sources.
+        :param settings: Settings               Dictionary of pack-specific settings to set locally.
+                                                If a key-value pair is present, override the global setting.
+        :param substitutions: dict[str, str]    Dictionary of keywords that can be used to substitute strings.
         """
         self.pack_name = pack_name
         self.apps = apps if apps else []
