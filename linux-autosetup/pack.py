@@ -11,7 +11,6 @@ class Predefined:
     backup_types: dict[str, dict[str, str]]
         Holds all types of backup methods, including their 'CREATE' and 'EXTRACT' commands.
         Can be modified and added to.
-        Will be run through substitution.
 
     ErrorHandling: class(Enum)
         Enum class that denotes how errors should be handled.
