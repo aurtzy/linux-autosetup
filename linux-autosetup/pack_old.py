@@ -2,20 +2,14 @@ import typing
 from typing import TypedDict
 from enum import Enum
 from runner import Runner
+from dataclasses import dataclass
 
 
 class Predefined:
     """
-    Holds predefined defaults.
-
-    backup_types: dict[str, dict[str, str]]
-        Holds all types of backup methods, including their 'CREATE' and 'EXTRACT' commands.
-        Can be modified and added to.
-
-    ErrorHandling: class(Enum)
-        Enum class that denotes how errors should be handled.
+    Predefined values
     """
-    backup_types: dict[object, dict[str, str]] = {
+    backup_cmds: dict[str, dict[str, str]] = {
         'COPY': {
             'CREATE': 'COMMAND',
             'EXTRACT': 'COMMAND'
@@ -30,28 +24,65 @@ class Predefined:
         }
     }
 
-    class ErrorHandling(Enum):
-        """
-        Determines how errors should be handled.
 
-        PROMPT : Prompt users with options to handle errors.
-
-        IGNORE : Ignore errors and continue working on pack.
-
-        SKIP : Abort and skip the pack.
-        """
-        PROMPT = 1
-        IGNORE = 2
-        SKIP = 3
 
         def __str__(self):
             return self.name
+
+@dataclass
+class Settings:
+    """
+    backup_types: dict[str, dict[str, str]]
+        Holds all types of backup methods, including their 'CREATE' and 'EXTRACT' commands.
+        Can be modified and added to.
+
+    ErrorHandling: class(Enum)
+        Enum class that denotes how errors should be handled.
+    """
+    # global_settings: dict[str, object] = {
+    #     'backup_types': 'hi'
+    # }
+    #
+
+
+    class Default(TypedDict):
+        install_cmd: str
+        backup_type: typing.Union[str, dict[str, str]]
+        paths: list[str]
+        keep_old: int
+        dump_dir: str
+        tmp_dir: str
+        placeholder_str: str
+
+    class Local(Default):
+        apps: list[str]
+        backup_sources: list[str]
+
 
 
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
-    class Settings(TypedDict, total=False):
+    class AppSettings(TypedDict):
+
+
+    class BackupSettings(TypedDict):
+        """
+        Configurable backup-specific settings.
+
+        paths: str
+            Denotes locations for created backups. Paths should be formatted to work in a shell.
+
+        backup_type
+        """
+        backup_type: typing.Union[str, dict[str, str]]
+        paths: list[str]
+        keep_old: int
+        dump_dir: str
+        tmp_dir: str
+
+
+    class SettingsTEMP(TypedDict, total=False):
         """
         Configurable global settings for packs, which can be overridden in instances.
 
@@ -92,17 +123,14 @@ class Pack:
 
 
         """
-        install_cmd: typing.Union[str]
-        create_backup_cmd: str
-        extract_backup_cmd: str
-        backup_paths: list[str]
-        backup_type: str
-        backup_keep: int
-        dump_dir: str
-        tmp_dir: str
+        install_cmd: str
         error_handling: Predefined.ErrorHandling
 
+
+
     packs = []
+
+    placeholder_str = '$%s$'
 
     global_settings: Settings = Settings(
         install_cmd='',
@@ -116,10 +144,9 @@ class Pack:
         error_handling=Predefined.ErrorHandling.PROMPT
     )
 
-    placeholder_str = '$%s$'
-
-    def __init__(self, pack_name: str, apps: list[str] = None, backup_sources: list[str] = None,
-                 enable_backups: bool = True, settings: Settings = None, substitutions: dict[str, str] = None):
+    def __init__(self, pack_name: str, apps: list[str] = None, backup_sources: list[str] = None
+                 , settings: Settings = None,
+                 substitutions: dict[str, str] = None):
         """
         Will perform checking on some settings and throw an error if an invalid value is found.
 
@@ -136,7 +163,6 @@ class Pack:
         self.pack_name: str = pack_name
         self.apps: list[str] = apps if apps else []
         self.backup_sources: list[str] = backup_sources if backup_sources else []
-        self.enable_backups: bool = enable_backups
 
         self.settings: Pack.Settings = self.global_settings
         if settings is not None:
@@ -216,7 +242,7 @@ class Pack:
         """
         return True
 
-    def __str__(self) -> str:
+    def __str__(self, verbose: bool = False) -> str:
         """
         Returns a string with the format:
             pack_name: $name
@@ -226,6 +252,8 @@ class Pack:
                 $settings
 
         $var represents str(var), where var is the label.
+
+        :param verbose: bool    Whether returned string should show all settings.
         """
         return 'pack_name: %s\napps: %s\nbackup_sources: %s\nSettings:\n%s' % (
             self.pack_name,

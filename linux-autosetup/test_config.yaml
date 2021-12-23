@@ -169,6 +169,11 @@ _________________
 # Finalizing rough draft of config template
 
 DEFAULT:
+    PREDEFINED:
+        backup_types:
+            COPY:
+            COMPRESS:
+            ENCRYPT:
     FALLBACK:
         settings:
             # . . .
@@ -181,22 +186,84 @@ DEFAULT:
 # e.g. if apps is str, convert to list[str], but accept list[str] too here.
 pack1:
     ubuntu:
-        extend: [debian, popos]
-        apps: deez nuts app3 app4
+        # accept only str - if only one line, then use split(); if more than one, then split by '\n'
+        extend: debian popos
+        apps: app1 app2 app3
         backup_sources: dez/nutz
         # settings and commands could be instances of separate classes??
         settings:
+            app_install_type: FLATPAK
             backup_type: COPY
             backup_paths: source/path
             backup_keep: 1
-            dump_dir: dump/directory
-            tmp_dir: tmp/directory
-            placeholder_str: some_str
+            dump_dir: /tmp/linux-autosetup-dump
+            tmp_dir: /tmp
+            var_str: '$%s$'
             error_handling: something # can just be a string... or enum? figure out whether importing is big deal
         commands:
-            app_install_cmd: install
-            backup_install_cmd: install backups
-            backup_create_cmd: create backups
 
+            # would be equivalent to just having
+            # echo someothercommand
+            # the two commands can by default be attached at the bottom like this
+            # if not found in custom cmd and they exist
+            custom_install_cmd: |
+                echo someothercommand
+                $app_install_cmd$
+                $backup_install_cmd$
+            custom_backup_cmd: |
+                ...
+        vars:
+            # BY DEFAULT, ALL SETTINGS ARE ASSIGNED TO VARS BY SAME NAME
 
+_______________
 
+# NOTES:
+# have conversion method for values that should be list[str], allowing both str or list[str]
+#     1. single-line delims by space; 2. multi-line delims by \n; 3. list is list
+#     mention somewhere limits of 1. and 3. with quotes and special characters
+# apps & backup_sources CAN have global values; default will just be empty list
+
+predefined:
+    app_install_types:
+        APT: sudo apt --assume-yes install $@
+        FLATPAK: flatpak --noninteractive -y install $@
+        PACMAN: sudo pacman --noconfirm -S  $@
+        PARU: paru --noconfirm -S $@
+
+    file_backup_types:
+        COPY:
+            INSTALL: tar -xPf "$1.tar"
+            BACKUP: tar -cPf "$1.tar" "${@:2}"
+        COMPRESS:
+            INSTALL: tar -xPf "$1.tar.xz"
+            BACKUP: tar -cJPf "$1.tar.xz" "${@:2}"
+        ENCRYPT:
+            INSTALL: openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -
+            BACKUP: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
+
+packs:
+    GLOBAL:
+        FALLBACK:
+            apps:
+                list: []
+                install_type: null
+            files:
+                list: []
+                backup_type: COPY
+                backup_paths: source/path
+                backup_keep: 1
+                dump_dir: /tmp/linux-autosetup-dump
+                tmp_dir: /tmp
+            custom:
+                install_cmd: null
+                backup_cmd: null
+            error_handling: PROMPT
+        ubuntu:
+            apps: []
+            backup_sources: []
+        popos:
+    a_pack:
+        popos:
+            extends: ubuntu
+
+pack_groups: # ? not given much thought about yet
