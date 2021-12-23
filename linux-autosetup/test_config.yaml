@@ -222,13 +222,19 @@ _______________
 #     1. single-line delims by space; 2. multi-line delims by \n; 3. list is list
 #     mention somewhere limits of 1. and 3. with quotes and special characters
 # apps & backup_sources CAN have global values; default will just be empty list
+# have "validate" option (and maybe options for this option, e.g. "validate packs"?)?
+#     would parse config and print any possibly useful information
+# using any false-type entry (e.g. '', [], null, False) should result in falling back to defaults
+# all settings should now be easily overridable like this
+# if a default is not provided in script options, find all from DEFAULTS section, regardless of if
+#     one exists obscurely in a pack - however, give user an option to enter a custom one by -> #custom_default
 
 predefined:
     app_install_types:
         APT: sudo apt --assume-yes install $@
-        FLATPAK: flatpak --noninteractive -y install $@
-        PACMAN: sudo pacman --noconfirm -S  $@
-        PARU: paru --noconfirm -S $@
+        FLATPAK: flatpak install -y --noninteractive $@
+        PACMAN: sudo pacman -S --noconfirm --needed $@
+        PARU: paru -S --noconfirm --needed $@
 
     file_backup_types:
         COPY:
@@ -242,15 +248,16 @@ predefined:
             BACKUP: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 
 packs:
-    GLOBAL:
+    DEFAULTS:
         FALLBACK:
+            extends: null
             apps:
                 list: []
                 install_type: null
             files:
                 list: []
                 backup_type: COPY
-                backup_paths: source/path
+                backup_paths: ./backups
                 backup_keep: 1
                 dump_dir: /tmp/linux-autosetup-dump
                 tmp_dir: /tmp
@@ -259,11 +266,12 @@ packs:
                 backup_cmd: null
             error_handling: PROMPT
         ubuntu:
-            apps: []
-            backup_sources: []
+            . . .
         popos:
+            . . .
     a_pack:
         popos:
             extends: ubuntu
+
 
 pack_groups: # ? not given much thought about yet
