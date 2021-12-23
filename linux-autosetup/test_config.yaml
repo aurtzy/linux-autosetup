@@ -218,16 +218,18 @@ pack1:
 _______________
 
 # NOTES:
-# have conversion method for values that should be list[str], allowing both str or list[str]
+# CONVERTING STR, LIST[STR] for values that should be list[str], allowing both str or list[str]
 #     1. single-line delims by space; 2. multi-line delims by \n; 3. list is list
 #     mention somewhere limits of 1. and 3. with quotes and special characters
-# apps & backup_sources CAN have global values; default will just be empty list
-# have "validate" option (and maybe options for this option, e.g. "validate packs"?)?
+# SETTINGS ALL HAVE GLOBAL VALUES now, including the now-defined app list and file list, being empty lists by default
+# "VALIDATE" OPTION (and maybe options for this option, e.g. "validate packs"?)?
 #     would parse config and print any possibly useful information
-# using any false-type entry (e.g. '', [], null, False) should result in falling back to defaults
-# all settings should now be easily overridable like this
-# if a default is not provided in script options, find all from DEFAULTS section, regardless of if
+# FALL BACK TO DEFAULTS when using any false-type values (e.g. '', [], null, False); makes it logical and easy to parse
+#     all settings should now be easily overridable like this
+# SCRIPT SHOULD FIND DISTROS BY looking through what is currently called DEFAULTS, regardless of if
 #     one exists obscurely in a pack - however, give user an option to enter a custom one by -> #custom_default
+# PIPES SHOULD BE DETECTED WHEN running commands to give Popen correct arguments. this should remedy
+#     having to hard-code the backup types and alows for different names if users want
 
 predefined:
     app_install_types:
@@ -248,7 +250,7 @@ predefined:
             BACKUP: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 
 packs:
-    DEFAULTS:
+    DEFAULTS: # better names than DEFAULTS and FALLBACK?
         FALLBACK:
             extends: null
             apps:
@@ -269,9 +271,18 @@ packs:
             . . .
         popos:
             . . .
-    a_pack:
+    custom_extra_special_pack_that_shows_off_some_special_stuff:
         popos:
             extends: ubuntu
+            files:
+                list: |
+                    //HOME/Documents/backups/etc  # "//HOME" can be used as a substitution for the "target" user from the prompt at start of script
+            custom:
+                install_cmd: |
+                    //app_install_cmd
+                    //file_install_cmd
+                backup_cmd: |
+                    //file_backup_cmd
 
 
 pack_groups: # ? not given much thought about yet
