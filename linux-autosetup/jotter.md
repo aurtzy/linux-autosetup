@@ -20,6 +20,9 @@ config.yaml
     yes
 
 
+# subprocesses currently keep running after script terminates, including with ctrl+c - what do?
+
+
 # QoL ideas
 
 - print "last updated" config time at beginning
