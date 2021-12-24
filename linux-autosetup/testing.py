@@ -1,6 +1,14 @@
-from enum import Enum
-from runner import Runner
-from pack import Pack, Predefined
+import os
+import subprocess
+import sys
+import pack
+try:
+    import yaml
+except ImportError:
+    from pip._internal import main as pip
+    pip(['install', '--user', 'yaml'])
+    import yaml
+import tarfile
 
 
 class Test:
@@ -15,12 +23,35 @@ class Test:
 
 
 if __name__ == '__main__':
-    test = Test()
-    print(test)
-    print(Test)
+    #print(Pack.global_settings.items())
+    #pack1 = Pack('PACK_NAME', ['app1', 'app2'], settings=Pack.Settings(install_cmd='echo $apps$! install biggus diccus!',
+    #                                                                   create_backup_cmd='echo deez $backup_sources$',
+     #                                                                  extract_backup_cmd='echo deez other $backup_sources$, $install_cmd$'))
+    #print(pack1)
+    # subprocess = Runner()
+    # subprocess.run(['echo $USER; sudo echo $USER'], Runner.ErrorHandling.PROMPT)
+    # text = 'echo hello!; echo no way!!; echo "some;string ;"'
+    # shlexer = shlex(instream=text, punctuation_chars=True)
+    # print(list(shlexer))
+    # p = subprocess.Popen(['tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"', ''] +
+    #                      ['/home/alvin/Downloads/testing/encrypted_boot', '/home/alvin/Downloads/testing/boot loli.jpeg'],
+    #                      stdin=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
+    # p.wait()
+    # print('hello' % 'hi')
 
-    print(Pack.global_settings.items())
-    pack1 = Pack('PACK_NAME', ['app1', 'app2'])
-    print(pack1)
-    print(Predefined.ErrorHandling.PROMPT)
+    # can be set to b if a --debug type option is set
 
+    sys.tracebacklimit = 0  # None if --debug option is present else 0
+    try:
+        with open('test_config.yaml', 'r') as file:
+            config = yaml.safe_load(file)
+        file.close()
+    except yaml.YAMLError as error:
+        raise yaml.YAMLError('There was an error reading config.') from error
+
+    try:
+        thing = pack.Runner('alvin')
+    except KeyError:
+        print('wow')
+        exit()
+    thing.run('echo $1\necho $2 $HOME')#, ['hello!', 'param 2 c:'])
