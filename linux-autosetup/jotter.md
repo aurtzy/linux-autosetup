@@ -13,25 +13,14 @@ pack.py
     module that hosts all pack stuff
 
 config_parser.py
-    installs yaml if doesn't exist and then imports it
-    reads config and passes correct arguments to create pack objects
+    installs yaml if it isn't installed and then imports it
+    parses config and provides proper arguments to create pack objects
 
 config.yaml
     yes
 
 
-# BACKUP FUNCTIONS!!
-
-forgot that backup cmds were actually functions before... how to approach?
-
-functions would be written to take in parameters,
-with pack backup methods handling the moving around.
-
-
-# YAML has something called 'anchors', which may be useful to include
-
-
-# possibility of expired sudo?
+~~# possibility of expired sudo?~~
 
 if a cmd string contains multiple commands with sudo, sudo might expire without another prompt to enter in.
 is this handled by Popen.communicate? is it persisent, or only does it once?
@@ -51,35 +40,6 @@ https://askubuntu.com/questions/155791/how-do-i-sudo-a-command-in-a-script-witho
  using TAGS, associating a distro with others. the list of distros specified can be iterated through in order, to find entries in these other distros instead if the current one does not have an entry.
 
 - strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
-
-
-# X how to tell whether install_cmd should be run?
-
-install_cmd could be anything which may or may not run regardless of whether there are apps,
-e.g. install_cmd = 'systemctl enable some-thing'
-while apps is empty, but this should still be run
-
-WHAT IF - users are forced to specify install_cmd if they want to use it? if apps are given,
-automatically insert install_cmd if one isn't given
-
-but... global install_cmd could be some weird thing that user would want applied, although
-that case could just be handled by the user
-
-rename install_cmd to app_install_cmd?
-
-then, the app thing is guaranteed, and we can instead use injection or whatever method to work around this
-in new install_cmd? or called something else?
-
-```custom_install_cmd``` and ```custom_backup_cmd``` could be used, paired with injection substitution
-e.g.
-```yaml
-app_install_cmd: sudo apt install $apps
-custom_install_cmd: |
-    do some come command here before app_install_cmd
-    some more
-    $app_install_cmd <- gets substituted with above
-    more commands
-```
 
 
 # X handling backup methods
@@ -137,6 +97,35 @@ to detect and debug
 
 
 # OLD #
+
+
+~~# X how to tell whether install_cmd should be run?~~
+
+install_cmd could be anything which may or may not run regardless of whether there are apps,
+e.g. install_cmd = 'systemctl enable some-thing'
+while apps is empty, but this should still be run
+
+WHAT IF - users are forced to specify install_cmd if they want to use it? if apps are given,
+automatically insert install_cmd if one isn't given
+
+but... global install_cmd could be some weird thing that user would want applied, although
+that case could just be handled by the user
+
+rename install_cmd to app_install_cmd?
+
+then, the app thing is guaranteed, and we can instead use injection or whatever method to work around this
+in new install_cmd? or called something else?
+
+```custom_install_cmd``` and ```custom_backup_cmd``` could be used, paired with injection substitution
+e.g.
+```yaml
+app_install_cmd: sudo apt install $apps
+custom_install_cmd: |
+    do some come command here before app_install_cmd
+    some more
+    $app_install_cmd <- gets substituted with above
+    more commands
+```
 
 
 ~~# X how should whitespaces, etc. be handled?~~
