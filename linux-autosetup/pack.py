@@ -58,6 +58,8 @@ class Runner:
         """
         Run the given command(s) through the shell along with any arguments.
 
+        If sudo_loop is True, run sudo_validate() every 5 seconds until process terminates.
+
         :param cmd:     String of command(s) to run.
         :param args:    Optional arguments to supply to the shell.
         :return:        Return-code of running command(s).
