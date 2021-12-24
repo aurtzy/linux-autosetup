@@ -54,4 +54,4 @@ if __name__ == '__main__':
     except KeyError:
         print('wow')
         exit()
-    thing.run('echo $1\necho $2 $HOME')#, ['hello!', 'param 2 c:'])
+    thing.run('sleep 10s')#, ['hello!', 'param 2 c:'])
