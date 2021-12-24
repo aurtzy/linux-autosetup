@@ -4,6 +4,8 @@ import pwd
 import shlex
 import time
 from subprocess import Popen
+from typing import TypedDict
+from enum import Enum
 
 
 class Runner:
@@ -70,7 +72,9 @@ class Runner:
                 def set_ids():
                     os.initgroups(self.target_user['uname'], self.target_user['gid'])
                     os.setuid(self.target_user['uid'])
+
                 return set_ids()
+
             p = Popen([cmd, ''] + args,
                       preexec_fn=get_set_ids(), universal_newlines=True, shell=True, env=self.target_user['env'])
         else:
@@ -80,3 +84,45 @@ class Runner:
                 self.sudo_validate()
                 time.sleep(5)
         return p.returncode
+
+
+class AppSettings(TypedDict):
+    apps: list[str]
+    install_type: str
+
+
+class FileSettings(TypedDict):
+    files: list[str]
+    backup_type: str
+    backup_paths: list[str]
+    backup_keep: int
+    dump_dir: str
+    tmp_dir: str
+
+
+class CustomSettings(TypedDict):
+    install_cmd: str
+    backup_cmd: str
+
+
+class ErrorHandling(Enum):
+    PROMPT = 1
+    SKIP = 2
+    ABORT = 3
+
+    def __str__(self):
+        return self.name
+
+
+class Settings(TypedDict):
+    extends: list[str]
+    depends: list[str]
+    apps: AppSettings
+    files: FileSettings
+    error_handling: ErrorHandling
+
+
+class Pack:
+
+    fallback_settings = Settings()
+    var_string = '//'
