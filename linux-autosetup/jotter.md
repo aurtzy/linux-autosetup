@@ -1,12 +1,34 @@
-if using python...
+# file organization
+
+linux-autosetup.py
+    option handling
+        option idea: "compile" script or something, which checks validity of config (not of commands; not sure
+                      if that would even be possible)
+    script information
+    prompt user to set all directory/sub-directory permissions as read-only or pass an option
+        to the script to run without these permissions set
+    prompt user to run with root permissions if not root when entering autosetup
+
+pack.py
+    module that hosts all pack stuff
+
+config_parser.py
+    installs yaml if doesn't exist and then imports it
+    reads config and passes correct arguments to create pack objects
+
+config.yaml
+    yes
+
+
+# BACKUP FUNCTIONS!!
+
+forgot that backup cmds were actually functions before... how to approach?
+
+functions would be written to take in parameters,
+with pack backup methods handling the moving around.
 
 
 # YAML has something called 'anchors', which may be useful to include
-
-
-# Vars
-
-probably won't do local inheriting or anything like that with this - unnecessarily complex
 
 
 # possibility of expired sudo?
@@ -16,6 +38,9 @@ is this handled by Popen.communicate? is it persisent, or only does it once?
 
 if it's not persistent, maybe have to run the subprocess as root somehow; maybe ```sudo bash ...```
 https://stackoverflow.com/questions/61363152/how-to-open-process-with-root-privileges-using-subprocess-popen
+
+OR another way to handle this could be to set sudo timeout to be infinite: 
+https://askubuntu.com/questions/155791/how-do-i-sudo-a-command-in-a-script-without-being-asked-for-a-password
 
 
 # QoL ideas
@@ -92,7 +117,36 @@ backup_type:
 ```
 
 
-## X big issue to figure out - overall design of objects and organization of data
+# X group handling - "groups" should be fine, but how to include in config?
+
+should groups be in a separate config file?
+
+```---``` can be used to technically separate config files somehow - might be useful?
+
+or, should groups be a field in each "app"/"archive" object that
+can be added instead? sounds like a decent idea, but don't like
+the repetitive nature of having to write group names multiple times - could
+be prone to errors which can't really be handled by the script
+
+OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
+
+HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
+to more than one group, BUT still might be preferred due to it being actually possible
+to detect and debug
+
+
+
+# OLD #
+
+
+~~# X how should whitespaces, etc. be handled?~~
+need a consistent, clear, and easy system for handling edge cases
+e.g. filename ```  file-with-2-spaces-in-front.a``` or ```"fil;'e"```
+
+```shlex``` module will help a lot with creating compatible strings
+
+
+~~## X big issue to figure out - overall design of objects and organization of data~~
 
 switching config files should be relatively easy, BUT i think
 config file switches should be meant for sharing configs
@@ -108,31 +162,38 @@ quite nice
 draft can be found in test_config.yaml
 
 
-# X how should whitespaces, etc. be handled?
-need a consistent, clear, and easy system for handling edge cases
-e.g. filename ```  file-with-2-spaces-in-front.a``` or ```"fil;'e"```
+~~# sudoing endeavour & running stuff~~
 
-```shlex``` module will help a lot with creating compatible strings
-
-
-# X group handling - "groups" should be fine, but how to include in config?
-
-should groups be in a separate config file?
-
-or, should groups be a field in each "app"/"archive" object that
-can be added instead? sounds like a decent idea, but don't like
-the repetitive nature of having to write group names multiple times - could
-be prone to errors which can't really be handled by the script
-
-OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
-
-HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
-to more than one group, BUT still might be preferred due to it being actually possible
-to detect and debug
+if fed a list with shell=True, Popen treats the first arg as the command and the rest as args to the shell so backup
+functions could work very similarly to how the original bash script did it
 
 
+this time will (partially) ignore minor security concerns, but once again:
 
-# ANSWERED AND IMPLEMENTED/DROPPED #
+running entire script as sudo:
+requires commands that aren't run as sudo to be reduced to not run as sudo.
+or not?
+option of either:
+    requiring sudo -u USER to be specified (which i don't like), OR
+    - appending 'sudo -u %s' % os.getlogin() or similar to the start of every line 
+      when running commands
+      drawback? - how to handle potential lines with commands separated with ';'
+        ~~can be handled by (roughly) finding shlex.split() with last ';' and excluding those with quotes after them in cmd~~
+        ~~might just require commands be written as multi-line~~
+        ~~shlex has a way to make this very easy! puncuation_chars=True will have ';' be an element in list if present~~
+
+NO RUN ENTIRELY AS SUDO!!!
+no need for sudo loop, or saving password; nothing like that!
+just create```sudo -v``` subprocesses throughout the script to refresh! Runner (name pending?) WILL be another class,
+ in which there will be a validate() method that will simply require the coder to guarantee a ```sudo -v```
+ at least once every... 5 minutes. if user has to deal with a prompt due to error or something, do a
+ validation immediately after instead of refreshing while script waits.
+user could also be prompted at beginning for what user they want the script to act as.
+
+
+~~# Vars~~
+
+probably won't do local inheriting or anything like that with this - unnecessarily complex
 
 
 ~~# SPLIT UP INSTALL/BACKUP settings?~~
@@ -189,7 +250,7 @@ leaning towards packages
 packs?
 
 
-[X] # X how will config files be used?
+~~# X how will config files be used?~~
 
 https://martin-thoma.com/configuration-files-in-python/
 above link has some ideas.
@@ -257,7 +318,7 @@ def run(cmd: str) -> int:
 it seems... i have found a way to do NOT running with sudo.
 
 
-[X] # X handling passing arguments from python to bash - how to fix bad characters and whitespaces separating strings?
+~~# X handling passing arguments from python to bash - how to fix bad characters and whitespaces separating strings?~~
 
 mention in documentation that paths in config must be properly escaped and should function normally in bash
 arguments should be surrounded in single-quotes, with any apostrophes replaced with ```'\\''```:
@@ -271,7 +332,7 @@ arguments should be surrounded in single-quotes, with any apostrophes replaced w
     ```
 
 
-[X] # X how will running bash commands from python work?
+~~# X how will running bash commands from python work?~~
 
 os.system will be helpful
 
