@@ -12,12 +12,55 @@ linux-autosetup.py
 pack.py
     module that hosts all pack stuff
 
+interactive.py
+    stuff that does most interaction with user
+
 config_parser.py
     installs yaml if it isn't installed and then imports it
     parses config and provides proper arguments to create pack objects
 
 config.yaml
     yes
+
+
+# settings - how to implement?
+
+numero uno most obvious is dump them all in Pack class - definitely not.
+
+slightly more sophisticated than above would be to follow the structure a bit
+what we have right now would mean something like:
+```
+class:
+    extends =
+    depends =
+    apps = {
+        list:
+        install_type:
+    }
+    ...
+```
+
+is above satisfactory? maybe not. at least, not worth the potential extra work.
+the config parser will take care of feeding the right values!! so,
+we could technically just pass a "settings" variable and not bother with scattered values. 
+
+two ways to do this?:
+    - settings variable could just be a dictionary of the values, plain simple.
+    - settings variable could also be an instance of a settings class, which might also be a good
+      idea considering each value has to be parsed individually regardless - or... does it? nevermind.
+case(s) to consider -
+ - printing. i think... after finally settling on a decent organization of files, this may not be a big deal,
+   and dedicating a class to it would just move the problem somewhere else.
+ - no other seemingly major case.
+typed dictionary it is, then.
+
+trouble.
+
+where to implement what? trying to write Settings TypedDict, but since it technically has the special TypedDicts (e.g. apps)
+in there too, i can't put them in a class together which makes them unable to read each other for some reason,
+and i don't want to litter the global module space - although not that terrible. reason to not was i thought it would
+be insecure due to the Runner class being exposed if importing everything, but it doesn't seem like that huge
+of a deal - actually, i think i'd need to call it from another module anyways, so this might be okay.
 
 
 # subprocesses currently keep running after script terminates, including with ctrl+c - what do?

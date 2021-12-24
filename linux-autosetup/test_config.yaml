@@ -69,15 +69,15 @@ packs:
                     /home///USER/Documents/backups/etc
                     path/with spaces/and-quotes/at end "
             custom:
-                # /INSTALL_APPS & /INSTALL_FILES
-                # can be used in install_cmd, organized however. automatically place at bottom if not found.
+                # //INSTALL_APPS & //INSTALL_FILES
+                # can be used in install_cmd, organized however wanted. automatically place at bottom if not found.
                 install_cmd: |
                     some_command
-                    /INSTALL_APPS
-                    /INSTALL_FILES
-                # same as install_cmd, except with /BACKUP_FILES
+                    //INSTALL_APPS
+                    //INSTALL_FILES
+                # same as install_cmd, except with //BACKUP_FILES
                 backup_cmd: |
-                    /BACKUP_FILES
+                    //BACKUP_FILES
 
 # wip
 pack_groups:
