@@ -1,38 +1,5 @@
 
-# allow for different cases of types which i can put some effort in making conversions
-# e.g. if apps is str, convert to list[str], but accept list[str] too here.
-pack1:
-    ubuntu:
-        # accept only str - if only one line, then use split(); if more than one, then split by '\n'
-        extend: debian popos
-        apps: app1 app2 app3
-        backup_sources: dez/nutz
-        # settings and commands could be instances of separate classes??
-        settings:
-            app_install_type: FLATPAK
-            backup_type: COPY
-            backup_paths: source/path
-            backup_keep: 1
-            dump_dir: /tmp/linux-autosetup-dump
-            tmp_dir: /tmp
-            var_str: '$%s$'
-            error_handling: something # can just be a string... or enum? figure out whether importing is big deal
-        commands:
-
-            # would be equivalent to just having
-            # echo someothercommand
-            # the two commands can by default be attached at the bottom like this
-            # if not found in custom cmd and they exist
-            custom_install_cmd: |
-                echo someothercommand
-                $app_install_cmd$
-                $backup_install_cmd$
-            custom_backup_cmd: |
-                ...
-        vars:
-            # BY DEFAULT, ALL SETTINGS ARE ASSIGNED TO VARS BY SAME NAME
-
-_______________
+######################
 
 # NOTES:
 # CONVERTING STR, LIST[STR] for values that should be list[str], allowing both str or list[str]
@@ -47,6 +14,8 @@ _______________
 #     one exists obscurely in a pack - however, give user an option to enter a custom one by -> #custom_default
 # PIPES SHOULD BE DETECTED WHEN running commands to give Popen correct arguments. this should remedy
 #     having to hard-code the backup types and alows for different names if users want
+# YAML SYNTAX RESOURCES:
+#    https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
 
 predefined:
     app_install_types:
@@ -91,16 +60,26 @@ packs:
     custom_extra_special_pack_that_shows_off_some_special_stuff:
         popos:
             extends: ubuntu
+            depends:
             files:
+                # //VAR can represent reserved aliases that will be substituted in script
+                # //USER seems like the only useful one right now
+                # each line will be run through shlex.quote(), so there is no need to make each line shell-compliant
                 list: |
-                    //HOME/Documents/backups/etc        # "//HOME" can be used as a substitution for the "target" user from the prompt at start of script
-                    path/with spaces/and-quotes/at end" # each line will be run through shlex.quote(), so there is no need to make these shell-compliant (sort of; think it is still possible to error)
+                    /home///USER/Documents/backups/etc
+                    path/with spaces/and-quotes/at end "
             custom:
+                # /INSTALL_APPS & /INSTALL_FILES
+                # can be used in install_cmd, organized however. automatically place at bottom if not found.
                 install_cmd: |
-                    //app_install_cmd
-                    //file_install_cmd
+                    some_command
+                    /INSTALL_APPS
+                    /INSTALL_FILES
+                # same as install_cmd, except with /BACKUP_FILES
                 backup_cmd: |
-                    //file_backup_cmd
+                    /BACKUP_FILES
+
+# wip
+pack_groups:
 
 
-pack_groups: # ? not given much thought about yet
