@@ -2,6 +2,7 @@ import getpass
 import os
 import pwd
 import shlex
+import time
 from subprocess import Popen
 
 
@@ -38,7 +39,7 @@ class Runner:
         self.has_target_user = target_user is not None
         self.sudo_loop = sudo_loop
 
-        #self.sudo_validate()
+        self.sudo_validate()
 
     def sudo_validate(self):
         """
@@ -47,6 +48,9 @@ class Runner:
         This should be used in conjunction with a loop to ensure sudo does not expire
         while commands are being run, which
         """
+        # TODO: REMOVE RETURN BELOW WHEN NOT TESTING
+        print("sudo -v would run right now.")
+        return
         if not self.is_root:
             Popen(['sudo', '-v']).wait()
 
@@ -69,5 +73,8 @@ class Runner:
                       preexec_fn=get_set_ids(), universal_newlines=True, shell=True, env=self.target_user['env'])
         else:
             p = Popen([cmd, ''] + args, universal_newlines=True, shell=True)
-        p.communicate()
+        if self.sudo_loop:
+            while p.poll() is None:
+                self.sudo_validate()
+                time.sleep(5)
         return p.returncode
