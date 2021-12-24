@@ -2,7 +2,7 @@
 
 linux-autosetup.py
     option handling
-        option idea: "compile" script or something, which checks validity of config (not of commands; not sure
+        option idea: "check_test" script or something, which checks validity of config (not of commands; not sure
                       if that would even be possible)
     script information
     prompt user to set all directory/sub-directory permissions as read-only or pass an option
@@ -20,18 +20,6 @@ config.yaml
     yes
 
 
-~~# possibility of expired sudo?~~
-
-if a cmd string contains multiple commands with sudo, sudo might expire without another prompt to enter in.
-is this handled by Popen.communicate? is it persisent, or only does it once?
-
-if it's not persistent, maybe have to run the subprocess as root somehow; maybe ```sudo bash ...```
-https://stackoverflow.com/questions/61363152/how-to-open-process-with-root-privileges-using-subprocess-popen
-
-OR another way to handle this could be to set sudo timeout to be infinite: 
-https://askubuntu.com/questions/155791/how-do-i-sudo-a-command-in-a-script-without-being-asked-for-a-password
-
-
 # QoL ideas
 
 - print "last updated" config time at beginning
@@ -42,7 +30,29 @@ https://askubuntu.com/questions/155791/how-do-i-sudo-a-command-in-a-script-witho
 - strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
 
 
-# X handling backup methods
+# X group handling - "groups" should be fine, but how to include in config?
+
+should groups be in a separate config file?
+
+```---``` can be used to technically separate config files somehow - might be useful?
+
+or, should groups be a field in each "app"/"archive" object that
+can be added instead? sounds like a decent idea, but don't like
+the repetitive nature of having to write group names multiple times - could
+be prone to errors which can't really be handled by the script
+
+OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
+
+HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
+to more than one group, BUT still might be preferred due to it being actually possible
+to detect and debug
+
+
+
+# OLD #
+
+
+~~# X handling backup methods~~
 
 ~~right now backup types are hardcoded enums, which makes it difficult to expand if someone wants to use different methods~~
 
@@ -77,26 +87,16 @@ backup_type:
 ```
 
 
-# X group handling - "groups" should be fine, but how to include in config?
+~~# possibility of expired sudo?~~
 
-should groups be in a separate config file?
+if a cmd string contains multiple commands with sudo, sudo might expire without another prompt to enter in.
+is this handled by Popen.communicate? is it persisent, or only does it once?
 
-```---``` can be used to technically separate config files somehow - might be useful?
+if it's not persistent, maybe have to run the subprocess as root somehow; maybe ```sudo bash ...```
+https://stackoverflow.com/questions/61363152/how-to-open-process-with-root-privileges-using-subprocess-popen
 
-or, should groups be a field in each "app"/"archive" object that
-can be added instead? sounds like a decent idea, but don't like
-the repetitive nature of having to write group names multiple times - could
-be prone to errors which can't really be handled by the script
-
-OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
-
-HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
-to more than one group, BUT still might be preferred due to it being actually possible
-to detect and debug
-
-
-
-# OLD #
+OR another way to handle this could be to set sudo timeout to be infinite: 
+https://askubuntu.com/questions/155791/how-do-i-sudo-a-command-in-a-script-without-being-asked-for-a-password
 
 
 ~~# X how to tell whether install_cmd should be run?~~
