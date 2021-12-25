@@ -45,7 +45,7 @@ class Runner:
     @staticmethod
     def sudo_loop():
         """
-        Meant to be run in a separate thread - threading.Thread(target=sudo_loop)
+        Meant to be run in a separate thread - e.g. threading.Thread(target=sudo_loop)
 
         Loop sudo validate every 5 seconds.
 
