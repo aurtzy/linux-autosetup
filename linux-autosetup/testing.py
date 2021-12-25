@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     sys.tracebacklimit = 0  # None if --debug option is present else 0
     try:
-        with open('test_config.yaml', 'r') as file:
+        with open('config.yaml', 'r') as file:
             config = yaml.safe_load(file)
         file.close()
     except yaml.YAMLError as error:
