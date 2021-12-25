@@ -126,6 +126,7 @@ class Settings(TypedDict):
     depends: list[str]
     apps: typing.Union[AppSettings, None]
     files: typing.Union[FileSettings, None]
+    custom: typing.Union[CustomSettings, None]
     error_handling: ErrorHandling
 
 
