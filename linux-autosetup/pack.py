@@ -1,3 +1,4 @@
+import re
 import typing
 from typing import TypedDict
 from enum import Enum
@@ -88,18 +89,10 @@ class CustomSettings(TypedDict):
     Custom install/backup commands that allow wider flexibility with
     running commands.
 
-    Can make use of aliases, which are defined by appending Pack.var_string to the var name
-    (e.g. INSTALL_APPS alias would be defined as "//INSTALL_APPS" in install_cmd.
-
     install_cmd: str
         Command(s) that will be run when calling install() after substituting aliases.
-        Defines the following aliases:
-            INSTALL_APPS : app install command designated by apps['install_type']
-            INSTALL_FILES : files install command designated by files['backup_type']
     backup_cmd: str
         Command(s) that will be run when calling backup() after substituting aliases.
-        Defines the following aliases:
-            BACKUP_FILES : files backup command designated by files['backup_type']
     """
     install_cmd: str
     backup_cmd: str
@@ -142,23 +135,29 @@ class Pack:
     def __init__(self, name: str, settings: Settings):
         self.name = name
         self.settings = settings
+
+        # TODO: set up aliases here?
         self.is_installed = False
         self.is_backed_up = False
         packs.append(self)
+
 
     def install(self, runner: Runner) -> bool:
         """
         Performs an installation of the pack.
 
+        Command subprocesses are separated by delimiters "\n\n" or " \\\n".
+
+        Makes use of aliases, which are defined by appending Pack.alias_prefix to the alias name
+        (e.g. INSTALL_APPS alias would be defined as "//INSTALL_APPS" in cmds.
+
+        Substitutes the following aliases:
+            INSTALL_APPS : App install command designated by apps['install_type']
+            INSTALL_FILES : File install command designated by files['backup_type']['EXTRACT']
+
         :param runner: Runner object to run commands from.
         :return: True if any errors occurred; False otherwise.
         """
-        # TODO: THIS DOES NOT CURRENTLY HANDLE INSTALLING BACKUPS. MUST SPLIT INSTALL CMD INTO 2-3 PIECES TO RUN
-        # IDEA: IF THERE IS AN EMPTY LINE BETWEEN COMMANDS, RUN THEM IN SEPARATE PROCESSES AS INDICATION
-        # OF SEPARATE COMMANDS
-        # OR: IF USER WANTS MULTILINED, USE ESCAPE CHARACTER
-        # at the end of each line, user can use \ to indicate the next line should be part of the same string
-        # just searched up, \ is perfect for this. search for something like " \\n" to indicate multilines
         if self.is_installed:
             return True
 
@@ -168,40 +167,34 @@ class Pack:
                     pack.install(runner)
 
         alias_prefix = Predefined.alias_prefix
+        apps = self.settings['apps']['apps'] if self.settings['apps'] else None
+        install_apps_cmd = Predefined.app_install_types[self.settings['apps']['install_type']] \
+                           if apps is not None else ''
+        files = self.settings['files']['files'] if self.settings['files'] else None
+        install_files_cmd = Predefined.file_backup_types[self.settings['files']['backup_type']]['EXTRACT'] \
+                            if files is not None else ''
 
-        install_cmd = self.settings['custom']['install_cmd'] if self.settings['custom'] else ''
+        cmds = self.settings['custom']['install_cmd'] if self.settings['custom'] \
+            else f'{alias_prefix}INSTALL_APPS\n\n{alias_prefix}INSTALL_FILES'
 
-        if '%sINSTALL_APPS' % alias_prefix not in install_cmd:
-            install_cmd += '\n%sINSTALL_APPS' % alias_prefix
-        if '%sINSTALL_FILES' % alias_prefix not in install_cmd:
-            install_cmd += '\n%sINSTALL_FILES' % alias_prefix
-
-        if self.settings['apps']:
-            app_settings: AppSettings = self.settings['apps']
-            install_cmd.replace('%sINSTALL_APPS' % alias_prefix,
-                                Predefined.app_install_types[app_settings['install_type']])
-            apps = app_settings['apps']
-        else:
-            install_cmd.replace('%sINSTALL_APPS' % alias_prefix, '')
-            apps = []
-
-        if self.settings['files']:
-            file_settings: FileSettings = self.settings['files']
-            install_cmd.replace('%sINSTALL_FILES' % alias_prefix,
-                                Predefined.file_backup_types[file_settings['backup_type']]['EXTRACT'])
-        else:
-            install_cmd.replace('%sINSTALL_FILES' % alias_prefix, '')
-
-        success = runner.run(install_cmd, apps)
-        if success:
-            self.is_installed = True
-            return True
-        else:
-            return False
+        cmd_list = re.split('|'.join(map(re.escape, ['\n\n', ' \\\n'])), cmds)
+        for cmd in cmd_list:
+            if f'{alias_prefix}INSTALL_APPS' in cmd:
+                success = runner.run(cmd.replace(f'{alias_prefix}INSTALL_APPS', install_apps_cmd), apps)
+            elif f'{alias_prefix}INSTALL_FILES' in cmd:
+                success = runner.run(cmd.replace(f'{alias_prefix}INSTALL_FILES', install_files_cmd), files)
+            else:
+                success = runner.run(cmd)
+            if not success:
+                # TODO: error handling
+                return False
+        return True
 
     def backup(self) -> bool:
         """
         Performs a backup on the pack.
+
+        BACKUP_FILES : files backup command designated by files['backup_type']
 
         :param runner: Runner object to run commands from.
         :return: True if any errors occurred; False otherwise.
