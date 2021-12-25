@@ -2,6 +2,8 @@ import typing
 from typing import TypedDict
 from enum import Enum
 
+from runner import Runner
+
 
 class Predefined:
     """
@@ -133,21 +135,26 @@ class Pack:
 
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.is_installed = False
+        self.is_backed_up = False
         self.packs.append(self)
 
-    def install(self) -> bool:
+    def install(self, runner: Runner) -> bool:
         """
-        Installs the pack.
+        Performs an installation of the pack.
 
+        :param runner: Runner object to run commands from.
         :return: True if any errors occurred; False otherwise.
         """
-        # TODO
+
         return True
 
     def backup(self) -> bool:
         """
-        TODO: docs
-        :return:
+        Performs a backup on the pack.
+
+        :param runner: Runner object to run commands from.
+        :return: True if any errors occurred; False otherwise.
         """
         # TODO
         return True
