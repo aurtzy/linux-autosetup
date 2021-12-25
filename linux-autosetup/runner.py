@@ -84,7 +84,7 @@ class Runner:
         :param args:    Optional arguments to supply to the shell.
         :return:        Return-code of running command(s).
         """
-        args = args if args else ['']
+        args = args if args else []
         if self.target_user:
             def set_ids():
                 os.initgroups(self.target_user['uname'], self.target_user['gid'])
