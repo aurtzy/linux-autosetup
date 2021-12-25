@@ -86,4 +86,18 @@ class Pack:
     def __init__(self, settings: Settings):
         self.settings = settings
 
+    def install(self) -> bool:
+        """
+        TODO: docs
+        :return:
+        """
+        # TODO
+        return True
 
+    def backup(self) -> bool:
+        """
+        TODO: docs
+        :return:
+        """
+        # TODO
+        return True
