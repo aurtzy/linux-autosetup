@@ -132,13 +132,13 @@ class Settings(TypedDict):
 
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
-    packs = []
 
-    def __init__(self, settings: Settings):
+    def __init__(self, name: str, settings: Settings):
+        self.name = name
         self.settings = settings
         self.is_installed = False
         self.is_backed_up = False
-        self.packs.append(self)
+        packs.append(self)
 
     def install(self, runner: Runner) -> bool:
         """
@@ -159,3 +159,5 @@ class Pack:
         """
         # TODO
         return True
+
+packs: list[Pack] = []
