@@ -14,8 +14,9 @@ class Runner:
     Provides a means of running command strings and handles management of permission elevations.
 
     Limitations:
-        os.geteuid() may not produce desired results if a user with sufficient privileges is not
-        an actual root user.
+        Since is_root checks if the euid is 0, users may not be able to run as target users if they are not the
+        root user, even if they may have sufficient privileges to do so. This means
+        users are required to run the script as root if they want to target another user.
     """
     is_root = os.geteuid() == 0
 
@@ -26,7 +27,7 @@ class Runner:
                             will throw a KeyError if username cannot be associated with anything.
         :param sudo_loop:   Whether script should refresh sudo calls to avoid sudo timeout.
         """
-        if target_user != getpass.getuser():
+        if target_user and target_user != getpass.getuser():
             if not self.is_root:
                 raise Exception('Setting target users is only allowed if the script is run as root.')
             info = pwd.getpwnam(target_user)
@@ -125,12 +126,12 @@ class CustomSettings(TypedDict):
 
     install_cmd: str
         Command(s) that will be run when calling install() after substituting aliases.
-        The following aliases are defined:
+        Defines the following aliases:
             INSTALL_APPS : app install command designated by apps['install_type']
             INSTALL_FILES : files install command designated by files['backup_type']
     backup_cmd: str
         Command(s) that will be run when calling backup() after substituting aliases.
-        The following aliases are defined:
+        Defines the following aliases:
             BACKUP_FILES : files backup command designated by files['backup_type']
     """
     install_cmd: str
