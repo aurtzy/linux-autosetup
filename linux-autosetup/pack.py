@@ -76,7 +76,7 @@ class FileSettings(TypedDict):
         Designated directory to keep temporary files in.
     """
     files: list[str]
-    backup_type: typing.Union[str, dict[str, str]]
+    backup_type: str
     backup_paths: list[str]
     backup_keep: int
     dump_dir: str
