@@ -20,14 +20,16 @@ class Runner:
     def __init__(self, target_user: str = None, sudo_loop: bool = True):
         """
         :param target_user: The user to run commands under.
-                            Only allowed if the script is root, and
-                            will throw a KeyError if username cannot be associated with anything.
+                            Only allowed if the script is root.
         :param sudo_loop:   Whether script should refresh sudo calls to avoid sudo timeout.
         """
         if target_user and target_user != getpass.getuser():
-            if not self.is_root:
-                raise Exception('Setting target users is only allowed if the script is run as root.')
-            info = pwd.getpwnam(target_user)
+            assert self.is_root, 'Setting target users is only allowed if the script is run as root.'
+            try:
+                info = pwd.getpwnam(target_user)
+            except KeyError:
+                print('User %s does not exist.' % target_user)
+                raise
             self.target_user = dict(
                 uname=target_user,
                 gid=info.pw_gid,
