@@ -16,9 +16,6 @@ class Predefined:
     """
     alias_prefix = '//'
 
-    preinstall_cmd: str = ''
-    prebackup_cmd: str = ''
-
     app_install_types: dict[str, str] = {
         'FLATPAK': 'flatpak install -y --noninteractive $@'
     }
