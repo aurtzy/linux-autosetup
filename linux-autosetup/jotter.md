@@ -12,6 +12,9 @@ linux-autosetup.py
 pack.py
     module that hosts all pack stuff
 
+runner.py
+    Runner class
+
 interactive.py
     stuff that does most interaction with user
 
@@ -23,7 +26,42 @@ config.yaml
     yes
 
 
-# settings - how to implement?
+# QoL ideas
+
+- print "last updated" config time at beginning
+
+- X how to combine same-based distros?
+ using TAGS, associating a distro with others. the list of distros specified can be iterated through in order, to find entries in these other distros instead if the current one does not have an entry.
+
+- strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
+
+
+# X group handling - "groups" should be fine, but how to include in config?
+
+should groups be in a separate config file?
+
+```---``` can be used to technically separate config files somehow - might be useful?
+
+or, should groups be a field in each "app"/"archive" object that
+can be added instead? sounds like a decent idea, but don't like
+the repetitive nature of having to write group names multiple times - could
+be prone to errors which can't really be handled by the script
+
+OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
+
+HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
+to more than one group, BUT still might be preferred due to it being actually possible
+to detect and debug
+
+
+
+# OLD #
+
+
+~~# subprocesses currently keep running after script terminates, including with ctrl+c - what do?~~
+
+
+~~# settings - how to implement?~~
 
 numero uno most obvious is dump them all in Pack class - definitely not.
 
@@ -60,42 +98,7 @@ where to implement what? trying to write Settings TypedDict, but since it techni
 in there too, i can't put them in a class together which makes them unable to read each other for some reason,
 and i don't want to litter the global module space - although not that terrible. reason to not was i thought it would
 be insecure due to the Runner class being exposed if importing everything, but it doesn't seem like that huge
-of a deal - actually, i think i'd need to call it from another module anyways, so this might be okay.
-
-
-# subprocesses currently keep running after script terminates, including with ctrl+c - what do?
-
-
-# QoL ideas
-
-- print "last updated" config time at beginning
-
-- X how to combine same-based distros?
- using TAGS, associating a distro with others. the list of distros specified can be iterated through in order, to find entries in these other distros instead if the current one does not have an entry.
-
-- strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
-
-
-# X group handling - "groups" should be fine, but how to include in config?
-
-should groups be in a separate config file?
-
-```---``` can be used to technically separate config files somehow - might be useful?
-
-or, should groups be a field in each "app"/"archive" object that
-can be added instead? sounds like a decent idea, but don't like
-the repetitive nature of having to write group names multiple times - could
-be prone to errors which can't really be handled by the script
-
-OR, what if "groups" was a reserved config file entry that holds all the groups!?!?!? genius
-
-HOWEVER, this still kind of has repetitiveness in it, with maybe needing to add an app/archive
-to more than one group, BUT still might be preferred due to it being actually possible
-to detect and debug
-
-
-
-# OLD #
+of a deal - ~~actually, i think i'd need to call it from another module anyways, so this might be okay.~~
 
 
 ~~# X handling backup methods~~

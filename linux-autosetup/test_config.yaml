@@ -8,22 +8,21 @@
 # SETTINGS ALL HAVE GLOBAL VALUES now, including the now-defined app list and file list, being empty lists by default
 # "VALIDATE" OPTION (and maybe options for this option, e.g. "validate packs"?)?
 #     would parse config and print any possibly useful information
-# FALL BACK TO DEFAULTS when using any false-type values (e.g. '', [], null, False); makes it logical and easy to parse
-#     all settings should now be easily overridable like this
-# SCRIPT SHOULD FIND DISTROS BY looking through what is currently called DEFAULTS, regardless of if
+# SCRIPT SHOULD FIND DISTROS BY looking through what is currently called defaults, regardless of if
 #     one exists obscurely in a pack - however, give user an option to enter a custom one by -> #custom_default
 # PIPES SHOULD BE DETECTED WHEN running commands to give Popen correct arguments. this should remedy
 #     having to hard-code the backup types and alows for different names if users want
 # YAML SYNTAX RESOURCES:
 #    https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+# USE OF EXTENDS scrapped, however instead users can use built-in yaml anchors which would be just as good, if not better
 
 predefined:
+    alias_prefix: //
     app_install_types:
         APT: sudo apt --assume-yes install $@
         FLATPAK: flatpak install -y --noninteractive $@
         PACMAN: sudo pacman -S --noconfirm --needed $@
         PARU: paru -S --noconfirm --needed $@
-
     file_backup_types:
         COPY:
             EXTRACT: tar -xPf "$1.tar"
@@ -36,9 +35,10 @@ predefined:
             CREATE: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 
 packs:
-    DEFAULTS: # better names than DEFAULTS and FALLBACK?
-        FALLBACK:
-            extends: null
+    defaults:
+        fallback:
+
+        ubuntu:
             apps:
                 list: []
                 install_type: null
@@ -53,20 +53,15 @@ packs:
                 install_cmd: null
                 backup_cmd: null
             error_handling: PROMPT
-        ubuntu:
-            . . .
-        popos:
-            . . .
     custom_extra_special_pack_that_shows_off_some_special_stuff:
         popos:
-            extends: ubuntu
             depends:
             files:
                 # //VAR can represent reserved aliases that will be substituted in script
                 # //USER seems like the only useful one right now
                 # each line will be run through shlex.quote(), so there is no need to make each line shell-compliant
                 list: |
-                    /home///USER/Documents/backups/etc
+                    $HOME/Documents/backups/etc
                     path/with spaces/and-quotes/at end "
             custom:
                 # //INSTALL_APPS & //INSTALL_FILES

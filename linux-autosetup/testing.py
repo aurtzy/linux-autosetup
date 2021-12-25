@@ -1,7 +1,10 @@
 import os
+import shlex
 import subprocess
 import sys
 import pack
+import runner
+
 try:
     import yaml
 except ImportError:
@@ -49,9 +52,6 @@ if __name__ == '__main__':
     except yaml.YAMLError as error:
         raise yaml.YAMLError('There was an error reading config.') from error
 
-    try:
-        thing = pack.Runner('alvin')
-    except KeyError:
-        print('wow')
-        exit()
-    thing.run('sleep 10s')#, ['hello!', 'param 2 c:'])
+    thing = runner.Runner('alvin')
+
+    print(thing.run('ech hi! $1; echo no!; sleep 2s; asdf', ['man'])[1])
