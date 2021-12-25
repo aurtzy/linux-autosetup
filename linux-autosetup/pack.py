@@ -153,6 +153,12 @@ class Pack:
         :param runner: Runner object to run commands from.
         :return: True if any errors occurred; False otherwise.
         """
+        # TODO: THIS DOES NOT CURRENTLY HANDLE INSTALLING BACKUPS. MUST SPLIT INSTALL CMD INTO 2-3 PIECES TO RUN
+        # IDEA: IF THERE IS AN EMPTY LINE BETWEEN COMMANDS, RUN THEM IN SEPARATE PROCESSES AS INDICATION
+        # OF SEPARATE COMMANDS
+        # OR: IF USER WANTS MULTILINED, USE ESCAPE CHARACTER
+        # at the end of each line, user can use \ to indicate the next line should be part of the same string
+        # just searched up, \ is perfect for this. search for something like " \\n" to indicate multilines
         if self.is_installed:
             return True
 
