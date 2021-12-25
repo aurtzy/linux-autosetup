@@ -23,6 +23,12 @@ class Predefined:
     }
     file_backup_types: dict[str, dict[str, str]] = {
         'COPY': {
+            # TODO
+        },
+        'HARDLINK': {
+            # TODO
+        },
+        'TAR_COPY': {
             'EXTRACT': 'tar -xPf "$1.tar"',
             'CREATE': 'tar -cPf "$1.tar" "${@:2}"'
         },
