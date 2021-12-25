@@ -1,7 +1,6 @@
 import getpass
 import os
 import pwd
-import shlex
 import threading
 import time
 from subprocess import Popen
