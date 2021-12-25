@@ -147,8 +147,45 @@ class Pack:
         :param runner: Runner object to run commands from.
         :return: True if any errors occurred; False otherwise.
         """
+        if self.is_installed:
+            return True
 
-        return True
+        if self.settings['depends']:
+            for pack in packs:
+                if pack.name in self.settings['depends']:
+                    pack.install(runner)
+
+        alias_prefix = Predefined.alias_prefix
+
+        install_cmd = self.settings['custom']['install_cmd'] if self.settings['custom'] else ''
+
+        if '%sINSTALL_APPS' % alias_prefix not in install_cmd:
+            install_cmd += '\n%sINSTALL_APPS' % alias_prefix
+        if '%sINSTALL_FILES' % alias_prefix not in install_cmd:
+            install_cmd += '\n%sINSTALL_FILES' % alias_prefix
+
+        if self.settings['apps']:
+            app_settings: AppSettings = self.settings['apps']
+            install_cmd.replace('%sINSTALL_APPS' % alias_prefix,
+                                Predefined.app_install_types[app_settings['install_type']])
+            apps = app_settings['apps']
+        else:
+            install_cmd.replace('%sINSTALL_APPS' % alias_prefix, '')
+            apps = []
+
+        if self.settings['files']:
+            file_settings: FileSettings = self.settings['files']
+            install_cmd.replace('%sINSTALL_FILES' % alias_prefix,
+                                Predefined.file_backup_types[file_settings['backup_type']]['EXTRACT'])
+        else:
+            install_cmd.replace('%sINSTALL_FILES' % alias_prefix, '')
+
+        success = runner.run(install_cmd, apps)
+        if success:
+            self.is_installed = True
+            return True
+        else:
+            return False
 
     def backup(self) -> bool:
         """
