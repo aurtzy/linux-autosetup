@@ -2,8 +2,8 @@ import getpass
 import os
 import pwd
 import shlex
+import threading
 import time
-import typing
 from subprocess import Popen
 from typing import TypedDict
 from enum import Enum
@@ -40,22 +40,39 @@ class Runner:
         else:
             self.target_user = None
         self.has_target_user = target_user is not None
-        self.sudo_loop = sudo_loop
+        if sudo_loop:
+            threading.Thread(target=Runner.sudo_loop).start()
 
-        self.sudo_validate()
-
-    def sudo_validate(self):
+    @staticmethod
+    def sudo_loop():
         """
-        Validate sudo, prompting password if necessary and refreshing timeout.
+        Meant to be run in a separate thread - threading.Thread(target=sudo_loop)
+
+        Loop sudo validate every 5 seconds.
+
+        Sudo may prompt for a password at call start.
 
         This should be used in conjunction with a loop to ensure sudo does not expire
-        while commands are being run, which
+        while commands are being run.
+        :return: Popen validation process if self.is_root; else None
         """
-        # TODO: REMOVE RETURN BELOW WHEN NOT TESTING
-        print("sudo -v would run right now.")
-        return
-        if not self.is_root:
-            Popen(['sudo', '-v']).wait()
+        def sleep():
+            i = 0.0
+            while i < 5:
+                if not threading.main_thread().is_alive():
+                    break
+                time.sleep(0.5)
+                i += 0.5
+        sleeper = threading.Thread(target=sleep)
+        while True:
+            if not threading.main_thread().is_alive():
+                break
+            if not sleeper.is_alive():
+                # TODO: FIX COMMENT AND REMOVE BELOW WHEN NOT A NUISANCE
+                Popen('echo sudo_loop', shell=True)
+                #Popen(['sudo', '-v']).wait()
+                sleeper = threading.Thread(target=sleep)
+                sleeper.start()
 
     def run(self, cmd: str, args: list[str] = None) -> int:
         """
@@ -69,21 +86,18 @@ class Runner:
         """
         args = list(map(lambda x: shlex.quote(x), args)) if args else ['']
         if self.target_user:
-            def get_set_ids():
-                def set_ids():
-                    os.initgroups(self.target_user['uname'], self.target_user['gid'])
-                    os.setuid(self.target_user['uid'])
-
-                return set_ids()
-
+            def set_ids():
+                os.initgroups(self.target_user['uname'], self.target_user['gid'])
+                os.setuid(self.target_user['uid'])
             p = Popen([cmd, ''] + args,
-                      preexec_fn=get_set_ids(), universal_newlines=True, shell=True, env=self.target_user['env'])
+                      preexec_fn=set_ids, universal_newlines=True, shell=True, env=self.target_user['env'])
         else:
             p = Popen([cmd, ''] + args, universal_newlines=True, shell=True)
-        if self.sudo_loop:
-            while p.poll() is None:
-                self.sudo_validate()
-                time.sleep(5)
+        try:
+            p.communicate()
+        except KeyboardInterrupt:
+            p.terminate()
+            exit('\nAborting.')
         return p.returncode
 
 
