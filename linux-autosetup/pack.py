@@ -6,56 +6,14 @@ from enum import Enum
 from runner import Runner
 
 
-class Predefined:
-    """
-    Predefined modifiable values.
-
-    alias_prefix: str
-        Used as a prefix to alias names in strings. Indicates substitution with aliases.
-    app_install_types: dict[str, str]
-        Types of install commands that can be used.
-    file_backup_types: dict[str, dict[str, str]]
-        Types of file install/backup commands that can be used.
-    """
-    alias_prefix = '//'
-
-    app_install_types: dict[str, str] = {
-        'FLATPAK': 'flatpak install -y --noninteractive $@'
-    }
-    file_backup_types: dict[str, dict[str, str]] = {
-        'COPY': {
-            # TODO
-        },
-        'HARDLINK': {
-            # TODO
-        },
-        'TAR_COPY': {
-            'EXTRACT': 'tar -xPf "$1.tar"',
-            'CREATE': 'tar -cPf "$1.tar" "${@:2}"'
-        },
-        'COMPRESS': {
-            'EXTRACT': 'tar -xPf "$1.tar.xz"',
-            'CREATE': 'tar -cJPf "$1.tar.xz" "${@:2}"'
-        },
-        'ENCRYPT': {
-            'EXTRACT': 'openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | '
-                       'tar -xPf -',
-            'CREATE': 'tar - cJPf - "${@:2}" | '
-                      'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
-        }
-    }
-
-
 class AppSettings(TypedDict):
     """
     App-specific settings.
 
-    apps: list[str]
-        List of apps.
     install_type: str
-        Indicates type of install command to use. Key to Predefined.app_install_types dictionary.
+        Indicates type of install command to use.
+        Key to Predefined.app_install_types dictionary.
     """
-    apps: list[str]
     install_type: str
 
 
@@ -63,12 +21,9 @@ class FileSettings(TypedDict):
     """
     File-specific settings.
 
-    files: list[str]
-        List of files.
-    backup_type: str | dict[str, str]
+    backup_type: str
         Indicates type of backup is performed.
         A str represents a key to Predefined.file_backup_types dictionary.
-        A dict[str, str] denotes a custom-defined backup type.
     backup_keep: int
         Number of old backups to keep before dumping.
     dump_dir: str
@@ -76,26 +31,11 @@ class FileSettings(TypedDict):
     tmp_dir: str
         Designated directory to keep temporary files in.
     """
-    files: list[str]
     backup_type: str
     backup_paths: list[str]
     backup_keep: int
     dump_dir: str
     tmp_dir: str
-
-
-class CustomSettings(TypedDict):
-    """
-    Custom install/backup commands that allow wider flexibility with
-    running commands.
-
-    install_cmd: str
-        Command(s) that will be run when calling install() after substituting aliases.
-    backup_cmd: str
-        Command(s) that will be run when calling backup() after substituting aliases.
-    """
-    install_cmd: str
-    backup_cmd: str
 
 
 class ErrorHandling(Enum):
@@ -115,17 +55,28 @@ class Settings(TypedDict):
     depends: list[str]
         List of pack names that the pack depends on, which should be installed first.
         Relevant when calling install().
-    apps: AppSettings | NoneType
-        App-related settings.
-    files: FileSettings | NoneType
-        File-related settings.
+    apps: list[str]
+        Apps to be assigned to the pack.
+    app_settings: AppSettings | NoneType
+        Custom app-related settings. Set to None when apps is an empty list.
+    files: list[str]
+        Files to be assigned to the pack.
+    file_settings: FileSettings | NoneType
+        Custom file-related settings. Set to None when files is an empty list.
+    install_cmd: str
+        Custom string of command(s) that will be run when calling install method.
+    backup_cmd: str
+        Custom string of command(s) that will be run when calling backup method.
     error_handling: ErrorHandling
         Indicates how script will handle errors.
     """
     depends: list[str]
-    apps: typing.Union[AppSettings, None]
-    files: typing.Union[FileSettings, None]
-    custom: typing.Union[CustomSettings, None]
+    apps: list[str]
+    app_settings: typing.Union[AppSettings, None]
+    files: list[str]
+    file_settings: typing.Union[FileSettings, None]
+    install_cmd: str
+    backup_cmd: str
     error_handling: ErrorHandling
 
 
