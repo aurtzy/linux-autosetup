@@ -13,12 +13,19 @@ class Predefined:
 
     alias_prefix: str
         Used as a prefix to alias names in strings. Indicates substitution with aliases.
+    move_cmd: str
+        Shell command used for moving files.
+    copy_cmd: str
+        Shell command used for copying files.
     AppInstallTypes: Enum
         Types of install commands that can be used.
     FilesBackupTypes: Enum
         Types of file install/backup commands that can be used.
     """
-    alias_prefix = '//'
+    alias_prefix: str
+
+    move_cmd: str
+    copy_cmd: str
 
     class AppInstallTypes(Enum):
         def __str__(self):
@@ -42,6 +49,9 @@ class Predefined:
 
 
 # TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
+Predefined.alias_prefix = '//'
+Predefined.move_cmd = 'mv'
+Predefined.copy_cmd = 'cp -a'
 Predefined.set_app_install_types({
     'FLATPAK': 'flatpak install -y --noninteractive $@'
 })
