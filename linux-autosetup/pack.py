@@ -143,65 +143,22 @@ class Settings(TypedDict):
     error_handling: ErrorHandling
 
 
-class Predefined:
-    """
-    Predefined modifiable values.
-
-    alias_prefix: str
-        Used as a prefix to alias names in strings. Indicates substitution with aliases.
-    app_install_types: dict[str, str]
-        Types of install commands that can be used.
-    file_backup_types: dict[str, dict[str, str]]
-        Types of file install/backup commands that can be used.
-    fallback_settings: Settings
-        Fallback settings for use with a config parser.
-        Some default values are meant to raise errors since they may
-        not have a sane default that can be set without user intervention.
-    """
-    alias_prefix = '//'
-
-    app_install_types: dict[str, str] = {
-        'FLATPAK': 'flatpak install -y --noninteractive $@'
-    }
-
-    file_backup_types: dict[str, dict[str, str]] = {
-        'COPY': {
-            # TODO
-        },
-        'HARDLINK': {
-            # TODO
-        },
-        'TAR_COPY': {
-            'EXTRACT': 'tar -xPf "$1.tar"',
-            'CREATE': 'tar -cPf "$1.tar" "${@:2}"'
-        },
-        'COMPRESS': {
-            'EXTRACT': 'tar -xPf "$1.tar.xz"',
-            'CREATE': 'tar -cJPf "$1.tar.xz" "${@:2}"'
-        },
-        'ENCRYPT': {
-            'EXTRACT': 'openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | '
-                       'tar -xPf -',
-            'CREATE': 'tar - cJPf - "${@:2}" | '
-                      'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
-        }
-    }
-
-    fallback_settings: Settings = Settings(depends=[],
-                                           apps=[],
-                                           app_settings=AppSettings(
-                                               install_type=''),
-                                           files=[],
-                                           file_settings=FileSettings(
-                                               backup_type='',
-                                               backup_paths=['./backups'],
-                                               backup_keep=1,
-                                               dump_dir='/tmp/linux-autosetup-dump',
-                                               tmp_dir='/tmp/linux-autosetup'),
-                                           install_cmd='',
-                                           backup_cmd='',
-                                           error_handling=ErrorHandling.PROMPT
-                                           )
+# TODO: put this in configparser.py instead of pack.py
+fallback_settings: Settings = Settings(depends=[],
+                                       apps=[],
+                                       files=[],
+                                       app_settings=AppSettings(
+                                           install_type=None),
+                                       file_settings=FileSettings(
+                                           backup_type=Predefined.FileBackupTypes['COPY'],
+                                           backup_paths=['./backups'],
+                                           backup_keep=1,
+                                           dump_dir='/tmp/linux-autosetup-dump',
+                                           tmp_dir='/tmp/linux-autosetup'),
+                                       install_cmd='',
+                                       backup_cmd='',
+                                       error_handling=ErrorHandling['PROMPT']
+                                       )
 
 
 class Pack:
