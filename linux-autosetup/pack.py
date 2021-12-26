@@ -174,14 +174,44 @@ class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
     def __init__(self, name: str, settings: Settings):
-        self.name = name
-        self.settings = settings
+        """
+        This constructor will check for the following, raising any errors if necessary:
+            If the apps or files list are non-empty, their respective settings
+            should not be None. Otherwise, KeyError is raised.
 
-        # TODO: set up aliases here?
+            Makes an additional check for any values set to None in app/file settings if they exist,
+            which raises a ValueError.
+
+        :param name: Name of the pack.
+        :param settings: Pack settings. If None, fallback_settings will be used.
+        """
+        self.name = name
+        if settings['apps']:
+            app_settings: AppSettings = settings['app_settings']
+            if app_settings is None:
+                raise KeyError(f'{self.name} apps list is not empty. '
+                               f'Setting app_settings to None is only allowed when apps is an empty list.')
+            else:
+                for k, v in app_settings.items():
+                    if v is None:
+                        raise ValueError(f'The app setting {k} was undefined for {self.name}.')
+        else:
+            settings['app_settings'] = None
+        if settings['files']:
+            file_settings: FileSettings = settings['file_settings']
+            if file_settings is None:
+                raise KeyError(f'{self.name} files list is not empty. '
+                               f'Setting file_settings to None is only allowed when files is an empty list.')
+            else:
+                for k, v in file_settings.items():
+                    if v is None:
+                        raise ValueError(f'The file setting {k} was undefined for {self.name}.')
+        else:
+            settings['file_settings'] = None
+        self.settings = settings
         self.is_installed = False
         self.is_backed_up = False
         packs.append(self)
-
 
     def install(self, runner: Runner) -> bool:
         """
