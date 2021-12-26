@@ -41,44 +41,44 @@ class Runner:
             self.target_user = None
         self.has_target_user = target_user is not None
         if sudo_loop:
-            threading.Thread(target=Runner.sudo_loop).start()
+            self.sudo_loop()
 
     @staticmethod
     def sudo_loop():
         """
-        Meant to be run in a separate thread - e.g. threading.Thread(target=sudo_loop)
-
-        Loop sudo validate every 5 seconds.
-
+        Once called, loop sudo validate every 5 seconds until parent process dies.
         Sudo may prompt for a password at call start.
 
-        This should be used in conjunction with a loop to ensure sudo does not expire
-        while commands are being run.
-        :return: Popen validation process if self.is_root; else None
+        Raises PermissionError if the first sudo call is not successful.
         """
-        def sleep():
+        # TODO: FIX SUDO COMMENTS AND PLACEHOLDER ECHOS WHEN NOT A NUISANCE
+        p = Popen('echo sudo_loop called', shell=True)
+        p.communicate()
+        if p.returncode != 0:
+            raise PermissionError('oh no! sudo failed on the call??')
+
+        # p = Popen(['sudo', '-v'])
+        # p.communicate()
+        # if p.returncode != 0:
+        #   raise PermissionError('sudo could not validate.')
+
+        def sudo_loop_thread():
             i = 0.0
-            while i < 5:
+            while True:
                 if not threading.main_thread().is_alive():
                     break
-                time.sleep(0.5)
-                i += 0.5
-        sleeper = threading.Thread(target=sleep)
-        while True:
-            if not threading.main_thread().is_alive():
-                break
-            if not sleeper.is_alive():
-                # TODO: FIX COMMENT AND REMOVE BELOW WHEN NOT A NUISANCE
-                Popen('echo sudo_loop', shell=True)
-                #Popen(['sudo', '-v']).wait()
-                sleeper = threading.Thread(target=sleep)
-                sleeper.start()
+                if i >= 5.0:
+                    Popen('echo sudo_loop', shell=True)
+                    # Popen(['sudo', '-v']).wait()
+                    i = 0.0
+                else:
+                    time.sleep(0.5)
+                    i += 0.5
+        threading.Thread(target=sudo_loop_thread).start()
 
     def run(self, cmd: str, args: list[str] = None) -> int:
         """
         Run the given command(s) through the shell along with any arguments.
-
-        If sudo_loop is True, run sudo_validate() every 5 seconds until process terminates.
 
         :param cmd:     String of command(s) to run.
         :param args:    Optional arguments to supply to the shell.
@@ -89,6 +89,7 @@ class Runner:
             def set_ids():
                 os.initgroups(self.target_user['uname'], self.target_user['gid'])
                 os.setuid(self.target_user['uid'])
+
             p = Popen([cmd, ''] + args,
                       preexec_fn=set_ids, universal_newlines=True, shell=True, env=self.target_user['env'])
         else:
