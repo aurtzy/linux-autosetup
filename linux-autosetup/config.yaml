@@ -5,13 +5,10 @@
 # CONVERTING STR, LIST[STR] for values that should be list[str], allowing both str or list[str]
 #     1. single-line delims by space; 2. multi-line delims by \n; 3. list is list
 #     mention somewhere limits of 1. and 3. with quotes and special characters
-# SETTINGS ALL HAVE GLOBAL VALUES now, including the now-defined app list and file list, being empty lists by default
 # "VALIDATE" OPTION (and maybe options for this option, e.g. "validate packs"?)?
 #     would parse config and print any possibly useful information
 # SCRIPT SHOULD FIND DISTROS BY looking through what is currently called defaults, regardless of if
 #     one exists obscurely in a pack - however, give user an option to enter a custom one by -> #custom_default
-# PIPES SHOULD BE DETECTED WHEN running commands to give Popen correct arguments. this should remedy
-#     having to hard-code the backup types and alows for different names if users want
 # YAML SYNTAX RESOURCES:
 #    https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
 # USE OF EXTENDS scrapped, however instead users can use built-in yaml anchors which would be just as good, if not better
