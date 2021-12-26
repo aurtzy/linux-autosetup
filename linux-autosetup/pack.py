@@ -277,5 +277,26 @@ class Pack:
         # TODO
         return True
 
+    def __str__(self, verbose=True):
+        rtn = []
+
+        def append_dict(a_dict: dict, lvl: int):
+            for key, val in a_dict.items():
+                if isinstance(val, dict):
+                    rtn.append("\t" * lvl + f'{key}:')
+                    append_dict(val, lvl + 1)
+                else:
+                    rtn.append(('\t' * lvl) + f'{key}: ' + (f'\n{val}'.replace('\n', '\n' + '\t' * (lvl + 1))
+                                                            if isinstance(val, str) and '\n' in val else
+                                                            val.name if issubclass(type(val), Enum) else str(val)))
+
+        rtn += [f'name: {self.name}',
+                f'apps: {self.settings["apps"]}',
+                f'files: {self.settings["files"]}']
+        if verbose:
+            append_dict(self.settings, 0)
+
+        return '\n'.join(rtn)
+
 
 packs: list[Pack] = []
