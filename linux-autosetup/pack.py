@@ -1,4 +1,3 @@
-import enum
 import re
 import typing
 from typing import TypedDict
