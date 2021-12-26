@@ -1,9 +1,72 @@
+import enum
 import re
 import typing
 from typing import TypedDict
-from enum import Enum
+from aenum import Enum, extend_enum
 
 from runner import Runner
+
+
+class Predefined:
+    """
+    Predefined modifiable values.
+
+    alias_prefix: str
+        Used as a prefix to alias names in strings. Indicates substitution with aliases.
+    AppInstallTypes: Enum
+        Types of install commands that can be used.
+    FilesBackupTypes: Enum
+        Types of file install/backup commands that can be used.
+    """
+    alias_prefix = '//'
+
+    class AppInstallTypes(Enum):
+        def __str__(self):
+            return self.name
+
+    @classmethod
+    def set_app_install_types(cls, new_install_types: dict[str, str]):
+        """:param new_install_types: New dictionary to replace enum name-value pairs."""
+        for k, v in new_install_types.items():
+            extend_enum(cls.AppInstallTypes, k, v)
+
+    class FileBackupTypes(Enum):
+        def __str__(self):
+            return self.name
+
+    @classmethod
+    def set_file_backup_types(cls, new_backup_types: dict[str, dict[str, str]]):
+        """:param new_backup_types: New dictionary to replace enum name-value pairs."""
+        for k, v in new_backup_types.items():
+            extend_enum(cls.FileBackupTypes, k, v)
+
+
+# TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
+Predefined.set_app_install_types({
+    'FLATPAK': 'flatpak install -y --noninteractive $@'
+})
+Predefined.set_file_backup_types({
+    'COPY': {
+        # TODO
+    },
+    'HARDLINK': {
+        # TODO
+    },
+    'TAR_COPY': {
+        'EXTRACT': 'tar -xPf "$1.tar"',
+        'CREATE': 'tar -cPf "$1.tar" "${@:2}"'
+    },
+    'COMPRESS': {
+        'EXTRACT': 'tar -xPf "$1.tar.xz"',
+        'CREATE': 'tar -cJPf "$1.tar.xz" "${@:2}"'
+    },
+    'ENCRYPT': {
+        'EXTRACT': 'openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | '
+                   'tar -xPf -',
+        'CREATE': 'tar - cJPf - "${@:2}" | '
+                  'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
+    }
+})
 
 
 class AppSettings(TypedDict):
@@ -14,7 +77,7 @@ class AppSettings(TypedDict):
         Indicates type of install command to use.
         Key to Predefined.app_install_types dictionary.
     """
-    install_type: str
+    install_type: Predefined.AppInstallTypes
 
 
 class FileSettings(TypedDict):
@@ -31,7 +94,7 @@ class FileSettings(TypedDict):
     tmp_dir: str
         Designated directory to keep temporary files in.
     """
-    backup_type: str
+    backup_type: Predefined.FileBackupTypes
     backup_paths: list[str]
     backup_keep: int
     dump_dir: str
