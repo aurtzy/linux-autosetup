@@ -191,10 +191,6 @@ class Pack:
             if app_settings is None:
                 raise KeyError(f'{self.name} apps list is not empty. '
                                f'Setting app_settings to None is only allowed when apps is an empty list.')
-            else:
-                for k, v in app_settings.items():
-                    if v is None:
-                        raise ValueError(f'The app setting {k} was undefined for {self.name}.')
         else:
             settings['app_settings'] = None
         if settings['files']:
@@ -202,10 +198,6 @@ class Pack:
             if file_settings is None:
                 raise KeyError(f'{self.name} files list is not empty. '
                                f'Setting file_settings to None is only allowed when files is an empty list.')
-            else:
-                for k, v in file_settings.items():
-                    if v is None:
-                        raise ValueError(f'The file setting {k} was undefined for {self.name}.')
         else:
             settings['file_settings'] = None
         self.settings = settings
