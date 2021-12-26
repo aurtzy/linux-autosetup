@@ -18,12 +18,17 @@ runner.py
 interactive.py
     stuff that does most interaction with user
 
-config_parser.py
+configparser.py
     installs yaml if it isn't installed and then imports it
     parses config and provides proper arguments to create pack objects
 
 config.yaml
     yes
+
+
+# COLOR
+https://www.geeksforgeeks.org/print-colors-python-terminal/
+interesting? plausible?
 
 
 # QoL ideas
