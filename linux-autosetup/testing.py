@@ -1,20 +1,25 @@
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 
 import pack
 import runner
-from aenum import extend_enum, Enum
 
 try:
     import yaml
 except ImportError:
     from pip._internal import main as pip
-
     pip(['install', '--user', 'yaml'])
     import yaml
-import tarfile
+
+try:
+    from aenum import Enum, extend_enum
+except ImportError:
+    from pip._internal import main as pip
+    pip(['install', '--user', 'aenum'])
+    from aenum import Enum, extend_enum
 
 
 class Test:
@@ -78,6 +83,9 @@ if __name__ == '__main__':
         if verbose:
             append_dict(settings, 0)
         print('\n'.join(rtn))
+
+
     settings['packs']['defaults']['ubuntu']['app_settings']['install_type'] = pack.Predefined.AppInstallTypes.FLATPAK
 
     print_settings()
+

@@ -63,6 +63,14 @@ to detect and debug
 # OLD #
 
 
+~~# handling mv and cp commands~~
+
+either use python-supplied commands or predefine them.
+
+python-supplied methods may not work well if running script as root is required, which i'm avoiding.
+if this is the case, then go for predefining, but prefer using python if there is a way.
+
+
 ~~# subprocesses currently keep running after script terminates, including with ctrl+c - what do?~~
 
 
