@@ -189,12 +189,10 @@ class Pack:
             If the apps or files list are non-empty, their respective settings
             should not be None. Otherwise, KeyError is raised.
 
-            Makes an additional check for any values set to None in app/file settings if they exist,
-            which raises a ValueError.
-
         :param name: Name of the pack.
         :param settings: Pack settings. If None, fallback_settings will be used.
         """
+        log(f'Initializing Pack object for {name}.', logging.INFO)
         self.name = name
         if settings['apps']:
             app_settings: AppSettings = settings['app_settings']
@@ -214,6 +212,7 @@ class Pack:
         self.is_installed = False
         self.is_backed_up = False
         packs.append(self)
+        log(f'Initialized pack {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
 
     def install(self, runner: Runner) -> bool:
         """
