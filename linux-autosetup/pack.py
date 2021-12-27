@@ -287,11 +287,12 @@ class Pack:
                                                             if isinstance(val, str) and '\n' in val else
                                                             val.name if issubclass(type(val), Enum) else str(val)))
 
-        rtn += [f'name: {self.name}',
-                f'apps: {self.settings["apps"]}',
-                f'files: {self.settings["files"]}']
+        rtn += [f'name: {self.name}']
         if verbose:
             append_dict(self.settings, 0)
+        else:
+            rtn += [f'apps: {self.settings["apps"]}',
+                    f'files: {self.settings["files"]}']
 
         return '\n'.join(rtn)
 
