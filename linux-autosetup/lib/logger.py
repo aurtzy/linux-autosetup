@@ -24,6 +24,6 @@ def init_settings(debug_mode: bool = False):
 init_settings(True)
 
 
-def log(msg: str, lvl: int, exception: bool = False,):
+def log(msg: str, lvl: int):
     msg = msg.replace('\n', '\n\t')
     logger.log(lvl, msg)
