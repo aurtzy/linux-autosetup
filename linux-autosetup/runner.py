@@ -1,4 +1,5 @@
 import getpass
+import logging
 import os
 import pwd
 import threading
@@ -23,6 +24,7 @@ class Runner:
                             Only allowed if the script is root.
         :param sudo_loop:   Whether script should refresh sudo calls to avoid sudo timeout.
         """
+        logging.info('Initializing runner object.')
         if target_user and target_user != getpass.getuser():
             assert self.is_root, 'Setting target users is only allowed if the script is run as root.'
             try:
@@ -39,9 +41,10 @@ class Runner:
             self.target_user['env'].update({'HOME': info.pw_dir, 'LOGNAME': target_user, 'USER': target_user})
         else:
             self.target_user = None
-        self.has_target_user = target_user is not None
+        self.has_target_user = self.target_user is not None
         if sudo_loop:
             self.sudo_loop()
+        logging.info(f'Runner object was created with the following settings:\n{str(self)}')
 
     @staticmethod
     def sudo_loop():
@@ -51,6 +54,7 @@ class Runner:
 
         Raises PermissionError if the first sudo call is not successful.
         """
+        logging.info('sudo_loop() was called.')
         # TODO: FIX SUDO COMMENTS AND PLACEHOLDER ECHOS WHEN NOT A NUISANCE
         p = Popen('echo sudo_loop called', shell=True)
         p.communicate()
@@ -66,6 +70,7 @@ class Runner:
             i = 0.0
             while True:
                 if not threading.main_thread().is_alive():
+                    logging.info('Exiting sudo_loop_thread.')
                     break
                 if i >= 5.0:
                     Popen('echo sudo_loop', shell=True)
@@ -75,6 +80,7 @@ class Runner:
                     time.sleep(0.5)
                     i += 0.5
         threading.Thread(target=sudo_loop_thread).start()
+        logging.info('Started sudo_loop_thread.')
 
     def run(self, cmd: str, args: list[str] = None) -> int:
         """
@@ -100,3 +106,11 @@ class Runner:
             p.terminate()
             exit('\nAborting.')
         return p.returncode
+
+    def __str__(self):
+        rtn = '\n'.join([
+            f'is_root: {self.is_root}',
+            f'target_user: {self.target_user}',
+            f'has_target_user: {self.has_target_user}'
+        ])
+        return rtn
