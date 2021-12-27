@@ -102,11 +102,16 @@ class Runner:
             else:
                 p = Popen([cmd, ''] + args, stderr=PIPE, universal_newlines=True, shell=True)
             _, error = p.communicate()
+            if p.returncode != 0:
+                log(f'The following command exited with a non-zero returncode:\n'
+                    f'{cmd}\n'
+                    f'exit code {p.returncode}\n'
+                    f'stderr {error}', logging.ERROR)
         except KeyboardInterrupt:
             if p:
                 p.terminate()
             return exit('\nAborting.')
-        return p.returncode, error
+        return p.returncode
 
     def __str__(self):
         rtn = '\n'.join([
