@@ -1,9 +1,11 @@
+import logging
 import re
 import typing
 from typing import TypedDict
 from aenum import Enum, extend_enum
 
-from runner import Runner
+from lib.runner import Runner
+from lib.logger import log
 
 
 class Predefined:
