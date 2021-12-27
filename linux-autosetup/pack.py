@@ -10,6 +10,10 @@ class Predefined:
     """
     Predefined modifiable values.
 
+    To make it less confusing, when making use of files in shell arguments, follow this convention:
+        $1 denotes the destination.
+        ${2:@} denotes the source(s).
+
     alias_prefix: str
         Used as a prefix to alias names in strings. Indicates substitution with aliases.
     move_cmd: str
@@ -24,7 +28,9 @@ class Predefined:
     alias_prefix: str
 
     move_cmd: str
+    move_alt_cmd: str
     copy_cmd: str
+    copy_alt_cmd: str
 
     class AppInstallTypes(Enum):
         def __str__(self):
@@ -49,8 +55,10 @@ class Predefined:
 
 # TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
 Predefined.alias_prefix = '//'
-Predefined.move_cmd = 'mv'
-Predefined.copy_cmd = 'cp -a'
+Predefined.move_cmd = 'mv -t $1 ${@:2}'
+Predefined.move_alt_cmd = 'sudo mv -t $1 ${@:2}'
+Predefined.copy_cmd = 'cp -at $1 ${@:2}'
+Predefined.copy_alt_cmd = 'sudo cp -at $1 ${@:2}'
 Predefined.set_app_install_types({
     'FLATPAK': 'flatpak install -y --noninteractive $@'
 })
