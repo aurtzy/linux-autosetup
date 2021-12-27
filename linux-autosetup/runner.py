@@ -6,6 +6,8 @@ import threading
 import time
 from subprocess import Popen
 
+from lib.logger import log
+
 
 class Runner:
     """
@@ -24,7 +26,7 @@ class Runner:
                             Only allowed if the script is root.
         :param sudo_loop:   Whether script should refresh sudo calls to avoid sudo timeout.
         """
-        logging.debug('Initializing runner object.')
+        log('Initializing runner object.', logging.INFO)
         if target_user and target_user != getpass.getuser():
             assert self.is_root, 'Setting target users is only allowed if the script is run as root.'
             try:
@@ -44,7 +46,7 @@ class Runner:
         self.has_target_user = self.target_user is not None
         if sudo_loop:
             self.sudo_loop()
-        logging.debug(f'Runner object was created with the following settings:\n{str(self)}')
+        log(f'Runner object was created with the following settings:\n{str(self)}', logging.DEBUG)
 
     @staticmethod
     def sudo_loop():
@@ -54,12 +56,8 @@ class Runner:
 
         Raises PermissionError if the first sudo call is not successful.
         """
-        logging.debug('sudo_loop() was called.')
+        log('Starting sudo loop.', logging.INFO)
         # TODO: FIX SUDO COMMENTS AND PLACEHOLDER ECHOS WHEN NOT A NUISANCE
-        p = Popen('echo sudo_loop called', shell=True)
-        p.communicate()
-        if p.returncode != 0:
-            raise PermissionError('oh no! sudo failed on the call??')
 
         # p = Popen(['sudo', '-v'])
         # p.communicate()
@@ -70,17 +68,17 @@ class Runner:
             i = 0.0
             while True:
                 if not threading.main_thread().is_alive():
-                    logging.debug('Exiting sudo_loop_thread.')
+                    log('Exiting sudo_loop_thread.', logging.DEBUG)
                     break
                 if i >= 5.0:
-                    Popen('echo sudo_loop', shell=True)
+                    log('Revalidating sudo.', logging.DEBUG)
                     # Popen(['sudo', '-v']).wait()
                     i = 0.0
                 else:
                     time.sleep(0.5)
                     i += 0.5
         threading.Thread(target=sudo_loop_thread).start()
-        logging.debug('Started sudo_loop_thread.')
+        log('Started sudo_loop_thread.', logging.DEBUG)
 
     def run(self, cmd: str, args: list[str] = None) -> int:
         """
@@ -90,6 +88,7 @@ class Runner:
         :param args:    Optional arguments to supply to the shell.
         :return:        Return-code of running command(s).
         """
+        log(f'Running cmd:\n{cmd}', logging.DEBUG)
         args = args if args else []
         if self.target_user:
             def set_ids():
