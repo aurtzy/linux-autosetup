@@ -283,9 +283,10 @@ class Pack:
                     rtn.append("\t" * lvl + f'{key}:')
                     append_dict(val, lvl + 1)
                 else:
-                    rtn.append(('\t' * lvl) + f'{key}: ' + (f'\n{val}'.replace('\n', '\n' + '\t' * (lvl + 1))
-                                                            if isinstance(val, str) and '\n' in val else
-                                                            val.name if issubclass(type(val), Enum) else str(val)))
+                    rtn.append(('\t' * lvl) + f'{key}: ' +
+                               (f'\n{val}'.replace('\n', '\n' + '\t' * (lvl + 1))
+                                if isinstance(val, str) and '\n' in val else
+                                val.name if issubclass(type(val), Enum) else str(val)))
 
         rtn += [f'name: {self.name}']
         if verbose:
