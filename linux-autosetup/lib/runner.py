@@ -89,7 +89,7 @@ class Runner:
         :return:        Return-code of running command(s).
         """
         log(f'Running cmd:\n{cmd}', logging.DEBUG)
-        args = args if args else []
+        args = args or []
         if self.target_user:
             def set_ids():
                 os.initgroups(self.target_user['uname'], self.target_user['gid'])
