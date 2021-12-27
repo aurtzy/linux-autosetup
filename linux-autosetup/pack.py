@@ -154,8 +154,8 @@ class Settings(TypedDict):
     """
     depends: list[str]
     apps: list[str]
-    app_settings: typing.Union[AppSettings, None]
     files: list[str]
+    app_settings: typing.Union[AppSettings, None]
     file_settings: typing.Union[FileSettings, None]
     install_cmd: str
     backup_cmd: str
@@ -169,7 +169,7 @@ fallback_settings: Settings = Settings(depends=[],
                                        app_settings=AppSettings(
                                            install_type=None),
                                        file_settings=FileSettings(
-                                           backup_type=Predefined.FileBackupTypes['COPY'],
+                                           backup_type=None,
                                            backup_paths=['./backups'],
                                            backup_keep=1,
                                            dump_dir='/tmp/linux-autosetup-dump',
