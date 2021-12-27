@@ -209,8 +209,8 @@ class Pack:
         else:
             settings['file_settings'] = None
         self.settings = settings
-        self.is_installed = False
-        self.is_backed_up = False
+        self.attempted_install = False
+        self.attempted_backup = False
         packs.append(self)
         log(f'Initialized pack {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
 
