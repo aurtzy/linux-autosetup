@@ -4,7 +4,7 @@ import os
 import pwd
 import threading
 import time
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 from lib.logger import log
 
@@ -80,7 +80,7 @@ class Runner:
         threading.Thread(target=sudo_loop_thread).start()
         log('Started sudo_loop_thread.', logging.DEBUG)
 
-    def run(self, cmd: str, args: list[str] = None) -> int:
+    def run(self, cmd: str, args: list[str] = None) -> (int, str):
         """
         Run the given command(s) through the shell along with any arguments.
 
@@ -98,15 +98,15 @@ class Runner:
                     os.setuid(self.target_user['uid'])
 
                 p = Popen([cmd, ''] + args,
-                          preexec_fn=set_ids, universal_newlines=True, shell=True, env=self.target_user['env'])
+                          preexec_fn=set_ids, stderr=PIPE, universal_newlines=True, shell=True, env=self.target_user['env'])
             else:
-                p = Popen([cmd, ''] + args, universal_newlines=True, shell=True)
-            p.communicate()
+                p = Popen([cmd, ''] + args, stderr=PIPE, universal_newlines=True, shell=True)
+            _, error = p.communicate()
         except KeyboardInterrupt:
             if p:
                 p.terminate()
-            exit('\nAborting.')
-        return p.returncode
+            return exit('\nAborting.')
+        return p.returncode, error
 
     def __str__(self):
         rtn = '\n'.join([
