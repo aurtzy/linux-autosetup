@@ -90,19 +90,21 @@ class Runner:
         """
         log(f'Running cmd:\n{cmd}', logging.DEBUG)
         args = args or []
-        if self.target_user:
-            def set_ids():
-                os.initgroups(self.target_user['uname'], self.target_user['gid'])
-                os.setuid(self.target_user['uid'])
-
-            p = Popen([cmd, ''] + args,
-                      preexec_fn=set_ids, universal_newlines=True, shell=True, env=self.target_user['env'])
-        else:
-            p = Popen([cmd, ''] + args, universal_newlines=True, shell=True)
+        p = None
         try:
+            if self.target_user:
+                def set_ids():
+                    os.initgroups(self.target_user['uname'], self.target_user['gid'])
+                    os.setuid(self.target_user['uid'])
+
+                p = Popen([cmd, ''] + args,
+                          preexec_fn=set_ids, universal_newlines=True, shell=True, env=self.target_user['env'])
+            else:
+                p = Popen([cmd, ''] + args, universal_newlines=True, shell=True)
             p.communicate()
         except KeyboardInterrupt:
-            p.terminate()
+            if p:
+                p.terminate()
             exit('\nAborting.')
         return p.returncode
 
