@@ -92,9 +92,8 @@ class AppSettings(TypedDict):
     """
     App-specific settings.
 
-    install_type: str
-        Indicates type of install command to use.
-        Key to Predefined.app_install_types dictionary.
+    install_type: Predefined.AppInstallTypes
+        Indicates the type of install command to use.
     """
     install_type: Predefined.AppInstallTypes
 
@@ -103,15 +102,20 @@ class FileSettings(TypedDict):
     """
     File-specific settings.
 
-    backup_type: str
-        Indicates type of backup is performed.
-        A str represents a key to Predefined.file_backup_types dictionary.
+    backup_type: Predefined.FileBackupTypes
+        Indicates the type of backup performed on files.
+    backup_paths: list[str]
+        Denotes paths where backups are stored.
+        Must have a length of at least one.
     backup_keep: int
         Number of old backups to keep before dumping.
+        Must be at least zero.
     dump_dir: str
         Designated directory to dump any files to.
+        Must not be an empty string.
     tmp_dir: str
         Designated directory to keep temporary files in.
+        Must not be an empty string.
     """
     backup_type: Predefined.FileBackupTypes
     backup_paths: list[str]
@@ -185,9 +189,8 @@ class Pack:
 
     def __init__(self, name: str, settings: Settings):
         """
-        This constructor will check for the following, raising any errors if necessary:
-            If the apps or files list are non-empty, their respective settings
-            should not be None. Otherwise, KeyError is raised.
+        This constructor will perform checks on values according to their respective docs,
+        if any such prerequisites exist.
 
         :param name: Name of the pack.
         :param settings: Pack settings. If None, fallback_settings will be used.
@@ -196,16 +199,46 @@ class Pack:
         self.name = name
         if settings['apps']:
             app_settings: AppSettings = settings['app_settings']
-            if app_settings is None:
-                raise KeyError(f'{self.name} apps list is not empty. '
-                               f'Setting app_settings to None is only allowed when apps is an empty list.')
+            try:
+                assert app_settings is not None
+            except AssertionError:
+                log(f'Unable to initialize {self.name}. Setting app_settings to None '
+                    f'when apps is non-empty is not allowed.', logging.ERROR)
+                raise
         else:
             settings['app_settings'] = None
         if settings['files']:
             file_settings: FileSettings = settings['file_settings']
-            if file_settings is None:
-                raise KeyError(f'{self.name} files list is not empty. '
-                               f'Setting file_settings to None is only allowed when files is an empty list.')
+            try:
+                assert file_settings is not None
+            except AssertionError:
+                log(f'Unable to initialize {self.name}. Setting file_settings to None '
+                    f'when files is non-empty is not allowed.', logging.ERROR)
+                exit('Aborting.')
+            try:
+                assert len(file_settings['backup_paths']) != 0
+            except AssertionError:
+                log(f'Unable to initialize {self.name}. Setting an empty backup_paths list when '
+                    f'files is non-empty is not allowed.', logging.ERROR)
+                exit('Aborting.')
+            try:
+                assert file_settings['backup_keep'] >= 0
+            except AssertionError:
+                log(f'Unable to initialized {self.name}. Setting a negative backup_keep count '
+                    f'is not allowed.', logging.ERROR)
+                exit('Aborting.')
+            try:
+                assert file_settings['dump_dir']
+            except AssertionError:
+                log('Packs must be initialized with a dump directory '
+                    'that is not an empty string.', logging.ERROR)
+                exit('Aborting.')
+            try:
+                assert file_settings['tmp_dir']
+            except AssertionError:
+                log('Packs must be initialized with a temporary directory '
+                    'that is not an empty string.', logging.ERROR)
+                exit('Aborting.')
         else:
             settings['file_settings'] = None
         self.settings = settings
