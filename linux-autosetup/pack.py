@@ -125,10 +125,21 @@ class FileSettings(TypedDict):
 
 
 class ErrorHandling(Enum):
-    """Indicates how script should handle errors."""
+    """
+    Indicates how script should handle errors.
+
+    PROMPT is the only option that facilitates user input.
+
+    RETRY and RETRY_CMD are meant for internal use with PROMPT as a default.
+    They can technically be used, but unless the user is dealing
+    with an extreme edge case that needs auto-retry functionalities, this is not recommended
+    as it will most likely put the script in a loop.
+    """
     PROMPT = 1
     SKIP = 2
     ABORT = 3
+    RETRY = 4
+    RETRY_CMD = 5
 
     def __str__(self):
         return self.name
