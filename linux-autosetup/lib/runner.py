@@ -106,7 +106,7 @@ class Runner:
                 log(f'The following command exited with a non-zero returncode:\n'
                     f'{cmd}\n'
                     f'exit code {p.returncode}\n'
-                    f'stderr {error}', logging.ERROR)
+                    f'stderr {error}', logging.WARNING)
         except KeyboardInterrupt:
             if p:
                 log('Terminating run process.', logging.DEBUG)
