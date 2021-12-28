@@ -259,21 +259,70 @@ class Pack:
         packs.append(self)
         log(f'Initialized pack {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
 
-    def install(self, runner: Runner) -> bool:
+    def handle_error(self, function) -> int:
+        """
+        Handles errors that occur when installing or backing up packs.
+
+        :param function: Function where the error occurred.
+        :return: ErrorHandling enum that is not PROMPT.
+        """
+        fun_name = function.__name__
+        log(f'Encountered error doing {fun_name} for {self.name}.\n'
+            f'Attempting to handle...', logging.DEBUG)
+        error_handling = self.settings['error_handling']
+        if error_handling == ErrorHandling.PROMPT:
+            user_in = None
+            while True:
+                log('Prompting user to handle error.', logging.DEBUG)
+                user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
+                                f'[t]ry the failed command again?\n'
+                                f'[r]erun the {fun_name} process?\n'
+                                f'[s]kip {fun_name} for this pack?\n'
+                                f'[a]bort this script?\n'
+                                f' [t/r/s/a] ')
+                log(f'User chose {user_in}.', logging.DEBUG)
+                match user_in[0].lower() or '':
+                    case 't':
+                        log(f'Attempting failed command again.', logging.INFO)
+                        return ErrorHandling.RETRY_CMD
+                    case 'r':
+                        log(f'Rerunning {fun_name}.', logging.INFO)
+                        return ErrorHandling.RERUN
+                    case 's':
+                        log(f'Skipping {self.name} {fun_name}.', logging.INFO)
+                        return ErrorHandling.SKIP
+                    case 'a':
+                        log('Aborting script. See log for more information.', logging.INFO)
+                        exit(1)
+                log(f'Could not match {user_in} with anything. Re-prompting...', logging.DEBUG)
+        elif error_handling == ErrorHandling.RETRY_CMD:
+            log('Attempting failed command again.', logging.INFO)
+            return ErrorHandling.RETRY_CMD
+        elif error_handling == ErrorHandling.RERUN:
+            log(f'Rerunning {fun_name}.', logging.INFO)
+            return ErrorHandling.RERUN
+        elif error_handling == ErrorHandling.SKIP:
+            log(f'Skipping {self.name} {fun_name}.', logging.INFO)
+            return ErrorHandling.SKIP
+        else:
+            log(f'Aborting due to error doing {fun_name} on {self.name}.\n'
+                f'See log for more information.', logging.ERROR)
+            exit(1)
+
+    def install(self, runner: Runner):
         """
         Performs an installation of the pack.
 
-        Command subprocesses are separated by delimiters "\n\n" or " \\\n".
+        Command subprocesses are separated by delimiter "\n\n".
 
-        Makes use of aliases, which are defined by appending Pack.alias_prefix to the alias name
-        (e.g. INSTALL_APPS alias would be defined as "//INSTALL_APPS" in cmds.
-
-        Substitutes the following aliases:
+        Defines the following aliases (detected by alias_prefix followed by the alias name):
             INSTALL_APPS : App install command designated by apps['install_type']
             INSTALL_FILES : File install command designated by files['backup_type']['EXTRACT']
 
+        If settings['install_cmd'] is an empty string, automatically append aliases at end.
+        This will only happen if install_cmd is empty.
+
         :param runner: Runner object to run commands from.
-        :return: True if any errors occurred; False otherwise.
         """
         if self.is_installed:
             return True
