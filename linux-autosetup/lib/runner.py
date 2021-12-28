@@ -109,7 +109,9 @@ class Runner:
                     f'stderr {error}', logging.ERROR)
         except KeyboardInterrupt:
             if p:
+                log('Terminating run process.', logging.DEBUG)
                 p.terminate()
+            log('Exiting due to KeyboardInterrupt', logging.DEBUG)
             return exit('\nAborting.')
         return p.returncode
 
