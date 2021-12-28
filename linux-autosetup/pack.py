@@ -281,7 +281,9 @@ class Pack:
                                 f'[a]bort this script?\n'
                                 f' [t/r/s/a] ')
                 log(f'User chose {user_in}.', logging.DEBUG)
-                match user_in[0].lower() or '':
+                if not user_in:
+                    continue
+                match user_in[0].lower():
                     case 't':
                         log(f'Attempting failed command again.', logging.INFO)
                         return ErrorHandling.RETRY_CMD
