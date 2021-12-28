@@ -264,7 +264,7 @@ class Pack:
         Handles errors that occur when installing or backing up packs.
 
         :param function: Function where the error occurred.
-        :return: ErrorHandling enum that is not PROMPT.
+        :return: ErrorHandling enum that is not PROMPT, so the caller can take further action.
         """
         fun_name = function.__name__
         log(f'Encountered error doing {fun_name} for {self.name}.\n'
