@@ -136,10 +136,10 @@ class ErrorHandling(Enum):
     as it will most likely put the script in a loop.
     """
     PROMPT = 1
-    SKIP = 2
-    ABORT = 3
-    RETRY = 4
-    RETRY_CMD = 5
+    RETRY_CMD = 3
+    RERUN = 2
+    SKIP = 4
+    ABORT = 5
 
     def __str__(self):
         return self.name
