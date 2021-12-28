@@ -2,7 +2,7 @@ import logging
 import re
 import typing
 from typing import TypedDict
-from aenum import Enum, extend_enum
+from aenum import Enum, extend_enum, auto
 
 from lib.runner import Runner
 from lib.logger import log
@@ -130,16 +130,17 @@ class ErrorHandling(Enum):
 
     PROMPT is the only option that facilitates user input.
 
-    RETRY and RETRY_CMD are meant for internal use with PROMPT as a default.
+    RERUN_CMD and RERUN are meant for internal use with PROMPT as a default.
     They can technically be used, but unless the user is dealing
     with an extreme edge case that needs auto-retry functionalities, this is not recommended
     as it will most likely put the script in a loop.
     """
-    PROMPT = 1
-    RETRY_CMD = 3
-    RERUN = 2
-    SKIP = 4
-    ABORT = 5
+    PROMPT: int = auto()
+    RERUN_CMD: int = auto()
+    RERUN: int = auto()
+    SKIP_CMD: int = auto()
+    SKIP: int = auto()
+    ABORT: int = auto()
 
     def __str__(self):
         return self.name
@@ -275,25 +276,29 @@ class Pack:
             while True:
                 log('Prompting user to handle error.', logging.DEBUG)
                 user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
-                                f'[t]ry the failed command again?\n'
-                                f'[r]erun the {fun_name} process?\n'
-                                f'[s]kip {fun_name} for this pack?\n'
-                                f'[a]bort this script?\n'
-                                f' [t/r/s/a] ')
+                                f'1 [rc]: Rerun this failed command again?\n'
+                                f'2 [rr]: Rerun the {fun_name} process?\n'
+                                f'3 [sc]: Skip this failed command in particular?\n'
+                                f'4 [sk]: Skip {fun_name} for this pack?\n'
+                                f'5 [ab]: Abort this script?\n'
+                                f' [#/rc/rr/sc/sk/ab] ')
                 log(f'User chose {user_in}.', logging.DEBUG)
                 if not user_in:
                     continue
-                match user_in[0].lower():
-                    case 't':
+                match user_in.lower():
+                    case '1' | 'rc':
                         log(f'Attempting failed command again.', logging.INFO)
-                        return ErrorHandling.RETRY_CMD
-                    case 'r':
+                        return ErrorHandling.RERUN_CMD
+                    case '2' | 'rr':
                         log(f'Rerunning {fun_name}.', logging.INFO)
                         return ErrorHandling.RERUN
-                    case 's':
+                    case '3' | 'sc':
+                        log(f'Skipping this failed command in particular.', logging.INFO)
+                        return ErrorHandling.SKIP_CMD
+                    case '4' | 'sk':
                         log(f'Skipping {self.name} {fun_name}.', logging.INFO)
                         return ErrorHandling.SKIP
-                    case 'a':
+                    case '5' | 'ab':
                         log('Aborting script. See log for more information.', logging.INFO)
                         exit(1)
                 log(f'Could not match {user_in} with anything. Re-prompting...', logging.DEBUG)
@@ -303,6 +308,9 @@ class Pack:
         elif error_handling == ErrorHandling.RERUN:
             log(f'Rerunning {fun_name}.', logging.INFO)
             return ErrorHandling.RERUN
+        elif error_handling == ErrorHandling.SKIP_CMD:
+            log(f'Skipping the failed command.', logging.INFO)
+            return ErrorHandling.SKIP_CMD
         elif error_handling == ErrorHandling.SKIP:
             log(f'Skipping {self.name} {fun_name}.', logging.INFO)
             return ErrorHandling.SKIP
