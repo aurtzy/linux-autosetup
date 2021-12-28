@@ -139,8 +139,9 @@ class Settings(TypedDict):
     Main Pack class settings.
 
     depends: list[str]
-        List of pack names that the pack depends on, which should be installed first.
+        List of pack object names that a pack depends on, which should be installed first.
         Relevant when calling install().
+        Implementations may want to check whether all depends names are valid.
     apps: list[str]
         Apps to be assigned to the pack.
     app_settings: AppSettings | NoneType
@@ -200,7 +201,7 @@ class Pack:
         if settings['apps']:
             app_settings: AppSettings = settings['app_settings']
             try:
-                assert app_settings is not None
+                assert app_settings
             except AssertionError:
                 log(f'Unable to initialize {self.name}. Setting app_settings to None '
                     f'when apps is non-empty is not allowed.', logging.ERROR)
@@ -210,7 +211,7 @@ class Pack:
         if settings['files']:
             file_settings: FileSettings = settings['file_settings']
             try:
-                assert file_settings is not None
+                assert file_settings
             except AssertionError:
                 log(f'Unable to initialize {self.name}. Setting file_settings to None '
                     f'when files is non-empty is not allowed.', logging.ERROR)
