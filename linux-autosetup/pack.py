@@ -279,7 +279,6 @@ class Pack:
         if error_handling == ErrorHandling.PROMPT:
             user_in = None
             while True:
-                # TODO: fix changed error_handling names
                 log('Prompting user to handle error.', logging.DEBUG)
                 user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
                                 f'1 [RP]: Try running the command again?\n'
