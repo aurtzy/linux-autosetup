@@ -130,16 +130,16 @@ class ErrorHandling(Enum):
 
     PROMPT is the only option that facilitates user input.
 
-    RERUN_CMD and RERUN are meant for internal use with PROMPT as a default.
+    RETRY_PART and RETRY_FULL are meant for internal use with PROMPT as a default.
     They can technically be used, but unless the user is dealing
     with an extreme edge case that needs auto-retry functionalities, this is not recommended
     as it will most likely put the script in a loop.
     """
     PROMPT: int = auto()
-    RERUN_CMD: int = auto()
-    RERUN: int = auto()
-    SKIP_CMD: int = auto()
-    SKIP: int = auto()
+    RETRY_PART: int = auto()
+    RETRY_FULL: int = auto()
+    SKIP_PART: int = auto()
+    SKIP_FULL: int = auto()
     ABORT: int = auto()
 
     def __str__(self):
@@ -274,46 +274,48 @@ class Pack:
         if error_handling == ErrorHandling.PROMPT:
             user_in = None
             while True:
+                # TODO: fix changed error_handling names
                 log('Prompting user to handle error.', logging.DEBUG)
                 user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
-                                f'1 [rc]: Rerun this failed command again?\n'
-                                f'2 [rr]: Rerun the {fun_name} process?\n'
-                                f'3 [sc]: Skip this failed command in particular?\n'
-                                f'4 [sk]: Skip {fun_name} for this pack?\n'
-                                f'5 [ab]: Abort this script?\n'
-                                f' [#/rc/rr/sc/sk/ab] ')
+                                f'1 [RP]: Try running the command again?\n'
+                                f'2 [RF]: Restart {fun_name} and try again?\n'
+                                f'3 [SP]: Skip just this failed command?\n'
+                                f'4 [SF]: Skip {fun_name} for this pack?\n'
+                                f'5 [AB]: Abort this script?\n'
+                                f'  [#/RP/RF/SP/SF/AB] ')
                 log(f'User chose {user_in}.', logging.DEBUG)
                 if not user_in:
+                    log('Empty user input. Re-prompting...', logging.DEBUG)
                     continue
-                match user_in.lower():
-                    case '1' | 'rc':
+                match user_in.upper():
+                    case '1' | 'RP':
                         log(f'Attempting failed command again.', logging.INFO)
-                        return ErrorHandling.RERUN_CMD
-                    case '2' | 'rr':
+                        return ErrorHandling.RETRY_PART
+                    case '2' | 'RF':
                         log(f'Rerunning {fun_name}.', logging.INFO)
-                        return ErrorHandling.RERUN
-                    case '3' | 'sc':
+                        return ErrorHandling.RETRY_FULL
+                    case '3' | 'SP':
                         log(f'Skipping this failed command in particular.', logging.INFO)
-                        return ErrorHandling.SKIP_CMD
-                    case '4' | 'sk':
+                        return ErrorHandling.SKIP_PART
+                    case '4' | 'SF':
                         log(f'Skipping {self.name} {fun_name}.', logging.INFO)
-                        return ErrorHandling.SKIP
-                    case '5' | 'ab':
+                        return ErrorHandling.SKIP_FULL
+                    case '5' | 'AB':
                         log('Aborting script. See log for more information.', logging.INFO)
                         exit(1)
                 log(f'Could not match {user_in} with anything. Re-prompting...', logging.DEBUG)
-        elif error_handling == ErrorHandling.RETRY_CMD:
+        elif error_handling == ErrorHandling.RETRY_PART:
             log('Attempting failed command again.', logging.INFO)
-            return ErrorHandling.RETRY_CMD
-        elif error_handling == ErrorHandling.RERUN:
-            log(f'Rerunning {fun_name}.', logging.INFO)
-            return ErrorHandling.RERUN
-        elif error_handling == ErrorHandling.SKIP_CMD:
+            return ErrorHandling.RETRY_PART
+        elif error_handling == ErrorHandling.RETRY_FULL:
+            log(f'Rerunning {self.name} {fun_name}.', logging.INFO)
+            return ErrorHandling.RETRY_FULL
+        elif error_handling == ErrorHandling.SKIP_PART:
             log(f'Skipping the failed command.', logging.INFO)
-            return ErrorHandling.SKIP_CMD
-        elif error_handling == ErrorHandling.SKIP:
+            return ErrorHandling.SKIP_PART
+        elif error_handling == ErrorHandling.SKIP_FULL:
             log(f'Skipping {self.name} {fun_name}.', logging.INFO)
-            return ErrorHandling.SKIP
+            return ErrorHandling.SKIP_FULL
         else:
             log(f'Aborting due to error doing {fun_name} on {self.name}.\n'
                 f'See log for more information.', logging.ERROR)
