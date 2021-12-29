@@ -1,4 +1,5 @@
 import logging
+import os.path
 import re
 import typing
 from typing import TypedDict
@@ -335,42 +336,81 @@ class Pack:
             INSTALL_APPS : App install command designated by apps['install_type']
             INSTALL_FILES : File install command designated by files['backup_type']['EXTRACT']
 
-        If settings['install_cmd'] is an empty string, automatically append aliases at end.
-        This will only happen if install_cmd is empty.
+        Automatically append aliases at end if they are not found and apps/files lists in that
+        order if they are not empty.
 
         :param runner: Runner object to run commands from.
         """
-        if self.is_installed:
-            return True
-
+        if self.attempted_install:
+            return
         if self.settings['depends']:
             for pack in packs:
-                if pack.name in self.settings['depends']:
+                if pack.name in self.settings['depends'] and pack.name != self.name:
                     pack.install(runner)
 
+        log(f'Installing {self.name}.', logging.INFO)
+
         alias_prefix = Predefined.alias_prefix
-        apps = self.settings['apps']['apps'] if self.settings['apps'] else None
-        install_apps_cmd = Predefined.app_install_types[self.settings['apps']['install_type']] \
-                           if apps is not None else ''
-        files = self.settings['files']['files'] if self.settings['files'] else None
-        install_files_cmd = Predefined.file_backup_types[self.settings['files']['backup_type']]['EXTRACT'] \
-                            if files is not None else ''
 
-        cmds = self.settings['custom']['install_cmd'] if self.settings['custom'] \
-            else f'{alias_prefix}INSTALL_APPS\n\n{alias_prefix}INSTALL_FILES'
+        apps = self.settings['apps']
+        app_settings: AppSettings = self.settings['app_settings']
+        install_apps_alias = f'{alias_prefix}INSTALL_APPS'
 
-        cmd_list = re.split('|'.join(map(re.escape, ['\n\n', ' \\\n'])), cmds)
-        for cmd in cmd_list:
-            if f'{alias_prefix}INSTALL_APPS' in cmd:
-                success = runner.run(cmd.replace(f'{alias_prefix}INSTALL_APPS', install_apps_cmd), apps)
-            elif f'{alias_prefix}INSTALL_FILES' in cmd:
-                success = runner.run(cmd.replace(f'{alias_prefix}INSTALL_FILES', install_files_cmd), files)
+        files = self.settings['files']
+        file_settings: FileSettings = self.settings['file_settings']
+        install_files_alias = f'{alias_prefix}INSTALL_FILES'
+
+        install_cmd = self.settings['install_cmd']
+
+        if apps and install_apps_alias not in install_cmd:
+            install_cmd += f'\n{install_apps_alias}'
+            installed_apps = False
+        else:
+            installed_apps = True
+        if files and install_files_alias not in install_cmd:
+            install_cmd += f'\n{install_files_alias}'
+            installed_files = False
+        else:
+            installed_files = True
+
+        cmd_list = re.split(re.escape('\n\n'), install_cmd)
+        cmd_list.reverse()
+        log(f'Setting the following cmd_list stack to run: {cmd_list}', logging.DEBUG)
+
+        while cmd_list:
+            cmd = cmd_list[-1]
+            if installed_apps is False and install_apps_alias in cmd:
+                cmd = Predefined.AppInstallTypes[app_settings['install_type']] if apps else ''
+                returncode = runner.run(cmd, apps)
+                if returncode:
+                    self.handle_error(self.install)
+                installed_apps = True
+            elif installed_files is False and install_apps_alias in cmd:
+                cmd = Predefined.FileBackupTypes[file_settings['backup_type']]['EXTRACT'] if files else ''
+                # Assumes backup_paths setting is not empty because of init checking
+                backup_paths = file_settings['backup_paths'].copy()
+                backup_paths.reverse()
+                log(f'Searching through the following backup_paths stack: {backup_paths}', logging.DEBUG)
+                backup_path: str = ''
+                while backup_paths:
+                    backup_path = backup_paths.pop()
+                    log(f'Checking if {backup_path} exists...', logging.INFO)
+                    if os.path.exists(backup_path):
+                        break
+                    else:
+                        log(f'{backup_path} does not exist.', logging.INFO)
+                    if not backup_paths:
+                        log(f'Could not find any existing backup paths for {self.name}.', logging.WARNING)
+                        # TODO: handle error
+                backup_path = f'{backup_path}/{self.name}'
+                returncode = runner.run(cmd, [backup_path])
+                installed_files = True
             else:
-                success = runner.run(cmd)
-            if not success:
-                # TODO: error handling
-                return False
-        return True
+                returncode = runner.run(cmd)
+            if returncode != 0:
+                return
+
+        log(f'Successfully installed {self.name}!', logging.INFO)
 
     def backup(self) -> bool:
         """
