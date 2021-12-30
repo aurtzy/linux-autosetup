@@ -26,19 +26,38 @@ config.yaml
     yes
 
 
+# exclusion and inclusion of defaults with packs
+packs definitely won't be used on all systems, so what can be done to exclude them?
+
+bringing back "extends" could be a decent idea
+
+this could also just not be a problem to worry about, since pack groups will probably be what will be used
+the most, and combining this with "other" could be annoying to deal with
+
+
+# light thinking on pack groups: any better names? interesting features to implement?
+
+- "exclude" specific packs feature, like yay does?
+- entry that notes what specific defaults the pack group should only show on?
+
+
 # COLOR
 https://www.geeksforgeeks.org/print-colors-python-terminal/
 interesting? plausible?
+answer is yes. yes it is. decent logging is now implemented, so color can be
+somewhat more easily implemented than thought before.
 
 
-# QoL ideas
+# braintyphoon ideas
 
-- print "last updated" config time at beginning
-
-- X how to combine same-based distros?
- using TAGS, associating a distro with others. the list of distros specified can be iterated through in order, to find entries in these other distros instead if the current one does not have an entry.
-
-- strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
+ - print "last updated" config time at beginning
+ - X how to combine same-based distros?
+   using TAGS, associating a distro with others. the list of distros specified can be iterated through in order, 
+ - to find entries in these other distros instead if the current one does not have an entry.
+ - strict config reading? if there's an entry not recognized, should it be notified to the user? probably, right?
+ - have some kind of note if user runs immediately as sudo: 
+   Avoid directly running the script as root if you
+   are not trying to use root environment variables.
 
 
 # X group handling - "groups" should be fine, but how to include in config?
@@ -61,6 +80,29 @@ to detect and debug
 
 
 # OLD #
+
+
+~~# X reapproaching sudo and running script as root~~
+
+okay, so maybe running the entire script as root isn't as big of a deal and avoids a lot of smaller issues
+with permission errors everywhere, however...
+
+the drawback right now is figuring out how to deal with getting environment variables.
+
+1. script must be started as regular user in order to retrieve environment. this seems like a decent idea.
+~~but how would the script transfer the environment over?~~ passing it through Popen's env= should
+do the trick.
+okay, now can this work if the user wants to run as another user? or as root? above might be
+too shallow for this.
+or.. not? if a target user is set, then what if instead the script is run as that user as root?
+e.g. ```sudo -u $USER python . . .``` which then runs itself as root since it's
+
+2. so instead, script can work by using whatever environment it starts with. This way, if it's another user
+or root, it will utilize that. how = if user is not root, then after whatever settings are set,
+the script will rerun itself with all those settings as root. the ids of these users can also be passed so that
+commands can be run as those users. if the script is root (which after previous sentences,
+should apply to all now), then use the environment it has. in addition, if in the options it received target user
+ids, then use those when running commands!
 
 
 ~~# handling mv and cp commands~~

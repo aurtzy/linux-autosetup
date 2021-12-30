@@ -52,6 +52,8 @@ predefined:
         backup_cmd: null
         error_handling: PROMPT
 
+# OVERRIDE IN THIS ORDER?:
+# defaults[all] -> defaults[distro] -> pack[all] -> pack[distro]
 packs:
     defaults:
         ubuntu:
@@ -69,11 +71,9 @@ packs:
             backup_cmd: null
             error_handling: PROMPT
     custom_extra_special_pack_that_shows_off_some_special_stuff:
-        popos:
-            depends:
-            # //VAR can represent reserved aliases that will be substituted in script
-            # //USER seems like the only useful one right now
-            # each line will be run through shlex.quote(), so there is no need to make each line shell-compliant
+        all:
+            # TODO: when implementing configparser, implement os.path.expandvars() on these paths
+            #       and pair with environment variable modifications from Runner class
             files: |
                 $HOME/Documents/backups/etc
                 path/with spaces/and-quotes/at end "
@@ -86,8 +86,9 @@ packs:
             # same as install_cmd, except with //BACKUP_FILES
             backup_cmd: |
                 //BACKUP_FILES
+        popos:
+            depends:
 
 # wip
 pack_groups:
-
 
