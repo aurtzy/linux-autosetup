@@ -64,9 +64,9 @@ class Predefined:
 # TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
 Predefined.alias_prefix = '//'
 Predefined.try_root_cmd = 'sudo'
-Predefined.move_cmd = 'mv -t $1 ${@:2}'
-Predefined.copy_cmd = 'cp -at $1 ${@:2}'
-Predefined.mkdir_cmd = 'mkdir -p $@'
+Predefined.move_cmd = 'mv -t "$1" "${@:2}"'
+Predefined.copy_cmd = 'cp -at "$1" "${@:2}"'
+Predefined.mkdir_cmd = 'mkdir -p "$@"'
 Predefined.set_app_install_types({
     'FLATPAK': 'flatpak install -y --noninteractive $@'
 })
