@@ -77,23 +77,21 @@ class Runner:
         :param args:    Optional arguments to supply to the shell.
         :return:        Return-code of running command(s).
         """
-        log(f'Running cmd:\n{cmd}', logging.DEBUG)
+        log(f'Running command(s):\n{cmd}', logging.DEBUG)
         args = args or []
+
+        def set_ids():
+            if self.target_user:
+                os.initgroups(self.target_user['uname'], self.target_user['gid'])
+                os.setuid(self.target_user['uid'])
+
         try:
-            def set_ids():
-                if self.target_user:
-                    os.initgroups(self.target_user['uname'], self.target_user['gid'])
-                    os.setuid(self.target_user['uid'])
-            try:
-                subprocess.run([cmd, ''] + args, preexec_fn=set_ids, check=True, text=True, shell=True)
-            except subprocess.CalledProcessError as error:
-                log(f'Encountered a CalledProcessError exception:\n'
-                    f'{error}\n', logging.ERROR)
-                return error.returncode
-            return 0
-        except KeyboardInterrupt:
-            log('Exiting due to KeyboardInterrupt', logging.DEBUG)
-            return exit('\nAborting.')
+            subprocess.run([cmd, ''] + args, preexec_fn=set_ids, check=True, text=True, shell=True)
+        except subprocess.CalledProcessError as error:
+            log(f'Encountered a CalledProcessError exception:\n'
+                f'{error}\n', logging.ERROR)
+            return error.returncode
+        return 0
 
     def __str__(self):
         rtn = f'target_user: {self.target_user}'
