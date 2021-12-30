@@ -369,11 +369,13 @@ class Pack:
         log(f'Setting the following cmd_list stack to run: {cmd_list}', logging.DEBUG)
 
         while cmd_list:
-            cmd = cmd_list[-1]
+            cmd = cmd_list.pop()
             if installed_apps is False and install_apps_alias in cmd:
                 cmd = Predefined.AppInstallTypes[app_settings['install_type']] if apps else ''
                 returncode = runner.run(cmd, apps)
                 if returncode:
+                    # TODO: implement handling what is done with commands after return
+                    #       of handle_error in app and file install
                     self.handle_error(self.install)
                 installed_apps = True
             elif installed_files is False and install_apps_alias in cmd:
@@ -383,23 +385,50 @@ class Pack:
                 backup_paths.reverse()
                 log(f'Searching through the following backup_paths stack: {backup_paths}', logging.DEBUG)
                 backup_path: str = ''
+
+                def get_latest_backup():
+                    # TODO: find the most recent backup and perform install with that
+                    pass
+
                 while backup_paths:
-                    backup_path = backup_paths.pop()
+                    backup_path = backup_paths.pop() + f'/{self.name}'
                     log(f'Checking if {backup_path} exists...', logging.INFO)
                     if os.path.exists(backup_path):
+                        log(f'Discovered {backup_path}.', logging.INFO)
                         break
                     else:
                         log(f'{backup_path} does not exist.', logging.INFO)
                     if not backup_paths:
-                        log(f'Could not find any existing backup paths for {self.name}.', logging.WARNING)
+                        # TODO
+                        log(f'No existing backup path exists in the following list: ', logging.WARNING)
                         # TODO: handle error
+                        error_handling = self.settings['error_handling']
+                        if error_handling == ErrorHandling.PROMPT:
+                            while True:
+                                log('Prompting user to handle error.', logging.DEBUG)
+                                user_in = input(f'No:\n'
+                                                f'1 [RP]: Try running the command again?\n'
+                                                f'2 [RF]: Restart {fun_name} and try again?\n'
+                                                f'3 [SP]: Skip just this failed command?\n'
+                                                f'4 [SF]: Skip {fun_name} for this pack?\n'
+                                                f'5 [AB]: Abort this script?\n'
+                                                f'  [#/RP/RF/SP/SF/AB] ')
+                                log(f'User chose {user_in}.', logging.DEBUG)
+                        elif error_handling <= ErrorHandling.RETRY_FULL:
+                            pass
+                        elif error_handling <= ErrorHandling.SKIP_FULL:
+                            pass
+                        else:
+                            log('Aborting script.', logging.ERROR)
+                            exit(1)
                 backup_path = f'{backup_path}/{self.name}'
                 returncode = runner.run(cmd, [backup_path])
+                if returncode:
+                    # TODO: see above in INSTALL_APPS
+                    self.handle_error(self.install)
                 installed_files = True
             else:
                 returncode = runner.run(cmd)
-            if returncode != 0:
-                return
 
         log(f'Successfully installed {self.name}!', logging.INFO)
 
