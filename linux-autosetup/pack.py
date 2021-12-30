@@ -268,7 +268,6 @@ class Pack:
             f'Attempting to handle...', logging.DEBUG)
         error_handling = self.settings['error_handling']
         if error_handling == ErrorHandling.PROMPT:
-            user_in = None
             while True:
                 log('Prompting user to handle error.', logging.DEBUG)
                 user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
@@ -284,37 +283,39 @@ class Pack:
                     continue
                 match user_in.upper():
                     case '1' | 'RP':
-                        log(f'Attempting failed command again.', logging.INFO)
+                        log(f'Attempting failed command again.', logging.ERROR)
                         return ErrorHandling.RETRY_PART
                     case '2' | 'RF':
-                        log(f'Rerunning {fun_name}.', logging.INFO)
+                        log(f'Rerunning {fun_name}.', logging.ERROR)
                         return ErrorHandling.RETRY_FULL
                     case '3' | 'SP':
-                        log(f'Skipping this failed command in particular.', logging.INFO)
+                        log(f'Skipping this failed command in particular.', logging.ERROR)
                         return ErrorHandling.SKIP_PART
                     case '4' | 'SF':
-                        log(f'Skipping {self.name} {fun_name}.', logging.INFO)
+                        log(f'Skipping {self.name} {fun_name}.', logging.ERROR)
                         return ErrorHandling.SKIP_FULL
                     case '5' | 'AB':
-                        log('Aborting script. See log for more information.', logging.INFO)
+                        log('Aborting script. See log for more information.', logging.ERROR)
                         exit(1)
                 log(f'Could not match {user_in} with anything. Re-prompting...', logging.DEBUG)
         elif error_handling == ErrorHandling.RETRY_PART:
-            log('Attempting failed command again.', logging.INFO)
+            log('Attempting failed command again.', logging.ERROR)
             return ErrorHandling.RETRY_PART
         elif error_handling == ErrorHandling.RETRY_FULL:
-            log(f'Rerunning {self.name} {fun_name}.', logging.INFO)
+            log(f'Rerunning {self.name} {fun_name}.', logging.ERROR)
             return ErrorHandling.RETRY_FULL
         elif error_handling == ErrorHandling.SKIP_PART:
-            log(f'Skipping the failed command.', logging.INFO)
+            log(f'Skipping the failed command.', logging.ERROR)
             return ErrorHandling.SKIP_PART
         elif error_handling == ErrorHandling.SKIP_FULL:
-            log(f'Skipping {self.name} {fun_name}.', logging.INFO)
+            log(f'Skipping {self.name} {fun_name}.', logging.ERROR)
             return ErrorHandling.SKIP_FULL
         else:
             log(f'Aborting due to error doing {fun_name} on {self.name}.\n'
                 f'See log for more information.', logging.ERROR)
             exit(1)
+
+
 
     def install(self, runner: Runner):
         """
