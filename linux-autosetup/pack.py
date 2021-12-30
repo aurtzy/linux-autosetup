@@ -388,6 +388,8 @@ class Pack:
 
                 def get_latest_backup():
                     # TODO: find the most recent backup and perform install with that
+                    # can use os.path.getmtime(path) to retrieve last modified path, which actually
+                    # might even be better
                     pass
 
                 while backup_paths:
@@ -429,6 +431,7 @@ class Pack:
                 installed_files = True
             else:
                 returncode = runner.run(cmd)
+                # TODO: handle error
 
         log(f'Successfully installed {self.name}!', logging.INFO)
 
