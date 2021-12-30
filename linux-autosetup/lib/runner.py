@@ -34,7 +34,8 @@ class Runner:
                 gid=info.pw_gid,
                 uid=info.pw_uid,
                 env=os.environ.copy())
-            self.target_user['env'].update({'HOME': info.pw_dir, 'LOGNAME': target_uname, 'USER': target_uname})
+            self.target_user['env'].update(
+                {'HOME': info.pw_dir, 'LOGNAME': target_uname, 'USER': target_uname, 'DOLLARSIGN': '$'})
         else:
             self.target_user = None
         log(f'Runner object was created with the following settings:\n{str(self)}', logging.DEBUG)
