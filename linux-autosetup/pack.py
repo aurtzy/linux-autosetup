@@ -13,21 +13,17 @@ class Predefined:
     """
     Predefined modifiable values.
 
-    To make it less confusing, when making use of files in shell arguments, follow this convention:
-        $1 denotes the destination.
-        ${2:@} denotes the source(s).
+    To make it less confusing, the following convention will be imposed when making use of shell arguments
+    to substitute file and directory paths:
+        $1 denotes the
+        destination path.
+        ${2:@} denotes the source path(s).
 
     alias_prefix: str
         Used as a prefix to alias names in strings. Indicates substitution with aliases.
-    try_root_cmd: str
-        Root user command used as a prefix to the predefined shell command strings below if
-        they fail in order to catch any permission errors.
-    move_cmd: str
-        Shell command used for moving files.
-    copy_cmd: str
-        Shell command used for copying files.
-    mkdir_cmd: str
-        Shell command used for making directories.
+    superuser_cmd: str
+        Prefix command used if a command requires superuser privilege elevation.
+        Mainly for use with rerunning the script as a superuser.
     AppInstallTypes: Enum
         Types of install commands that can be used.
     FilesBackupTypes: Enum
@@ -35,10 +31,7 @@ class Predefined:
     """
     alias_prefix: str
 
-    try_root_cmd: str
-    move_cmd: str
-    copy_cmd: str
-    mkdir_cmd: str
+    superuser_cmd: str
 
     class AppInstallTypes(Enum):
         def __str__(self):
@@ -63,10 +56,7 @@ class Predefined:
 
 # TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
 Predefined.alias_prefix = '//'
-Predefined.try_root_cmd = 'sudo'
-Predefined.move_cmd = 'mv -t "$1" "${@:2}"'
-Predefined.copy_cmd = 'cp -at "$1" "${@:2}"'
-Predefined.mkdir_cmd = 'mkdir -p "$@"'
+Predefined.superuser_cmd = 'sudo'
 Predefined.set_app_install_types({
     'FLATPAK': 'flatpak install -y --noninteractive $@'
 })
