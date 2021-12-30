@@ -32,7 +32,9 @@ class Runner:
             self.target_user = dict(
                 uname=target_uname,
                 gid=info.pw_gid,
-                uid=info.pw_uid)
+                uid=info.pw_uid,
+                env=os.environ.copy())
+            self.target_user['env'].update({'HOME': info.pw_dir, 'LOGNAME': target_uname, 'USER': target_uname})
         else:
             self.target_user = None
         log(f'Runner object was created with the following settings:\n{str(self)}', logging.DEBUG)
@@ -80,13 +82,16 @@ class Runner:
         log(f'Running command(s):\n{cmd}', logging.DEBUG)
         args = args or []
 
-        def set_ids():
-            if self.target_user:
-                os.initgroups(self.target_user['uname'], self.target_user['gid'])
-                os.setuid(self.target_user['uid'])
+        def get_set_ids(target_user):
+            def set_ids():
+                if target_user:
+                    os.initgroups(target_user['uname'], target_user['gid'])
+                    os.setuid(target_user['uid'])
+            return set_ids
 
         try:
-            subprocess.run([cmd, ''] + args, preexec_fn=set_ids, check=True, text=True, shell=True)
+            subprocess.run([cmd, ''] + args, preexec_fn=get_set_ids(self.target_user),
+                           check=True, text=True, shell=True, env=self.target_user['env'])
         except subprocess.CalledProcessError as error:
             log(f'Encountered a CalledProcessError exception:\n'
                 f'{error}\n', logging.ERROR)
