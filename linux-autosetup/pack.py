@@ -5,7 +5,7 @@ import typing
 from typing import TypedDict
 from aenum import Enum, extend_enum, auto
 
-from lib.runner import Runner
+from lib.runner import run
 from lib.logger import log
 
 
