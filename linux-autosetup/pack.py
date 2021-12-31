@@ -124,7 +124,7 @@ class ErrorHandling(Enum):
     """
     Indicates how script should handle errors.
 
-    PROMPT is the only option that facilitates user input.
+    PROMPT is the only option that should facilitate user input.
 
     RETRY_PART and RETRY_FULL are meant for internal use with PROMPT as a default.
     They can technically be used, but unless the user is dealing
