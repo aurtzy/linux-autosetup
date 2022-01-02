@@ -107,13 +107,8 @@ class Settings:
             Must have a length of at least one.
         backup_keep: int
             Number of old backups to keep before dumping.
-            Must be at least zero.
-        dump_dir: str
-            Designated directory to dump any files to.
-            Must not be an empty string.
-        tmp_dir: str
-            Designated directory to keep temporary files in.
-            Must not be an empty string.
+            If set to -1, script will keep all backups made and not dump old ones.
+            If set to 0, only the most recent made one in a backup path is kept.
 
         Implements __iter__, which iterates through the files list.
         """
@@ -121,8 +116,6 @@ class Settings:
         backup_type: FileBackupType
         backup_paths: list[str]
         backup_keep: int
-        dump_dir: str
-        tmp_dir: str
 
         def __iter__(self):
             for file in self.files:
@@ -151,10 +144,7 @@ class Settings:
             Raise an AssertionError if the list is empty.
         files.backup_keep:
             Can never be less than zero. This is impossible. Raises AssertionError.
-        files.dump_dir:
-            Log warning if it is empty.
-        files.tmp_dir:
-            Log warning if it is empty.
+            Excludes -1, because that is a special number.
         """
         if self.apps is not None and len(self.apps.apps) == 0:
             log(f'App settings were set for {self.pack_name}, but the apps list is empty. These settings '
@@ -172,20 +162,10 @@ class Settings:
                 f'without at least one set; please fix.', logging.CRITICAL)
             raise
         try:
-            assert self.files.backup_keep > 0
+            assert self.files.backup_keep >= -1
         except AssertionError:
             log(f'No, you may not have a negative number of backups for {self.pack_name}. Pls fix.', logging.CRITICAL)
             raise
-        try:
-            assert self.files.dump_dir
-        except AssertionError:
-            log(f'The pack {self.pack_name} was initialized without a dump_dir setting. It is recommended that one be\n'
-                f'set unless you know what you\'re doing.', logging.WARNING)
-        try:
-            assert self.files.tmp_dir
-        except AssertionError:
-            log(f'The pack {self.pack_name} was initialized without a tmp_dir setting. It is recommended that one be\n'
-                f'set unless you know what you\'re doing.', logging.WARNING)
 
 
 class Pack:
