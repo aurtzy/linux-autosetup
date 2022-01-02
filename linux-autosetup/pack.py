@@ -1,9 +1,8 @@
 import logging
 import os.path
 import re
-import typing
-from typing import TypedDict
-from aenum import Enum, extend_enum, auto
+from dataclasses import dataclass
+from aenum import auto
 
 from lib.runner import run
 from lib.logger import log
@@ -50,61 +49,149 @@ class ErrorHandling(Enum):
         return self.name
 
 
-class Settings(TypedDict):
+@dataclass
+class Settings:
     """
-    Main Pack class settings.
-
+    pack_name: str
+        Name of the pack these settings will be assigned to.
+    error_handling: ErrorHandling
+        Indicates how script will handle errors.
     depends: list[str]
         List of pack object names that a pack depends on, which should be installed first.
         Relevant when calling install().
-        Implementations may want to check whether all depends names are valid.
-    apps: list[str]
-        Apps to be assigned to the pack.
-    app_settings: AppSettings | NoneType
-        Custom app-related settings. Set to None when apps is an empty list.
-    files: list[str]
-        Files to be assigned to the pack.
-    file_settings: FileSettings | NoneType
-        Custom file-related settings. Set to None when files is an empty list.
+        Implementations may want to check whether all names are valid before using.
+    apps: Apps
+        Contains all app-related settings for the pack.
+    files: Files
+        Contains all file-related settings for the pack.
     install_cmd: str
-        Custom string of command(s) that will be run when calling install method.
+        Command to run in a shell when the pack install method is called.
+        Makes use of aliases specified in the install method.
+        Empty by default, but can be assigned custom commands.
     backup_cmd: str
-        Custom string of command(s) that will be run when calling backup method.
-    error_handling: ErrorHandling
-        Indicates how script will handle errors.
+        Command to run in a shell when the pack backup method is called.
+        Makes use of aliases specified in the backup method.
+        Empty by default, but can be assigned custom commands.
     """
-    depends: list[str]
-    apps: list[str]
-    files: list[str]
-    app_settings: typing.Union[AppSettings, None]
-    file_settings: typing.Union[FileSettings, None]
-    install_cmd: str
-    backup_cmd: str
+
+    @dataclass
+    class Apps:
+        """
+        App-specific settings.
+
+        apps: list[str]
+            List of app names used in installation.
+        install_type: AppInstallTypes
+            Indicates the type of install command to use.
+
+        Implements __iter__, which iterates through the apps list.
+        """
+        apps: list[str]
+        install_type: AppInstallType
+
+        def __iter__(self):
+            for app in self.apps:
+                yield app
+
+    @dataclass
+    class Files:
+        """
+        File-specific settings.
+
+        files: list[str]
+            List of file paths that are or will be backed up.
+        backup_type: FileBackupTypes
+            Indicates the type of backup performed on files.
+        backup_paths: list[str]
+            Denotes paths where backups are stored.
+            Must have a length of at least one.
+        backup_keep: int
+            Number of old backups to keep before dumping.
+            Must be at least zero.
+        dump_dir: str
+            Designated directory to dump any files to.
+            Must not be an empty string.
+        tmp_dir: str
+            Designated directory to keep temporary files in.
+            Must not be an empty string.
+
+        Implements __iter__, which iterates through the files list.
+        """
+        files: list[str]
+        backup_type: FileBackupType
+        backup_paths: list[str]
+        backup_keep: int
+        dump_dir: str
+        tmp_dir: str
+
+        def __iter__(self):
+            for file in self.files:
+                yield file
+
+    pack_name: str
     error_handling: ErrorHandling
+    depends: list[str] | None = None
+    apps: Apps | None = None
+    files: Files | None = None
+    install_cmd: str = ''
+    backup_cmd: str = ''
 
+    def __post_init__(self):
+        """
+        Checks validity of given settings.
 
-# TODO: put this in configparser.py instead of pack.py
-fallback_settings: Settings = Settings(depends=[],
-                                       apps=[],
-                                       files=[],
-                                       app_settings=AppSettings(
-                                           install_type=None),
-                                       file_settings=FileSettings(
-                                           backup_type=None,
-                                           backup_paths=['./backups'],
-                                           backup_keep=1,
-                                           dump_dir='/tmp/linux-autosetup-dump',
-                                           tmp_dir='/tmp/linux-autosetup'),
-                                       install_cmd='',
-                                       backup_cmd='',
-                                       error_handling=ErrorHandling['PROMPT']
-                                       )
+        apps:
+            If apps exists and apps.apps is empty, log a warning and set apps to None. This is because app
+            settings only have an effect on the apps in the list, but if it is empty, the user must have
+            set it without giving a list of apps which may be an error.
+        files:
+            Similarly to checking apps, if files is not None and files.files is empty, log a warning
+            and set files to None.
+        files.backup_paths:
+            Raise an AssertionError if the list is empty.
+        files.backup_keep:
+            Can never be less than zero. This is impossible. Raises AssertionError.
+        files.dump_dir:
+            Log warning if it is empty.
+        files.tmp_dir:
+            Log warning if it is empty.
+        """
+        if self.apps is not None and len(self.apps.apps) == 0:
+            log(f'App settings were set for {self.pack_name}, but the apps list is empty. These settings '
+                f'will be ignored.', logging.WARNING)
+            self.apps = None
+        if self.files is not None and len(self.files.files) == 0:
+            log(f'File settings were set for {self.files}, but the files list is empty. These settings '
+                f'will be ignored.', logging.WARNING)
+            self.files = None
+
+        try:
+            assert len(self.files.backup_paths) > 0
+        except AssertionError:
+            log(f'The pack {self.pack_name} was initialized without any backup paths. The script cannot function\n'
+                f'without at least one set; please fix.', logging.CRITICAL)
+            raise
+        try:
+            assert self.files.backup_keep > 0
+        except AssertionError:
+            log(f'No, you may not have a negative number of backups for {self.pack_name}. Pls fix.', logging.CRITICAL)
+            raise
+        try:
+            assert self.files.dump_dir
+        except AssertionError:
+            log(f'The pack {self.pack_name} was initialized without a dump_dir setting. It is recommended that one be\n'
+                f'set unless you know what you\'re doing.', logging.WARNING)
+        try:
+            assert self.files.tmp_dir
+        except AssertionError:
+            log(f'The pack {self.pack_name} was initialized without a tmp_dir setting. It is recommended that one be\n'
+                f'set unless you know what you\'re doing.', logging.WARNING)
 
 
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
-    def __init__(self, name: str, settings: Settings):
+    def __init__(self, settings: Settings):
         """
         This constructor will perform checks on values according to their respective docs,
         if any such prerequisites exist.
@@ -112,57 +199,12 @@ class Pack:
         :param name: Name of the pack.
         :param settings: Pack settings. If None, fallback_settings will be used.
         """
-        log(f'Initializing Pack object for {name}.', logging.INFO)
-        self.name = name
-        if settings['apps']:
-            app_settings: AppSettings = settings['app_settings']
-            try:
-                assert app_settings
-            except AssertionError:
-                log(f'Unable to initialize {self.name}. Setting app_settings to None '
-                    f'when apps is non-empty is not allowed.', logging.ERROR)
-                raise
-        else:
-            settings['app_settings'] = None
-        if settings['files']:
-            file_settings: FileSettings = settings['file_settings']
-            try:
-                assert file_settings
-            except AssertionError:
-                log(f'Unable to initialize {self.name}. Setting file_settings to None '
-                    f'when files is non-empty is not allowed.', logging.ERROR)
-                exit('Aborting.')
-            try:
-                assert len(file_settings['backup_paths']) != 0
-            except AssertionError:
-                log(f'Unable to initialize {self.name}. Setting an empty backup_paths list when '
-                    f'files is non-empty is not allowed.', logging.ERROR)
-                exit('Aborting.')
-            try:
-                assert file_settings['backup_keep'] >= 0
-            except AssertionError:
-                log(f'Unable to initialized {self.name}. Setting a negative backup_keep count '
-                    f'is not allowed.', logging.ERROR)
-                exit('Aborting.')
-            try:
-                assert file_settings['dump_dir']
-            except AssertionError:
-                log('Packs must be initialized with a dump directory '
-                    'that is not an empty string.', logging.ERROR)
-                exit('Aborting.')
-            try:
-                assert file_settings['tmp_dir']
-            except AssertionError:
-                log('Packs must be initialized with a temporary directory '
-                    'that is not an empty string.', logging.ERROR)
-                exit('Aborting.')
-        else:
-            settings['file_settings'] = None
+        log(f'Initializing Pack object for {settings.pack_name}.', logging.INFO)
         self.settings = settings
         self.attempted_install = False
         self.attempted_backup = False
         packs.append(self)
-        log(f'Initialized pack {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
+        log(f'Initialized pack {self.settings.pack_name} with the following settings:\n{str(self)}', logging.DEBUG)
 
     def handle_error(self, function) -> int:
         """
