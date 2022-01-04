@@ -1,9 +1,10 @@
 import logging
-# TODO: figure out stylizing text?
+
 
 logger = logging.getLogger('linux-autosetup')
 
 
+# TODO: move to main init area when ready
 def init_settings(debug_mode: bool = False):
     """Initialize logger settings. Should only be called once."""
     logger.setLevel(logging.DEBUG)
@@ -20,10 +21,11 @@ def init_settings(debug_mode: bool = False):
     logger.addHandler(stream_handler)
     logger.addHandler(logfile_handler)
 
-# TODO: temp; move to main runner when ready
+
 init_settings(True)
 
 
 def log(msg: str, lvl: int):
+    # TODO: figure out stylizing text?
     msg = msg.replace('\n', '\n\t')
     logger.log(lvl, msg)
