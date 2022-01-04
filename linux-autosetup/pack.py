@@ -9,24 +9,6 @@ from lib.logger import log
 from lib.configurable import *
 
 
-# TODO: put this in configparser.py instead of pack.py
-fallback_settings: Settings = Settings(depends=[],
-                                       apps=[],
-                                       files=[],
-                                       app_settings=AppSettings(
-                                           install_type=None),
-                                       file_settings=FileSettings(
-                                           backup_type=None,
-                                           backup_paths=['./backups'],
-                                           backup_keep=1,
-                                           dump_dir='/tmp/linux-autosetup-dump',
-                                           tmp_dir='/tmp/linux-autosetup'),
-                                       install_cmd='',
-                                       backup_cmd='',
-                                       error_handling=ErrorHandling['PROMPT']
-                                       )
-
-
 class ErrorHandling(Enum):
     """
     Indicates how script should handle errors.
