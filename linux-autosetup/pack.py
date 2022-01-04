@@ -158,8 +158,7 @@ class Pack:
         This constructor will perform checks on values according to their respective docs,
         if any such prerequisites exist.
 
-        :param name: Name of the pack.
-        :param settings: Pack settings. If None, fallback_settings will be used.
+        :param settings: Pack settings.
         """
         log(f'Initializing Pack object for {settings.pack_name}.', logging.INFO)
         self.settings = settings
