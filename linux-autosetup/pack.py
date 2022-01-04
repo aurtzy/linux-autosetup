@@ -167,63 +167,61 @@ class Pack:
         packs.append(self)
         log(f'Initialized pack {self.settings.pack_name} with the following settings:\n{str(self)}', logging.DEBUG)
 
-    def handle_error(self, function) -> int:
+    def get_cmd_error_handler(self, failed_cmd: str) -> int:
         """
-        Handles errors that occur when installing or backing up packs.
+        Called when there is an error running some cmd.
 
-        :param function: Function where the error occurred.
+        Gets the desired error handler based on the error_handling pack setting.
+
+        :param failed_cmd: Command that failed.
         :return: ErrorHandling enum that is not PROMPT, so the caller can take further action.
         """
-        fun_name = function.__name__
-        log(f'Encountered error doing {fun_name} for {self.name}.\n'
-            f'Attempting to handle...', logging.DEBUG)
-        error_handling = self.settings['error_handling']
+        pack_name = self.settings.pack_name
+
+        log(f'Attempting to handle command error...', logging.DEBUG)
+        error_handling = self.settings.error_handling
         if error_handling == ErrorHandling.PROMPT:
             while True:
                 log('Prompting user to handle error.', logging.DEBUG)
-                user_in = input(f'An error occurred doing {self.name} {fun_name}. Do you want to:\n'
-                                f'1 [RP]: Try running the command again?\n'
-                                f'2 [RF]: Restart {fun_name} and try again?\n'
+                user_in = input(f'Encountered an error while running commands for {pack_name}. Do you want to:\n'
+                                f'1 [RP]: Try running the failed command again?\n'
+                                f'2 [RF]: Restart commands from {pack_name}?\n'
                                 f'3 [SP]: Skip just this failed command?\n'
-                                f'4 [SF]: Skip {fun_name} for this pack?\n'
+                                f'4 [SF]: Skip {pack_name}?\n'
                                 f'5 [AB]: Abort this script?\n'
                                 f'  [#/RP/RF/SP/SF/AB] ')
                 log(f'User chose {user_in}.', logging.DEBUG)
-                if not user_in:
-                    log('Empty user input. Re-prompting...', logging.DEBUG)
-                    continue
                 match user_in.upper():
                     case '1' | 'RP':
                         log(f'Attempting failed command again.', logging.ERROR)
                         return ErrorHandling.RETRY_PART
                     case '2' | 'RF':
-                        log(f'Rerunning {fun_name}.', logging.ERROR)
+                        log(f'Restarting commands for {pack_name}.', logging.ERROR)
                         return ErrorHandling.RETRY_FULL
                     case '3' | 'SP':
                         log(f'Skipping this failed command in particular.', logging.ERROR)
                         return ErrorHandling.SKIP_PART
                     case '4' | 'SF':
-                        log(f'Skipping {self.name} {fun_name}.', logging.ERROR)
+                        log(f'Skipping {pack_name}.', logging.ERROR)
                         return ErrorHandling.SKIP_FULL
                     case '5' | 'AB':
-                        log('Aborting script. See log for more information.', logging.ERROR)
+                        log('Aborting script.', logging.ERROR)
                         exit(1)
-                log(f'Could not match {user_in} with anything. Re-prompting...', logging.DEBUG)
+                log(f'Could not match "{user_in}" with anything. Re-prompting...', logging.DEBUG)
         elif error_handling == ErrorHandling.RETRY_PART:
             log('Attempting failed command again.', logging.ERROR)
             return ErrorHandling.RETRY_PART
         elif error_handling == ErrorHandling.RETRY_FULL:
-            log(f'Rerunning {self.name} {fun_name}.', logging.ERROR)
+            log(f'Restarting commands for {pack_name}.', logging.ERROR)
             return ErrorHandling.RETRY_FULL
         elif error_handling == ErrorHandling.SKIP_PART:
             log(f'Skipping the failed command.', logging.ERROR)
             return ErrorHandling.SKIP_PART
         elif error_handling == ErrorHandling.SKIP_FULL:
-            log(f'Skipping {self.name} {fun_name}.', logging.ERROR)
+            log(f'Skipping {pack_name}.', logging.ERROR)
             return ErrorHandling.SKIP_FULL
         else:
-            log(f'Aborting due to error doing {fun_name} on {self.name}.\n'
-                f'See log for more information.', logging.ERROR)
+            log(f'Aborting due to an error running a command for {pack_name}.', logging.ERROR)
             exit(1)
 
 
