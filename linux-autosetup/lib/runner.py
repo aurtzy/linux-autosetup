@@ -59,3 +59,43 @@ def run(cmd: str, args: list[str] = None) -> int:
             f'{error}\n', logging.ERROR)
         return error.returncode
     return 0
+
+
+def copy(dest: str, src: str | list[str]) -> bool:
+    """
+    Copies files from the given path(s) src to dest.
+
+    :param dest: str
+        Destination path to copy source(s) to.
+    :param src: str | list[str]
+        Source path(s) to copy from.
+    :return: True if the copy was successful; False otherwise.
+    """
+    print(f'TEMP: copy from {src} to {dest}')
+    return True
+
+
+def mv(dest: str, src: str | list[str]) -> bool:
+    """
+    Moves files from the given path(s) src to dest.
+
+    :param dest: str
+        Destination path to move source(s) to.
+    :param src: str | list[str]
+        Source path(s) to copy from.
+    :return: True if the move was successful; False otherwise.
+    """
+    print(f'TEMP: move {src} to {dest}')
+    return True
+
+
+def mkdir(path: str) -> bool:
+    """
+    Creates directory if it doesn't exist at the specified path.
+
+    :param path: str
+        Path to create directory to.
+    :return: True if the directory creation was successful or if it already exists; False otherwise.
+    """
+    print(f'TEMP: Create directory to path {path} if it doesn\'t exist.')
+    return True
