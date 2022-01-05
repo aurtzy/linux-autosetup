@@ -1,9 +1,25 @@
+import logging
+
 from aenum import Enum, extend_enum
 
 
-# Superuser command used to run things as root if needed.
+# Superuser command, used to run things as root if needed.
 # Uses 'sudo' by default.
+from lib.logger import log
+
 su_cmd: str = 'sudo'
+
+# Copy command, used for copying files to locations.
+cp_cmd: str = 'cp -at "$1" "${@:2}"'
+
+# Move command, used for moving files to locations.
+mv_cmd: str = 'mv -t "$1" "${@:2}'
+
+# Command for creating directories.
+mkdir_cmd: str = 'mkdir -p $1'
+
+# TODO: still unsure about if this is necessary; marking for now
+# set_file_perms =
 
 # mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
 # Uses '//' by default.
@@ -27,7 +43,9 @@ class AppInstallType(Enum):
         Expects str -> str pairs.
         """
         for k, v in install_types.items():
-            assert isinstance(k, str) and isinstance(v, str)
+            if not isinstance(v, str):
+                log(f'Potential error assigning {v} as the AppInstallType {k}.',
+                    logging.WARNING)
             extend_enum(cls, k, v)
 
 
@@ -45,11 +63,16 @@ class FileBackupType(Enum):
         """
         Adds the entries of the given dictionary of backup types to this enum class.
 
-        Expects str -> dict[str, str] pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
+        Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
         """
         for k, v in backup_types.items():
-            assert isinstance(k, str) and isinstance(v['CREATE'], str) and isinstance(v['EXTRACT'], str)
-            extend_enum(cls.FileBackupTypes, k, {'CREATE': v['CREATE'], 'EXTRACT': v['EXTRACT']})
+            extract = v.get('EXTRACT')
+            create = v.get('CREATE')
+            if not isinstance(extract, str):
+                log(f'Potential error assigning {extract} to the FileBackupType {k}.', logging.WARNING)
+            if not isinstance(create, str):
+                log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
+            extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
 
 
 # TODO: REMOVE AND MOVE TO configparser.py when making - TEMPORARY PLACEMENT
