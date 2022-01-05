@@ -10,7 +10,7 @@ def init_settings(debug_mode: bool = False):
     logger.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler()
-    stream_format = logging.Formatter('%(message)s')
+    stream_format = logging.Formatter('[%(levelname)s]: %(message)s')
     stream_handler.setFormatter(stream_format)
     stream_handler.setLevel(logging.DEBUG if debug_mode else logging.ERROR)
 
@@ -19,7 +19,7 @@ def init_settings(debug_mode: bool = False):
     logfile_handler.setFormatter(logfile_format)
 
     logger.addHandler(stream_handler)
-    logger.addHandler(logfile_handler)
+    # logger.addHandler(logfile_handler)
 
 
 init_settings(True)
