@@ -13,9 +13,10 @@ def get_input(options: list[list[str]], pre_prompt: str = ''):
     Any elements of the list[str] after that are assumed as alternative accepted inputs that are associated with
     that option.
 
-    Every option in options is automatically tagged with their respective natural number in the list.
+    Every option in options is automatically tagged with their respective natural number in the list
+    which can also be matched with the user input.
 
-    :returns: The natural number position of the first found option which matches user input.
+    :returns: The index of the first found option which matches user input.
     """
     if not options:
         log('get_input only expects a non-empty list of options... Exiting.', logging.ERROR)
