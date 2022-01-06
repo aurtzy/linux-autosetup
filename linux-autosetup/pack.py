@@ -68,6 +68,8 @@ class FileBackupType(Enum):
 class FileBackupPath(Enum):
     """
     Backup paths that can be used.
+
+    This enum class can be added to.
     """
 
     def __str__(self):
