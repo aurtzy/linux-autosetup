@@ -7,11 +7,13 @@ def get_input(options: list[list[str]], pre_prompt: str = ''):
     """
     Provides a universal method of getting decently formatted prompts from the user.
 
-    Expects a list of tuples, in which each tuple contains an option.
+    Expects a list of list[str], in which each element contains an option.
 
-    The first element of the tuple will be considered the message to be attached, while
-    any elements after that are assumed as alternative accepted inputs that are associated with
-    that option. Every option in the list is automatically tagged with their respective natural number in the list.
+    The first index of each element will be considered the message to be attached.
+    Any elements of the list[str] after that are assumed as alternative accepted inputs that are associated with
+    that option.
+
+    Every option in options is automatically tagged with their respective natural number in the list.
 
     :returns: The natural number position of the first found option which matches user input.
     """
