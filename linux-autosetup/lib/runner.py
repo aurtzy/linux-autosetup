@@ -5,6 +5,26 @@ import time
 
 from lib.logger import log
 
+# Superuser command, used to run things as root if needed.
+# Uses 'sudo' by default.
+su_cmd: str = 'sudo'
+
+# Copy command, used for copying files to locations.
+cp_cmd: str = 'cp -at "$1" "${@:2}"'
+
+# Move command, used for moving files to locations.
+mv_cmd: str = 'mv -t "$1" "${@:2}'
+
+# Command for creating directories.
+mkdir_cmd: str = 'mkdir -p $1'
+
+# TODO: still unsure about if this is necessary; marking for now
+# set_file_perms =
+
+# mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
+# Uses '//' by default.
+alias_prefix: str = '//'
+
 
 def sudo_loop():
     """
@@ -75,7 +95,7 @@ def copy(dest: str, src: str | list[str]) -> bool:
     return True
 
 
-def mv(dest: str, src: str | list[str]) -> bool:
+def move(dest: str, src: str | list[str]) -> bool:
     """
     Moves files from the given path(s) src to dest.
 
