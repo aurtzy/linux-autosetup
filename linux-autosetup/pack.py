@@ -9,6 +9,11 @@ from lib.runner import run, copy, move, mkdir
 from lib.logger import log
 
 
+# mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
+# Uses '//' by default.
+alias_prefix: str = '//'
+
+
 class AppInstallType(Enum):
     """
     Types of install commands that can be used.

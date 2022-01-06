@@ -21,10 +21,6 @@ mkdir_cmd: str = 'mkdir -p $1'
 # TODO: still unsure about if this is necessary; marking for now
 # set_file_perms =
 
-# mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
-# Uses '//' by default.
-alias_prefix: str = '//'
-
 
 def sudo_loop():
     """
