@@ -199,7 +199,7 @@ class Settings:
             List of file paths that are or will be backed up.
         backup_type: FileBackupTypes
             Indicates the type of backup performed on files.
-        backup_paths: list[str]
+        backup_paths: list[FileBackupPath]
             Denotes paths where backups are stored.
             Must have a length of at least one.
         backup_keep: int
