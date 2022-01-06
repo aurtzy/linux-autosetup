@@ -81,6 +81,7 @@ class FileBackupPath(Enum):
         """
         for k, v in backup_paths.items():
             while True:
+                skip = False
                 if not isinstance(v, str):
                     log(f'Potential error assigning {v} to the FileBackupPath {k}.', logging.WARNING)
                 if not os.path.exists(v):
@@ -90,15 +91,18 @@ class FileBackupPath(Enum):
                         mkdir(v)
                     else:
                         log('Prompting user to handle.', logging.DEBUG)
-                        i = get_input([['Create this backup path and add it?', 'C'],
-                                       ['Try to add it again (Maybe you forgot to mount it!)?', 'T'],
+                        i = get_input([['Try to add it again (Maybe you forgot to mount it!)?', 'T'],
+                                       ['Create this backup path and add it?', 'C'],
                                        ['Skip adding this backup path?', 'S'],
                                        ['Abort script?', 'A']],
                                       pre_prompt='How do you want to handle this?')
-
+                        if i == 0:
+                            log('Trying again to add backup path.', logging.INFO)
+                            continue
                         if i == 1:
                             log(f'Creating new backup path {v}.', logging.INFO)
                             mkdir(v)
+                            continue
                         elif i == 2:
                             log(f'Skipping this backup path - it will not be added.', logging.INFO)
                             skip = True
@@ -106,7 +110,6 @@ class FileBackupPath(Enum):
                         else:
                             log('Aborting script.', logging.INFO)
                             exit(1)
-                skip = False
                 break
             if not skip:
                 log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
