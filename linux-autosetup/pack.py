@@ -265,6 +265,10 @@ class Settings:
 class Pack:
     """Contains various settings and functions for installing and backing up stuff."""
 
+    alias_install_apps: str = f'{alias_prefix}INSTALL_APPS'
+    alias_install_files: str = f'{alias_prefix}INSTALL_FILES'
+    alias_backup_files: str = f'{alias_prefix}BACKUP_FILES'
+
     def __init__(self, settings: Settings):
         """
         This constructor will perform checks on values according to their respective docs,
