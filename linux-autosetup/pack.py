@@ -101,20 +101,21 @@ class FileBackupPath(Enum):
                                        ['Skip adding this backup path?', 'S'],
                                        ['Abort script?', 'A']],
                                       pre_prompt='How do you want to handle this?')
-                        if i == 0:
-                            log('Trying again to add backup path.', logging.INFO)
-                            continue
-                        if i == 1:
-                            log(f'Creating new backup path {v}.', logging.INFO)
-                            mkdir(v)
-                            continue
-                        elif i == 2:
-                            log(f'Skipping this backup path - it will not be added.', logging.INFO)
-                            skip = True
-                            break
-                        else:
-                            log('Aborting script.', logging.INFO)
-                            exit(1)
+                        match i:
+                            case 0:
+                                log('Trying again to add backup path.', logging.INFO)
+                                continue
+                            case 1:
+                                log(f'Creating new backup path {v}.', logging.INFO)
+                                mkdir(v)
+                                continue
+                            case 2:
+                                log(f'Skipping this backup path - it will not be added.', logging.INFO)
+                                skip = True
+                                break
+                            case _:
+                                log('Aborting script.', logging.INFO)
+                                exit(1)
                 break
             if not skip:
                 log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
