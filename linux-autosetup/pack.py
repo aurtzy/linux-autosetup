@@ -208,7 +208,7 @@ class Settings:
         """
         files: list[str]
         backup_type: FileBackupType
-        backup_paths: list[str]
+        backup_paths: list[FileBackupPath]
         backup_keep: int
 
         def __iter__(self):
