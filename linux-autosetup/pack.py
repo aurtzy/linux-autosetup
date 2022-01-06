@@ -2,11 +2,115 @@ import logging
 import os.path
 import re
 from dataclasses import dataclass
-from aenum import auto
+from aenum import Enum, extend_enum, auto
 
-from lib.runner import run
+from lib.prompter import get_input
+from lib.runner import run, move, copy, mkdir
 from lib.logger import log
-from lib.configurable import *
+
+
+class AppInstallType(Enum):
+    """
+    Types of install commands that can be used.
+
+    This enum class can be added to.
+    """
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def add(cls, install_types: dict[str, str]):
+        """
+        Adds the entries of the given dictionary of install types to this enum class.
+
+        Expects str -> str pairs.
+        """
+        for k, v in install_types.items():
+            if not isinstance(v, str):
+                log(f'Potential error assigning {v} as the AppInstallType {k}.',
+                    logging.WARNING)
+            extend_enum(cls, k, v)
+
+
+class FileBackupType(Enum):
+    """
+    Types of file backup commands that can be used.
+
+    This enum class can be added to.
+    """
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def add(cls, backup_types: dict[str, dict[str, str]]):
+        """
+        Adds the entries of the given dictionary of backup types to this enum class.
+
+        Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
+        """
+        for k, v in backup_types.items():
+            extract = v.get('EXTRACT')
+            create = v.get('CREATE')
+            if not isinstance(extract, str):
+                log(f'Potential error assigning {extract} to the FileBackupType {k}.', logging.WARNING)
+            if not isinstance(create, str):
+                log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
+            extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
+
+
+class FileBackupPath(Enum):
+    """
+    Backup paths that can be used.
+    """
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def add(cls, backup_paths: dict[str, str], no_confirm: bool = False):
+        """
+        Adds the entries of the given dictionary of backup paths to this enum class.
+
+        Will perform checks on each path to confirm if they are valid, prompting the user to either create
+        the backup directory or skip adding it if it doesn't exist.
+
+        If the no_confirm param is True, no prompts will be made, and the script will automatically create
+        backup paths if they are missing and add them to the enum class.
+        """
+        for k, v in backup_paths.items():
+            while True:
+                if not isinstance(v, str):
+                    log(f'Potential error assigning {v} to the FileBackupPath {k}.', logging.WARNING)
+                if not os.path.exists(v):
+                    log(f'Could not find an existing backup path {v}.', logging.WARNING)
+                    if no_confirm:
+                        log(f'Creating new backup path {v}.', logging.INFO)
+                        mkdir(v)
+                    else:
+                        log('Prompting user to handle.', logging.DEBUG)
+                        i = get_input([['Create this backup path and add it?', 'C'],
+                                       ['Try to add it again (Maybe you forgot to mount it!)?', 'T'],
+                                       ['Skip adding this backup path?', 'S'],
+                                       ['Abort script?', 'A']],
+                                      pre_prompt='How do you want to handle this?')
+
+                        if i == 1:
+                            log(f'Creating new backup path {v}.', logging.INFO)
+                            mkdir(v)
+                        elif i == 2:
+                            log(f'Skipping this backup path - it will not be added.', logging.INFO)
+                            skip = True
+                            break
+                        else:
+                            log('Aborting script.', logging.INFO)
+                            exit(1)
+                skip = False
+                break
+            if not skip:
+                log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
+                extend_enum(cls, k, v)
 
 
 class ErrorHandling(Enum):
