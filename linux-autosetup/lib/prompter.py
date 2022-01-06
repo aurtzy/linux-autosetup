@@ -35,6 +35,6 @@ def get_input(options: list[list[str]], pre_prompt: str = ''):
         user_in = input('Please choose one of the options above: ')
         for i, option in enumerate(options):
             if user_in.upper() in option[1:] or user_in == str(i):
-                log(f'Accepting input {user_in} and returning {i}.', logging.DEBUG)
+                log(f'Accepting input {user_in} and returning {i} which corresponds to {option}.', logging.DEBUG)
                 return i
         log(f'Could not find any option matching input. Try again.', logging.INFO)
