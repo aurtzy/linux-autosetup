@@ -20,6 +20,7 @@ def sudo_loop():
     Raises PermissionError if the first sudo call is not successful.
     """
     log('Starting sudo loop.', logging.INFO)
+
     # TODO: FIX SUDO COMMENTS WHEN NOT A NUISANCE
     # p = Popen(['sudo', '-v'])
     # p.communicate()
@@ -39,6 +40,7 @@ def sudo_loop():
             else:
                 time.sleep(0.5)
                 i += 0.5
+
     threading.Thread(target=sudo_loop_thread).start()
     log('Started sudo_loop_thread.', logging.DEBUG)
 
