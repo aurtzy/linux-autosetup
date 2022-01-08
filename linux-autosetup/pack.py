@@ -73,10 +73,10 @@ class FileBackupPath(Enum):
     """
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.value}'
 
     @classmethod
-    def add(cls, backup_paths: dict[str, str], no_confirm: bool = False):
+    def add(cls, backup_paths: dict[str, Path], no_confirm: bool = False):
         """
         Adds the entries of the given dictionary of backup paths to this enum class.
 
@@ -95,10 +95,10 @@ class FileBackupPath(Enum):
                     log(f'Could not find an existing backup path {v}.', logging.WARNING)
                     if no_confirm:
                         log(f'Creating new backup path {v}.', logging.INFO)
-                        mkdir(v)
+                        Path.mkdir(v)
                     else:
                         log('Prompting user to handle.', logging.DEBUG)
-                        i = get_input([['Try to add it again (Maybe you forgot to mount it!)?', 'T'],
+                        i = get_input([['Try to add it again? If it\'s on another drive, check if it is mounted.', 'T'],
                                        ['Create this backup path and add it?', 'C'],
                                        ['Skip adding this backup path?', 'S'],
                                        ['Abort script?', 'A']],
@@ -109,8 +109,7 @@ class FileBackupPath(Enum):
                                 continue
                             case 1:
                                 log(f'Creating new backup path {v}.', logging.INFO)
-                                mkdir(v)
-                                continue
+                                Path.mkdir(v)
                             case 2:
                                 log(f'Skipping this backup path - it will not be added.', logging.INFO)
                                 skip = True
