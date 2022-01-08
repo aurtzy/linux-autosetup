@@ -70,16 +70,14 @@ class Path(os.PathLike):
 
     path: str
         A path to some directory or file on the system which may or may not exist.
-        This is passed through os.expandvars(). In order to avoid edge cases of undesired substitution,
-        this class adds the DOLLARSIGN environment variable for escaping '$'.
 
     Class variables:
         su_cmd: str
             Superuser command, used to elevate commands to make sure they have necessary permissions to function.
             Uses 'sudo' by default.
 
-        The following variables are configured for use with GNU/Linux systems, but may be changed to work for
-        other systems instead:
+        The following variables are configured for use with GNU/Linux systems by default, but may be
+        changed to work for other systems instead:
 
         cp_cmd: str
             Copy command, used for copying files to locations.
@@ -98,7 +96,7 @@ class Path(os.PathLike):
     mkdir_cmd: str = 'mkdir -p $1'
 
     def __init__(self, path):
-        self.path = os.path.expandvars(str(path))
+        self.path = path
 
     @staticmethod
     def copy(dest: "Path", *args: "Path") -> bool:
@@ -129,6 +127,15 @@ class Path(os.PathLike):
         """
         print(f'TEMP: Create directory to path {path} if it doesn\'t exist.')
         return True
+
+    @staticmethod
+    def expanded_vars(path: str):
+        """Returns a Path object with expanded environment variables from the given path arg."""
+        return Path(os.path.expandvars(str(path)))
+
+    def subdir(self, rel_path: "Path") -> "Path":
+        """Returns a subdirectory of self.path, in which the rel_path argument is appended to self.path."""
+        return Path(self.path + '/' + str(rel_path))
 
     def __fspath__(self):
         return self.path
