@@ -8,119 +8,164 @@ from lib.prompter import get_input
 from lib.system import run, Path
 from lib.logger import log
 
-
 # mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
 # Uses '//' by default.
 alias_prefix: str = '//'
 
 
-class AppInstallType(Enum):
+@dataclass
+class AppSettings:
     """
-    Types of install commands that can be used.
+    App-specific settings.
 
-    This enum class can be added to.
+    apps: list[str]
+        List of app names used in installation.
+    install_type: InstallType
+        Indicates the type of install command to use.
+
+    Implements __iter__, which iterates through the apps list.
     """
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def add(cls, install_types: dict[str, str]):
+    class InstallType(Enum):
         """
-        Adds the entries of the given dictionary of install types to this enum class.
+        Types of install commands that can be used.
 
-        Expects str -> str pairs.
+        This enum class can be added to.
         """
-        for k, v in install_types.items():
-            if not isinstance(v, str):
-                log(f'Potential error assigning {v} as the AppInstallType {k}.',
-                    logging.WARNING)
-            extend_enum(cls, k, v)
 
+        def __str__(self):
+            return self.name
 
-class FileBackupType(Enum):
-    """
-    Types of file backup commands that can be used.
+        @classmethod
+        def add(cls, install_types: dict[str, str]):
+            """
+            Adds the entries of the given dictionary of install types to this enum class.
 
-    This enum class can be added to.
-    """
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def add(cls, backup_types: dict[str, dict[str, str]]):
-        """
-        Adds the entries of the given dictionary of backup types to this enum class.
-
-        Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
-        """
-        for k, v in backup_types.items():
-            extract = v.get('EXTRACT')
-            create = v.get('CREATE')
-            if not isinstance(extract, str):
-                log(f'Potential error assigning {extract} to the FileBackupType {k}.', logging.WARNING)
-            if not isinstance(create, str):
-                log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
-            extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
-
-
-class FileBackupPath(Enum):
-    """
-    Backup paths that can be used.
-
-    This enum class can be added to.
-    """
-
-    def __str__(self):
-        return f'{self.name} - {self.value}'
-
-    @classmethod
-    def add(cls, backup_paths: dict[str, Path], no_confirm: bool = False):
-        """
-        Adds the entries of the given dictionary of backup paths to this enum class.
-
-        Will perform checks on each path to confirm if they are valid, prompting the user to either create
-        the backup directory or skip adding it if it doesn't exist.
-
-        If the no_confirm param is True, no prompts will be made, and the script will automatically create
-        backup paths if they are missing and add them to the enum class.
-        """
-        for k, v in backup_paths.items():
-            while True:
-                skip = False
+            Expects str -> str pairs.
+            """
+            for k, v in install_types.items():
                 if not isinstance(v, str):
-                    log(f'Potential error assigning {v} to the FileBackupPath {k}.', logging.WARNING)
-                if not os.path.exists(v):
-                    log(f'Could not find an existing backup path {v}.', logging.WARNING)
-                    if no_confirm:
-                        log(f'Creating new backup path {v}.', logging.INFO)
-                        Path.mkdir(v)
-                    else:
-                        log('Prompting user to handle.', logging.DEBUG)
-                        i = get_input([['Try to add it again? If it\'s on another drive, check if it is mounted.', 'T'],
-                                       ['Create this backup path and add it?', 'C'],
-                                       ['Skip adding this backup path?', 'S'],
-                                       ['Abort script?', 'A']],
-                                      pre_prompt='How do you want to handle this?')
-                        match i:
-                            case 0:
-                                log('Trying again to add backup path.', logging.INFO)
-                                continue
-                            case 1:
-                                log(f'Creating new backup path {v}.', logging.INFO)
-                                Path.mkdir(v)
-                            case 2:
-                                log(f'Skipping this backup path - it will not be added.', logging.INFO)
-                                skip = True
-                                break
-                            case _:
-                                log('Aborting script.', logging.INFO)
-                                exit(1)
-                break
-            if not skip:
-                log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
+                    log(f'Potential error assigning {v} as the AppInstallType {k}.',
+                        logging.WARNING)
                 extend_enum(cls, k, v)
+
+    apps: list[str]
+    install_type: InstallType
+
+    def __iter__(self):
+        for app in self.apps:
+            yield app
+
+@dataclass
+class FileSettings:
+    """
+    File-specific settings.
+
+    files: list[str]
+        List of file paths that are or will be backed up.
+    backup_type: BackupType
+        Indicates the type of backup performed on files.
+    backup_paths: list[BackupPath]
+        Denotes paths where backups are stored.
+        Must have a length of at least one.
+    backup_keep: int
+        Number of old backups to keep before dumping.
+        If set to -1, script will keep all backups made and not dump old ones.
+        If set to 0, only the most recent made one in a backup path is kept.
+
+    Implements __iter__, which iterates through the files list.
+    """
+    class BackupType(Enum):
+        """
+        Types of file backup commands that can be used.
+
+        This enum class can be added to.
+        """
+
+        def __str__(self):
+            return self.name
+
+        @classmethod
+        def add(cls, backup_types: dict[str, dict[str, str]]):
+            """
+            Adds the entries of the given dictionary of backup types to this enum class.
+
+            Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
+            """
+            for k, v in backup_types.items():
+                extract = v.get('EXTRACT')
+                create = v.get('CREATE')
+                if not isinstance(extract, str):
+                    log(f'Potential error assigning {extract} to the FileBackupType {k}.', logging.WARNING)
+                if not isinstance(create, str):
+                    log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
+                extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
+
+    class BackupPath(Enum):
+        """
+        Backup paths that can be used.
+
+        This enum class can be added to.
+        """
+
+        def __str__(self):
+            return f'{self.name} - {self.value}'
+
+        @classmethod
+        def add(cls, backup_paths: dict[str, Path], no_confirm: bool = False):
+            """
+            Adds the entries of the given dictionary of backup paths to this enum class.
+
+            Will perform checks on each path to confirm if they are valid, prompting the user to either create
+            the backup directory or skip adding it if it doesn't exist.
+
+            If the no_confirm param is True, no prompts will be made, and the script will automatically create
+            backup paths if they are missing and add them to the enum class.
+            """
+            for k, v in backup_paths.items():
+                while True:
+                    skip = False
+                    if not isinstance(v, str):
+                        log(f'Potential error assigning {v} to the FileBackupPath {k}.', logging.WARNING)
+                    if not os.path.exists(v):
+                        log(f'Could not find an existing backup path {v}.', logging.WARNING)
+                        if no_confirm:
+                            log(f'Creating new backup path {v}.', logging.INFO)
+                            Path.mkdir(v)
+                        else:
+                            log('Prompting user to handle.', logging.DEBUG)
+                            i = get_input(
+                                [['Try to add it again? If it\'s on another drive, check if it is mounted.', 'T'],
+                                 ['Create this backup path and add it?', 'C'],
+                                 ['Skip adding this backup path?', 'S'],
+                                 ['Abort script?', 'A']],
+                                pre_prompt='How do you want to handle this?')
+                            match i:
+                                case 0:
+                                    log('Trying again to add backup path.', logging.INFO)
+                                    continue
+                                case 1:
+                                    log(f'Creating new backup path {v}.', logging.INFO)
+                                    Path.mkdir(v)
+                                case 2:
+                                    log(f'Skipping this backup path - it will not be added.', logging.INFO)
+                                    skip = True
+                                    break
+                                case _:
+                                    log('Aborting script.', logging.INFO)
+                                    exit(1)
+                    break
+                if not skip:
+                    log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
+                    extend_enum(cls, k, v)
+
+    files: list[str]
+    backup_type: BackupType
+    backup_paths: list[BackupPath]
+    backup_keep: int
+
+    def __iter__(self):
+        for file in self.files:
+            yield file
 
 
 class ErrorHandling(Enum):
@@ -156,9 +201,9 @@ class Settings:
         List of pack object names that a pack depends on, which should be installed first.
         Relevant when calling install().
         Implementations may want to check whether all names are valid before using.
-    apps: Apps
+    app_settings: AppSettings
         Contains all app-related settings for the pack.
-    files: Files
+    file_settings: FileSettings
         Contains all file-related settings for the pack.
     install_cmd: str
         Command to run in a shell when the pack install method is called.
@@ -169,59 +214,11 @@ class Settings:
         Makes use of aliases specified in the backup method.
         Empty by default, but can be assigned custom commands.
     """
-
-    @dataclass
-    class Apps:
-        """
-        App-specific settings.
-
-        apps: list[str]
-            List of app names used in installation.
-        install_type: AppInstallTypes
-            Indicates the type of install command to use.
-
-        Implements __iter__, which iterates through the apps list.
-        """
-        apps: list[str]
-        install_type: AppInstallType
-
-        def __iter__(self):
-            for app in self.apps:
-                yield app
-
-    @dataclass
-    class Files:
-        """
-        File-specific settings.
-
-        files: list[str]
-            List of file paths that are or will be backed up.
-        backup_type: FileBackupTypes
-            Indicates the type of backup performed on files.
-        backup_paths: list[FileBackupPath]
-            Denotes paths where backups are stored.
-            Must have a length of at least one.
-        backup_keep: int
-            Number of old backups to keep before dumping.
-            If set to -1, script will keep all backups made and not dump old ones.
-            If set to 0, only the most recent made one in a backup path is kept.
-
-        Implements __iter__, which iterates through the files list.
-        """
-        files: list[str]
-        backup_type: FileBackupType
-        backup_paths: list[FileBackupPath]
-        backup_keep: int
-
-        def __iter__(self):
-            for file in self.files:
-                yield file
-
     pack_name: str
     error_handling: ErrorHandling
     depends: list[str] | None = None
-    apps: Apps | None = None
-    files: Files | None = None
+    apps: AppSettings | None = None
+    files: FileSettings | None = None
     install_cmd: str = ''
     backup_cmd: str = ''
 
