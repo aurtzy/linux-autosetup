@@ -64,8 +64,8 @@ class FileSettings:
         List of file paths that are or will be backed up.
     backup_type: BackupType
         Indicates the type of backup performed on files.
-    backup_paths: list[str]
-        Denotes paths where backups are stored.
+    backup_dirs: list[BackupDir]
+        Denotes directories where backups are stored.
         Must have a length of at least one.
     backup_keep: int
         Number of old backups to keep before dumping.
@@ -100,9 +100,9 @@ class FileSettings:
                     log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
                 extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
 
-    class BackupPath(Enum):
+    class BackupDir(Enum):
         """
-        Backup paths that can be used.
+        Backup directories that can be used.
 
         This enum class can be added to.
         """
@@ -160,7 +160,7 @@ class FileSettings:
 
     files: list[str]
     backup_type: BackupType
-    backup_paths: list[BackupPath]
+    backup_paths: list[BackupDir]
     backup_keep: int
 
     def __iter__(self):
