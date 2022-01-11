@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from aenum import Enum, extend_enum, auto
 
 from lib.prompter import get_input
-from lib.system import run, Path
+from lib.system import run, PathOps
 from lib.logger import log
 
 # mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
@@ -64,7 +64,7 @@ class FileSettings:
         List of file paths that are or will be backed up.
     backup_type: BackupType
         Indicates the type of backup performed on files.
-    backup_paths: list[BackupPath]
+    backup_paths: list[str]
         Denotes paths where backups are stored.
         Must have a length of at least one.
     backup_keep: int
@@ -111,7 +111,7 @@ class FileSettings:
             return f'{self.name} - {self.value}'
 
         @classmethod
-        def add(cls, backup_paths: dict[str, Path], no_confirm: bool = False):
+        def add(cls, backup_paths: dict[str, str], no_confirm: bool = False):
             """
             Adds the entries of the given dictionary of backup paths to this enum class.
 
@@ -130,7 +130,7 @@ class FileSettings:
                         log(f'Could not find an existing backup path {v}.', logging.WARNING)
                         if no_confirm:
                             log(f'Creating new backup path {v}.', logging.INFO)
-                            Path.mkdir(v)
+                            PathOps.mkdir(v)
                         else:
                             log('Prompting user to handle.', logging.DEBUG)
                             i = get_input(
@@ -145,7 +145,7 @@ class FileSettings:
                                     continue
                                 case 1:
                                     log(f'Creating new backup path {v}.', logging.INFO)
-                                    Path.mkdir(v)
+                                    PathOps.mkdir(v)
                                 case 2:
                                     log(f'Skipping this backup path - it will not be added.', logging.INFO)
                                     skip = True

@@ -64,42 +64,36 @@ def run(cmd: str, args: list[str] = None) -> int:
     return 0
 
 
-class Path(os.PathLike):
+class PathOps:
     """
-    Implements os.PathLike with additional functionalities for interacting with the system.
+    Provides methods in which to manipulate and interact with files on the system.
 
-    path: str
-        A path to some directory or file on the system which may or may not exist.
+    The following commands are configured to work on most GNU/Linux systems, but may be changed to
+    work with other systems.
 
-    Class variables:
-        su_cmd: str
-            Superuser command, used to elevate commands to make sure they have necessary permissions to function.
-            Uses 'sudo' by default.
+    su_cmd: str
+        Superuser command, used to elevate commands to make sure they have necessary permissions to function.
+        Uses 'sudo' by default.
+    cp_cmd: str
+        Copy command, used for copying files to locations.
+    mv_cmd: str
+        Move command, used for moving files to locations.
+    mkdir_cmd: str
+        Make directory command, used for creating directories.
 
-        The following variables are configured for use with GNU/Linux systems by default, but may be
-        changed to work for other systems instead:
-
-        cp_cmd: str
-            Copy command, used for copying files to locations.
-        mv_cmd: str
-            Move command, used for moving files to locations.
-        mkdir_cmd: str
-            Make directory command, used for creating directories.
+    Calling these methods will invoke a check for if the path(s) exist, and an error
+    is raised if any path does not exist.
     """
 
     os.environ['DOLLARSIGN'] = '$'
 
     su_cmd: str = 'sudo'
-
     cp_cmd: str = 'cp -at "$1" "${@:2}"'
     mv_cmd: str = 'mv -t "$1" "${@:2}'
     mkdir_cmd: str = 'mkdir -p $1'
 
-    def __init__(self, path):
-        self.path = path
-
     @staticmethod
-    def copy(dest: "Path", *args: "Path") -> bool:
+    def copy(dest: str, *args: str) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
@@ -109,7 +103,7 @@ class Path(os.PathLike):
         return True
 
     @staticmethod
-    def move(dest: "Path", *args: "Path") -> bool:
+    def move(dest: str, *args: str) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
@@ -119,7 +113,7 @@ class Path(os.PathLike):
         return True
 
     @staticmethod
-    def mkdir(path: "Path") -> bool:
+    def mkdir(path: str) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
@@ -127,18 +121,3 @@ class Path(os.PathLike):
         """
         print(f'TEMP: Create directory to path {path} if it doesn\'t exist.')
         return True
-
-    @staticmethod
-    def expanded_vars(path: str):
-        """Returns a Path object with expanded environment variables from the given path arg."""
-        return Path(os.path.expandvars(str(path)))
-
-    def subdir(self, rel_path: "Path") -> "Path":
-        """Returns a subdirectory of self.path, in which the rel_path argument is appended to self.path."""
-        return Path(self.path + '/' + str(rel_path))
-
-    def __fspath__(self):
-        return self.path
-
-    def __str__(self):
-        return self.path
