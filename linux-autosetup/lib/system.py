@@ -60,7 +60,9 @@ def run(cmd: str, args: list[str] = None) -> int:
     log(f'Running command(s):\n{cmd}', logging.DEBUG)
     args = args or []
     try:
-        subprocess.run([cmd, ''] + args, check=True, text=True, shell=True)
+        pass
+        # TODO: temporary; remove when appropriate
+        # subprocess.run([cmd, ''] + args, check=True, text=True, shell=True)
     except subprocess.CalledProcessError as error:
         log(f'Encountered an error running shell commands:\n'
             f'{error}\n', logging.ERROR)
@@ -156,7 +158,7 @@ class PathOps:
                 i = get_input([
                     ['Try searching for it again?', 'T'],
                     ['Ignore this path?', 'I'],
-                    ['Abort this script?', 'a']
+                    ['Abort this script?', 'A']
                 ], f'The path "{path}" could not be found. How do you want to handle this?')
                 match i:
                     case 0:
