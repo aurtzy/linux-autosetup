@@ -5,6 +5,11 @@ import threading
 import time
 
 from lib.logger import log
+from lib.prompter import get_input
+
+
+# Used for commands that may require superuser elevation, such as PathOps
+su_cmd: str = 'sudo'
 
 
 def sudo_loop():
@@ -81,19 +86,26 @@ class PathOps:
     mkdir_cmd: str
         Make directory command, used for creating directories.
 
+    validate_path: str
+        Command that checks if a file or directory exists.
+        POSIX compliant by default.
+    validate_dir: str
+        Command that checks if a directory exists.
+        POSIX compliant by default.
+
     Calling these methods will invoke a check for if the path(s) exist, and an error
     is raised if any path does not exist.
     """
 
-    os.environ['DOLLARSIGN'] = '$'
-
-    su_cmd: str = 'sudo'
     cp_cmd: str = 'cp -at "$1" "${@:2}"'
     mv_cmd: str = 'mv -t "$1" "${@:2}'
     mkdir_cmd: str = 'mkdir -p $1'
 
-    @staticmethod
-    def copy(dest: str, *args: str) -> bool:
+    validate_path: str = '[ -e "$1" ]'
+    validate_dir: str = '[ -d "$1" ]'
+
+    @classmethod
+    def copy(cls, dest: str, *args: str) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
@@ -102,8 +114,8 @@ class PathOps:
         print(f'TEMP: copy {", ".join(str(path) for path in args)} to {dest}')
         return True
 
-    @staticmethod
-    def move(dest: str, *args: str) -> bool:
+    @classmethod
+    def move(cls, dest: str, *args: str) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
@@ -112,8 +124,8 @@ class PathOps:
         print(f'TEMP: move {", ".join(str(path) for path in args)} to {dest}')
         return True
 
-    @staticmethod
-    def mkdir(path: str) -> bool:
+    @classmethod
+    def mkdir(cls, path: str) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
