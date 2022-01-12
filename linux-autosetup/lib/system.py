@@ -1,5 +1,4 @@
 import logging
-import os
 import subprocess
 import threading
 import time
@@ -133,3 +132,49 @@ class PathOps:
         """
         print(f'TEMP: Create directory to path {path} if it doesn\'t exist.')
         return True
+
+    @classmethod
+    def accept_valid_path(cls, path: str, no_confirm: bool = False) -> bool:
+        """
+        Validates the given path string.
+
+        If no_confirm is true, the method will return false if the path does not exist.
+        Otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
+
+        :return: True if the path is valid and exists; false otherwise.
+        """
+        while True:
+            log(f'Checking if {path} exists...', logging.INFO)
+            if run(f'{su_cmd} {cls.validate_path}', [path]) == 0:
+                log('Path found.', logging.INFO)
+                return True
+            elif no_confirm:
+                log('Path not found. Ignoring...', logging.INFO)
+                return False
+            else:
+                log('Path not found. Prompting user to handle...', logging.DEBUG)
+                i = get_input([
+                    ['Try searching for it again?', 'T'],
+                    ['Ignore this path?', 'I'],
+                    ['Abort this script?', 'a']
+                ], f'The path "{path}" could not be found. How do you want to handle this?')
+                match i:
+                    case 0:
+                        log('Trying again to find path...', logging.INFO)
+                        continue
+                    case 1:
+                        log('Ignoring path.', logging.INFO)
+                        return False
+                    case _:
+                        log('Aborting.', logging.ERROR)
+                        exit(1)
+
+    @classmethod
+    def make_valid_dir(cls, path: str) -> bool:
+        """
+        Creates a directory to the given path if it does not exist. If no_confirm is false, prompt the user with
+        additional options to
+
+        :return:
+        """
+        pass
