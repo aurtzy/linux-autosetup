@@ -136,9 +136,9 @@ class PathOps:
         return True
 
     @classmethod
-    def accept_valid_path(cls, path: str, no_confirm: bool = False) -> bool:
+    def path_exists(cls, path: str, no_confirm: bool = False) -> bool:
         """
-        Validates the given path string.
+        Checks if the given path exists.
 
         If no_confirm is true, the method will return false if the path does not exist.
         Otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
@@ -172,11 +172,14 @@ class PathOps:
                         exit(1)
 
     @classmethod
-    def make_valid_dir(cls, path: str) -> bool:
+    def dir_valid(cls, dir_path: str, no_confirm: bool = False) -> bool:
         """
-        Creates a directory to the given path if it does not exist. If no_confirm is false, prompt the user with
-        additional options to
+        Validates the given directory path. Unlike path_exists, this method allows the given directory path
+        to be created if it is not found.
 
-        :return:
+        If no_confirm is true and the path does not exist, automatically create the directory and return True.
+        Otherwise, prompt the user for options to handle the missing directory.
+
+        :return: True if the directory path is valid and exists; False otherwise.
         """
         pass
