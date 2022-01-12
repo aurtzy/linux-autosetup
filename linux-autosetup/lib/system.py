@@ -7,7 +7,8 @@ from lib.logger import log
 from lib.prompter import get_input
 
 
-# Used for commands that may require superuser elevation, such as PathOps
+# Used for commands that may require superuser elevation, such as PathOps.
+# By default, uses 'sudo'
 su_cmd: str = 'sudo'
 
 
@@ -59,6 +60,7 @@ def run(cmd: str, args: list[str] = None) -> int:
     """
     log(f'Running command(s):\n{cmd}', logging.DEBUG)
     args = args or []
+    log(f'The following shell arguments will be passed:\n{args}', logging.DEBUG)
     try:
         pass
         # TODO: temporary; remove when appropriate
