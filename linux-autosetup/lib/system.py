@@ -143,10 +143,12 @@ class PathOps:
         If no_confirm is true, the method will return false if the path does not exist.
         Otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
 
+        Implementations should not use the given path if this method returns False.
+
         :return: True if the path is valid and exists; false otherwise.
         """
         while True:
-            log(f'Checking if {path} exists...', logging.INFO)
+            log(f'Checking if "{path}" exists...', logging.INFO)
             if run(f'{su_cmd} {cls.validate_path}', [path]) == 0:
                 log('Path found.', logging.INFO)
                 return True
@@ -157,7 +159,7 @@ class PathOps:
                 log('Path not found. Prompting user to handle...', logging.DEBUG)
                 i = get_input([
                     ['Try searching for it again?', 'T'],
-                    ['Ignore this path?', 'I'],
+                    ['Ignore this path for the session?', 'I'],
                     ['Abort this script?', 'A']
                 ], f'The path "{path}" could not be found. How do you want to handle this?')
                 match i:
@@ -180,6 +182,37 @@ class PathOps:
         If no_confirm is true and the path does not exist, automatically create the directory and return True.
         Otherwise, prompt the user for options to handle the missing directory.
 
+        Implementations should not use the directory given if this method returns False.
+
         :return: True if the directory path is valid and exists; False otherwise.
         """
-        pass
+        while True:
+            log(f'Checking if directory path "{dir_path}" exists...', logging.INFO)
+            if run(f'{su_cmd} {cls.validate_dir}', [dir_path]) == 0:
+                log(f'Directory path found.', logging.INFO)
+                return True
+            elif no_confirm:
+                log(f'Path is missing - automatically creating directory at "{dir_path}".', logging.INFO)
+                PathOps.mkdir(dir_path)
+            else:
+                log('Path could not be found - Prompting user to handle.', logging.DEBUG)
+                i = get_input(
+                    [['Try to find it again? If it\'s on another drive, check if it is mounted.', 'T'],
+                     ['Create a new directory?', 'C'],
+                     ['Ignore this path for the session?', 'I'],
+                     ['Abort this script?', 'A']],
+                    pre_prompt=f'The directory "{dir_path}" was not found. How do you want to handle this?')
+                match i:
+                    case 0:
+                        log('Attempting to find directory again.', logging.INFO)
+                        continue
+                    case 1:
+                        log(f'Creating new directory.', logging.INFO)
+                        PathOps.mkdir(dir_path)
+                        return True
+                    case 2:
+                        log(f'Ignoring this path for the session.', logging.INFO)
+                        return False
+                    case _:
+                        log('Aborting.', logging.INFO)
+                        exit(1)
