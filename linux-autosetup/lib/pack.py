@@ -350,5 +350,12 @@ class Pack:
         return True
 
     def __str__(self, verbose=True):
-        # TODO
-        pass
+        string = f'Pack Name: {self.name}\n' \
+                 f'Description: {self.desc}'
+        if verbose:
+            string += f'\n' \
+                      f'Modules:'
+            for module in self.modules:
+                string += f'\n' \
+                          f'{module}'
+        return string
