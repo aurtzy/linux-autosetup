@@ -1,16 +1,161 @@
 import logging
 import os.path
 import re
+from abc import abstractmethod, ABC
 from dataclasses import dataclass
-from aenum import Enum, extend_enum, auto
+from aenum import Enum, extend_enum
 
+from lib.configurable import configurable
 from lib.prompter import get_input
 from lib.system import run, PathOps
 from lib.logger import log
 
-# mainly for use with install_cmd and backup_cmd in packs when requiring substitution of commands.
-# Uses '//' by default.
-alias_prefix: str = '//'
+
+class BaseModule(ABC):
+    """
+    Abstract method for creating new modules.
+
+    The labels "module" and "alt" are reserved for use with configs, and are not recommended
+    as property names.
+    """
+
+    @staticmethod
+    def convert_to_str_list(arg) -> list[str]:
+        """
+        Converts the given arg into a str list.
+
+        If arg is a list, pass each element through str() and return that;
+        otherwise, perform the following on str(arg):
+            If arg contains no newline characters, delimit into a list by spaces.
+            Otherwise, delimit by newline characters.
+        """
+        log(f'Got {str(arg)} as arg to convert.', logging.DEBUG)
+        if arg is None:
+            log('Arg is NoneType - setting to empty list.', logging.DEBUG)
+            arg = []
+        elif isinstance(arg, list):
+            log('Arg is a list - converting any elements to str if not already str.', logging.DEBUG)
+            arg = [str(element) for element in arg]
+        else:
+            arg = str(arg)
+            if '\n' in arg:
+                arg = arg.split('\n')
+            else:
+                arg = arg.split(' ')
+        log(f'Returning {arg}', logging.DEBUG)
+        return arg
+
+    @abstractmethod
+    def __init__(self, settings: dict):
+        pass
+
+    @abstractmethod
+    def install(self, no_confirm: bool = False):
+        pass
+
+    @abstractmethod
+    def backup(self, no_confirm: bool = False):
+        pass
+
+
+class DependenciesModule(BaseModule):
+    """Handles installation of pack dependencies."""
+
+    def __init__(self, settings: dict):
+        log('Initializing dependencies module...', logging.DEBUG)
+        log(str(settings), logging.DEBUG)
+
+        # dependencies
+        self.dependencies = self.convert_to_str_list(settings.get('dependencies'))
+        if not self.dependencies:
+            log('This DependenciesModule has no dependencies. Is this intentional?', logging.WARNING)
+
+    def install(self, no_confirm: bool = False):
+        pass
+
+    def backup(self, no_confirm: bool = False):
+        pass
+
+
+class CustomCmdsModule(BaseModule):
+    """Handles running custom commands."""
+
+    def __init__(self, settings: dict):
+        # cmd
+        self.cmd: str = settings.get('cmd')
+
+        # args
+        self.args: list[str]
+
+    def install(self, no_confirm: bool = False):
+        pass
+
+    def backup(self, no_confirm: bool = False):
+        pass
+
+
+class AppCmdsModule(CustomCmdsModule):
+    """Handles installation of apps."""
+
+    install_cmds: dict[str, str] = {}
+
+    def __init__(self, settings: dict):
+        log('Initializing apps module...', logging.INFO)
+        log(str(settings), logging.DEBUG)
+
+        # apps
+        self.apps = self.convert_to_str_list(settings.get('apps'))
+        if not self.apps:
+            log('Initializing with no apps. Is this intentional?', logging.WARNING)
+
+        # install_cmd
+        self.install_cmd = settings.get('install_cmd')
+        if self.install_cmd not in configurable['INSTALL_CMDS'].keys():
+            log(f'Could not match {self.install_cmd} with anything in INSTALL_CMDS - Please fix.', logging.ERROR)
+            exit(1)
+
+    def install(self, no_confirm: bool = False):
+        # todo: log('install app . . .)
+        super(no_confirm)
+
+    def backup(self, no_confirm: bool = False):
+        pass
+
+
+class FileCmdsModule(CustomCmdsModule):
+    """Handles installation and backing up of files."""
+
+    def __init__(self, settings: dict):
+        log('Initializing files module...', logging.INFO)
+        log(str(settings), logging.DEBUG)
+
+        # files_location
+        self.files_location = settings.get('files_location')
+        if not isinstance(self.files_location, str):
+            log('Expected files_location to be a string, but it was not. Is this intentional?', logging.WARNING)
+        log('Expanding any variables in files_location', logging.DEBUG)
+        self.files_location = os.path.expandvars(str(self.files_location))
+        log(self.files_location, logging.DEBUG)
+
+        # files
+        self.files = self.convert_to_str_list(settings.get('files'))
+        if not self.files:
+            log('Initializing with an empty list of files. Is this intentional?', logging.WARNING)
+
+        #
+
+    def install(self, no_confirm: bool = False):
+        pass
+
+    def backup(self, no_confirm: bool = False):
+        pass
+
+
+class Module(Enum):
+    dependencies = DependenciesModule
+    custom = CustomCmdsModule
+    apps = AppCmdsModule
+    files = FileCmdsModule
 
 
 @dataclass
@@ -25,6 +170,7 @@ class AppSettings:
 
     Implements __iter__, which iterates through the apps list.
     """
+
     class InstallType(Enum):
         """
         Types of install commands that can be used.
@@ -55,17 +201,26 @@ class AppSettings:
         for app in self.apps:
             yield app
 
+
 @dataclass
 class FileSettings:
     """
     File-specific settings.
-
+    # TODO: what if we combined files_dir and files, and made it "backup_args"? better name?
+       install_args for both AppSettings and FileSettings; backup_args for FileSettings too
+    files_dir: str
+        Optional path that denotes the working directory of the BackupType command, notably used with tar's -C switch.
+        Useful for potentially variable directory names like user home folders - substituting variables through
+        the files list makes it only work for that variable after it is substituted, which may result in unintended
+        behavior.
     files: list[str]
         List of file paths that are or will be backed up.
-    backup_type: BackupType
-        Indicates the type of backup performed on files.
+
+    install_args
+    archive_cmds: ArchiveCmds
+        Indicates the type of commands used to create and extract archived files.
     backup_dirs: list[BackupDir]
-        Denotes directories where backups are stored.
+        Denotes directories where archives are stored.
         Must have a length of at least one.
     backup_keep: int
         Number of old backups to keep before dumping.
@@ -74,9 +229,10 @@ class FileSettings:
 
     Implements __iter__, which iterates through the files list.
     """
-    class BackupType(Enum):
+
+    class ArchiveCmds(Enum):
         """
-        Types of file backup commands that can be used.
+        Types of file archive commands that can be used.
 
         This enum class can be added to.
         """
@@ -85,19 +241,19 @@ class FileSettings:
             return self.name
 
         @classmethod
-        def add(cls, backup_types: dict[str, dict[str, str]]):
+        def add(cls, archive_cmds: dict[str, dict[str, str]]):
             """
             Adds the entries of the given dictionary of backup types to this enum class.
 
             Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
             """
-            for k, v in backup_types.items():
+            for k, v in archive_cmds.items():
                 extract = v.get('EXTRACT')
                 create = v.get('CREATE')
                 if not isinstance(extract, str):
-                    log(f'Potential error assigning {extract} to the FileBackupType {k}.', logging.WARNING)
+                    log(f'Potential error assigning {extract} as the {k} EXTRACT command(s).', logging.WARNING)
                 if not isinstance(create, str):
-                    log(f'Potential error assigning {create} to the FileBackupType {k}.', logging.WARNING)
+                    log(f'Potential error assigning {create} as the {k} CREATE command(s).', logging.WARNING)
                 extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
 
     class BackupDir(Enum):
@@ -111,9 +267,9 @@ class FileSettings:
             return f'{self.name} - {self.value}'
 
         @classmethod
-        def add(cls, backup_paths: dict[str, str], no_confirm: bool = False):
+        def add(cls, backup_dirs: dict[str, str], no_confirm: bool = False):
             """
-            Adds the entries of the given dictionary of backup paths to this enum class.
+            Adds the entries of the given dictionary of backup directories to this enum class.
 
             Will perform checks on each path to confirm if they are valid, prompting the user to either create
             the backup directory or skip adding it if it doesn't exist.
@@ -121,378 +277,78 @@ class FileSettings:
             If the no_confirm param is True, no prompts will be made, and the script will automatically create
             backup paths if they are missing and add them to the enum class.
             """
-            for k, v in backup_paths.items():
-                while True:
-                    skip = False
-                    if not isinstance(v, str):
-                        log(f'Potential error assigning {v} to the FileBackupPath {k}.', logging.WARNING)
-                    if not os.path.exists(v):
-                        log(f'Could not find an existing backup path {v}.', logging.WARNING)
-                        if no_confirm:
-                            log(f'Creating new backup path {v}.', logging.INFO)
-                            PathOps.mkdir(v)
-                        else:
-                            log('Prompting user to handle.', logging.DEBUG)
-                            i = get_input(
-                                [['Try to add it again? If it\'s on another drive, check if it is mounted.', 'T'],
-                                 ['Create this backup path and add it?', 'C'],
-                                 ['Skip adding this backup path?', 'S'],
-                                 ['Abort script?', 'A']],
-                                pre_prompt='How do you want to handle this?')
-                            match i:
-                                case 0:
-                                    log('Trying again to add backup path.', logging.INFO)
-                                    continue
-                                case 1:
-                                    log(f'Creating new backup path {v}.', logging.INFO)
-                                    PathOps.mkdir(v)
-                                case 2:
-                                    log(f'Skipping this backup path - it will not be added.', logging.INFO)
-                                    skip = True
-                                    break
-                                case _:
-                                    log('Aborting script.', logging.INFO)
-                                    exit(1)
-                    break
-                if not skip:
-                    log(f'Adding FileBackupPath {k}: "{v}"', logging.DEBUG)
-                    extend_enum(cls, k, v)
+            for k, dir_path in backup_dirs.items():
+                if PathOps.dir_valid(dir_path):
+                    log(f'Adding FileBackupPath {k}: "{dir_path}"', logging.DEBUG)
+                    extend_enum(cls, k, dir_path)
 
+    files_location: str
     files: list[str]
-    backup_type: BackupType
-    backup_paths: list[BackupDir]
+    archive_cmds: ArchiveCmds
+    backup_dirs: list[BackupDir]
     backup_keep: int
+    tmp_dir: str = ''
 
     def __iter__(self):
         for file in self.files:
             yield file
 
 
-class ErrorHandling(Enum):
-    """
-    Indicates how script should handle errors.
-
-    PROMPT is the only option that should facilitate user input.
-
-    RETRY_PART and RETRY_FULL are meant for internal use with PROMPT as a default.
-    They can technically be used, but unless the user is dealing
-    with an extreme edge case that needs auto-retry functionalities, this is not recommended
-    as it will most likely put the script in a loop.
-    """
-    PROMPT: int = auto()
-    RETRY_PART: int = auto()
-    RETRY_FULL: int = auto()
-    SKIP_PART: int = auto()
-    SKIP_FULL: int = auto()
-    ABORT: int = auto()
-
-    def __str__(self):
-        return self.name
-
-
-@dataclass
-class Settings:
-    """
-    pack_name: str
-        Name of the pack these settings will be assigned to.
-    error_handling: ErrorHandling
-        Indicates how script will handle errors.
-    depends: list[str]
-        List of pack object names that a pack depends on, which should be installed first.
-        Relevant when calling install().
-        Implementations may want to check whether all names are valid before using.
-    app_settings: AppSettings
-        Contains all app-related settings for the pack.
-    file_settings: FileSettings
-        Contains all file-related settings for the pack.
-    install_cmd: str
-        Command to run in a shell when the pack install method is called.
-        Makes use of aliases specified in the install method.
-        Empty by default, but can be assigned custom commands.
-    backup_cmd: str
-        Command to run in a shell when the pack backup method is called.
-        Makes use of aliases specified in the backup method.
-        Empty by default, but can be assigned custom commands.
-    """
-    pack_name: str
-    error_handling: ErrorHandling
-    depends: list[str] | None = None
-    apps: AppSettings | None = None
-    files: FileSettings | None = None
-    install_cmd: str = ''
-    backup_cmd: str = ''
-
-    def __post_init__(self):
-        """
-        Checks validity of given settings.
-
-        apps:
-            If apps exists and apps.apps is empty, log a warning and set apps to None. This is because app
-            settings only have an effect on the apps in the list, but if it is empty, the user must have
-            set it without giving a list of apps which may be an error.
-        files:
-            Similarly to checking apps, if files is not None and files.files is empty, log a warning
-            and set files to None.
-        files.backup_paths:
-            Raise an AssertionError if the list is empty.
-        files.backup_keep:
-            Can never be less than zero. This is impossible. Raises AssertionError.
-            Excludes -1, because that is a special number.
-        """
-        if self.apps is not None and len(self.apps.apps) == 0:
-            log(f'App settings were set for {self.pack_name}, but the apps list is empty. These settings '
-                f'will be ignored.', logging.WARNING)
-            self.apps = None
-        if self.files is not None and len(self.files.files) == 0:
-            log(f'File settings were set for {self.files}, but the files list is empty. These settings '
-                f'will be ignored.', logging.WARNING)
-            self.files = None
-
-        try:
-            assert len(self.files.backup_paths) > 0
-        except AssertionError:
-            log(f'The pack {self.pack_name} was initialized without any backup paths. The script cannot function\n'
-                f'without at least one set; please fix.', logging.CRITICAL)
-            raise
-        try:
-            assert self.files.backup_keep >= -1
-        except AssertionError:
-            log(f'No, you may not have a negative number of backups for {self.pack_name}. Pls fix.', logging.CRITICAL)
-            raise
-
-
 class Pack:
-    """Contains various settings and functions for installing and backing up stuff."""
+    """Glues modules together which can be collectively installed/backed up."""
 
-    alias_install_apps: str = f'{alias_prefix}INSTALL_APPS'
-    alias_install_files: str = f'{alias_prefix}INSTALL_FILES'
-    alias_backup_files: str = f'{alias_prefix}BACKUP_FILES'
+    packs: list["Pack"] = []
 
-    def __init__(self, settings: Settings):
-        """
-        This constructor will perform checks on values according to their respective docs,
-        if any such prerequisites exist.
+    def __init__(self, name: str, modules: list[Module], desc: str = ''):
+        log(f'Initializing pack "{name}"...', logging.INFO)
 
-        :param settings: Pack settings.
-        """
-        log(f'Initializing Pack object for {settings.pack_name}.', logging.INFO)
-        self.settings = settings
-        self.attempted_install = False
-        self.attempted_backup = False
-        packs.append(self)
-        log(f'Initialized pack {self.settings.pack_name} with the following settings:\n{str(self)}', logging.DEBUG)
-
-    def get_cmd_error_handler(self, failed_cmd: str) -> int:
-        """
-        Called when there is an error running some cmd.
-
-        Gets the desired error handler based on the error_handling pack setting.
-
-        :param failed_cmd: Command that failed.
-        :return: ErrorHandling enum that is not PROMPT, so the caller can take further action.
-        """
-        pack_name = self.settings.pack_name
-
-        log(f'Attempting to handle command error...', logging.DEBUG)
-        error_handling = self.settings.error_handling
-        if error_handling == ErrorHandling.PROMPT:
-            while True:
-                log('Prompting user to handle error.', logging.DEBUG)
-                user_in = input(f'Encountered an error while running commands for {pack_name}. Do you want to:\n'
-                                f'1 [RP]: Try running the failed command again?\n'
-                                f'2 [RF]: Restart commands from {pack_name}?\n'
-                                f'3 [SP]: Skip just this failed command?\n'
-                                f'4 [SF]: Skip {pack_name}?\n'
-                                f'5 [AB]: Abort this script?\n'
-                                f'  [#/RP/RF/SP/SF/AB] ')
-                log(f'User chose {user_in}.', logging.DEBUG)
-                match user_in.upper():
-                    case '1' | 'RP':
-                        log(f'Attempting failed command again.', logging.ERROR)
-                        return ErrorHandling.RETRY_PART
-                    case '2' | 'RF':
-                        log(f'Restarting commands for {pack_name}.', logging.ERROR)
-                        return ErrorHandling.RETRY_FULL
-                    case '3' | 'SP':
-                        log(f'Skipping this failed command in particular.', logging.ERROR)
-                        return ErrorHandling.SKIP_PART
-                    case '4' | 'SF':
-                        log(f'Skipping {pack_name}.', logging.ERROR)
-                        return ErrorHandling.SKIP_FULL
-                    case '5' | 'AB':
-                        log('Aborting script.', logging.ERROR)
-                        exit(1)
-                log(f'Could not match "{user_in}" with anything. Re-prompting...', logging.DEBUG)
-        elif error_handling == ErrorHandling.RETRY_PART:
-            log('Attempting failed command again.', logging.ERROR)
-            return ErrorHandling.RETRY_PART
-        elif error_handling == ErrorHandling.RETRY_FULL:
-            log(f'Restarting commands for {pack_name}.', logging.ERROR)
-            return ErrorHandling.RETRY_FULL
-        elif error_handling == ErrorHandling.SKIP_PART:
-            log(f'Skipping the failed command.', logging.ERROR)
-            return ErrorHandling.SKIP_PART
-        elif error_handling == ErrorHandling.SKIP_FULL:
-            log(f'Skipping {pack_name}.', logging.ERROR)
-            return ErrorHandling.SKIP_FULL
-        else:
-            log(f'Aborting due to an error running a command for {pack_name}.', logging.ERROR)
+        # name
+        self.name = name
+        if self.name == '':
+            log('Pack names cannot be empty. Please check config.', logging.ERROR)
+            exit(1)
+        elif self.name in self.packs:
+            log(f'Pack name {self.name} already exists, which is causing an overlap.', logging.ERROR)
             exit(1)
 
+        # modules
+        self.modules = modules
+        if not self.modules:
+            log(f'Modules list for {self.name} is empty. Is this intentional?', logging.WARNING)
 
+        # desc
+        self.desc = desc
 
-    def install(self, runner: Runner):
+        self.attempted_install = False
+        self.attempted_backup = False
+        self.packs.append(self)
+        log(f'Initialized {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
+
+    @staticmethod
+    def get_sorted_backups(backup_dir: str) -> list[str]:
         """
-        Performs an installation of the pack.
-
-        Command subprocesses are separated by delimiter "\n\n".
-
-        Defines the following aliases (detected by alias_prefix followed by the alias name):
-            INSTALL_APPS : App install command designated by apps['install_type']
-            INSTALL_FILES : File install command designated by files['backup_type']['EXTRACT']
-
-        Automatically append aliases at end if they are not found and apps/files lists in that
-        order if they are not empty.
-
-        :param runner: Runner object to run commands from.
+        Returns a list of paths to existing backups in the specified backup_dir for this pack,
+        sorted from oldest to newest.
         """
+        log(f'Attempting to find any directories that exist in {backup_dir}...', logging.DEBUG)
+        # TODO: case where dir doesn't exist, causing StopIteration error
+
+        return sorted(
+            filter(lambda path: re.match('^\\d$', path, flags=re.ASCII) is not None,
+                   next(os.walk(backup_dir))[1]))
+
+    def install(self):
+        """Performs an installation of the pack."""
         if self.attempted_install:
             return
-        if self.settings['depends']:
-            for pack in packs:
-                if pack.name in self.settings['depends'] and pack.name != self.name:
-                    pack.install(runner)
-
-        log(f'Installing {self.name}.', logging.INFO)
-
-        alias_prefix = Predefined.alias_prefix
-
-        apps = self.settings['apps']
-        app_settings: AppSettings = self.settings['app_settings']
-        install_apps_alias = f'{alias_prefix}INSTALL_APPS'
-
-        files = self.settings['files']
-        file_settings: FileSettings = self.settings['file_settings']
-        install_files_alias = f'{alias_prefix}INSTALL_FILES'
-
-        install_cmd = self.settings['install_cmd']
-
-        if apps and install_apps_alias not in install_cmd:
-            install_cmd += f'\n{install_apps_alias}'
-            installed_apps = False
-        else:
-            installed_apps = True
-        if files and install_files_alias not in install_cmd:
-            install_cmd += f'\n{install_files_alias}'
-            installed_files = False
-        else:
-            installed_files = True
-
-        cmd_list = re.split(re.escape('\n\n'), install_cmd)
-        cmd_list.reverse()
-        log(f'Setting the following cmd_list stack to run: {cmd_list}', logging.DEBUG)
-
-        while cmd_list:
-            cmd = cmd_list.pop()
-            if installed_apps is False and install_apps_alias in cmd:
-                cmd = Predefined.AppInstallTypes[app_settings['install_type']] if apps else ''
-                returncode = runner.run(cmd, apps)
-                if returncode:
-                    # TODO: implement handling what is done with commands after return
-                    #       of handle_error in app and file install
-                    self.handle_error(self.install)
-                installed_apps = True
-            elif installed_files is False and install_apps_alias in cmd:
-                cmd = Predefined.FileBackupTypes[file_settings['backup_type']]['EXTRACT'] if files else ''
-                # Assumes backup_paths setting is not empty because of init checking
-                backup_paths = file_settings['backup_paths'].copy()
-                backup_paths.reverse()
-                log(f'Searching through the following backup_paths stack: {backup_paths}', logging.DEBUG)
-                backup_path: str = ''
-
-                def get_latest_backup():
-                    # TODO: find the most recent backup and perform install with that
-                    # can use os.path.getmtime(path) to retrieve last modified path, which actually
-                    # might even be better
-                    pass
-
-                while backup_paths:
-                    backup_path = backup_paths.pop() + f'/{self.name}'
-                    log(f'Checking if {backup_path} exists...', logging.INFO)
-                    if os.path.exists(backup_path):
-                        log(f'Discovered {backup_path}.', logging.INFO)
-                        break
-                    else:
-                        log(f'{backup_path} does not exist.', logging.INFO)
-                    if not backup_paths:
-                        # TODO
-                        log(f'No existing backup path exists in the following list: ', logging.WARNING)
-                        # TODO: handle error
-                        error_handling = self.settings['error_handling']
-                        if error_handling == ErrorHandling.PROMPT:
-                            while True:
-                                log('Prompting user to handle error.', logging.DEBUG)
-                                user_in = input(f'No:\n'
-                                                f'1 [RP]: Try running the command again?\n'
-                                                f'2 [RF]: Restart {fun_name} and try again?\n'
-                                                f'3 [SP]: Skip just this failed command?\n'
-                                                f'4 [SF]: Skip {fun_name} for this pack?\n'
-                                                f'5 [AB]: Abort this script?\n'
-                                                f'  [#/RP/RF/SP/SF/AB] ')
-                                log(f'User chose {user_in}.', logging.DEBUG)
-                        elif error_handling <= ErrorHandling.RETRY_FULL:
-                            pass
-                        elif error_handling <= ErrorHandling.SKIP_FULL:
-                            pass
-                        else:
-                            log('Aborting script.', logging.ERROR)
-                            exit(1)
-                backup_path = f'{backup_path}/{self.name}'
-                returncode = runner.run(cmd, [backup_path])
-                if returncode:
-                    # TODO: see above in INSTALL_APPS
-                    self.handle_error(self.install)
-                installed_files = True
-            else:
-                returncode = runner.run(cmd)
-                # TODO: handle error
 
         log(f'Successfully installed {self.name}!', logging.INFO)
 
-    def backup(self) -> bool:
-        """
-        Performs a backup on the pack.
-
-        BACKUP_FILES : files backup command designated by files['backup_type']
-
-        :param runner: Runner object to run commands from.
-        :return: True if any errors occurred; False otherwise.
-        """
+    def backup(self):
+        """Performs a backup of the pack."""
         # TODO
         return True
 
     def __str__(self, verbose=True):
-        rtn = []
-
-        def append_dict(a_dict: dict, lvl: int):
-            for key, val in a_dict.items():
-                if isinstance(val, dict):
-                    rtn.append("\t" * lvl + f'{key}:')
-                    append_dict(val, lvl + 1)
-                else:
-                    rtn.append(('\t' * lvl) + f'{key}: ' +
-                               (f'\n{val}'.replace('\n', '\n' + '\t' * (lvl + 1))
-                                if isinstance(val, str) and '\n' in val else
-                                val.name if issubclass(type(val), Enum) else str(val)))
-
-        rtn += [f'name: {self.name}']
-        if verbose:
-            append_dict(self.settings, 0)
-        else:
-            rtn += [f'apps: {self.settings["apps"]}',
-                    f'files: {self.settings["files"]}']
-
-        return '\n'.join(rtn)
-
-
-packs: list[Pack] = []
+        # TODO
+        pass
