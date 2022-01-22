@@ -21,7 +21,8 @@ settings:
             tar_copy: tar -cPf "$1.tar" "${@:2}"
             compress: tar -cJPf "$1.tar.xz" "${@:2}"
             encrypt: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
-    path_ops:
+    system_cmds:
+        superuser: sudo
         cp: cp -at "$1" "${@:2}"
         mv: mv -t "$1" "${@:2}"
         mkdir: mkdir -p $1

@@ -14,7 +14,8 @@ class FilesModuleSettings(TypedDict):
     backup_cmd_types: dict[str, str]
 
 
-class PathOpsSettings(TypedDict):
+class SystemCmdsSettings(TypedDict):
+    superuser: str
     cp: str
     mv: str
     mkdir: str
@@ -26,7 +27,7 @@ class GlobalSettings(TypedDict):
     noconfirm: bool
     apps_module: AppsModuleSettings
     files_module: FilesModuleSettings
-    path_ops: PathOpsSettings
+    system_cmds: SystemCmdsSettings
 
 
 global_settings: GlobalSettings = {
@@ -56,7 +57,8 @@ global_settings: GlobalSettings = {
                        'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
         }
     },
-    'path_ops': {
+    'system_cmds': {
+        'superuser': 'sudo',
         'cp': 'cp -at "$1" "${@:2}"',
         'mv': 'mv -t "$1" "${@:2}"',
         'mkdir': 'mkdir -p "$1"',
