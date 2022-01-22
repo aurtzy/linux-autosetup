@@ -58,8 +58,8 @@ global_settings: GlobalSettings = {
     },
     'path_ops': {
         'cp': 'cp -at "$1" "${@:2}"',
-        'mv': 'mv -t "$1" "${@:2}',
-        'mkdir': 'mkdir -p $1',
+        'mv': 'mv -t "$1" "${@:2}"',
+        'mkdir': 'mkdir -p "$1"',
         'validate_path': '[ -e "$1" ]',
         'validate_dir': '[ -d "$1" ]'
     }
