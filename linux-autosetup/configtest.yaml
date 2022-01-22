@@ -7,7 +7,7 @@ settings:
             apt: sudo apt --assume-yes install $@
             flatpak: flatpak install -y --noninteractive $@
             pacman: sudo pacman -S --noconfirm --needed $@
-            paru: paru -S --noconfirm --needed $@
+            yay: yay -S --noconfirm --needed $@
     files_module:
         install_cmd_types:
             copy:

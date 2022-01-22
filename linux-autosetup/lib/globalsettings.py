@@ -36,7 +36,7 @@ global_settings: GlobalSettings = {
             'flatpak': 'flatpak install -y --noninteractive $@',
             'apt': 'sudo apt --assume-yes install $@',
             'pacman': 'sudo pacman -S --noconfirm --needed $@',
-            'yay': 'paru -S --noconfirm --needed $@'
+            'yay': 'yay -S --noconfirm --needed $@'
         }
     },
     'files_module': {
