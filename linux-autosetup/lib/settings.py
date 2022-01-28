@@ -150,6 +150,7 @@ class GlobalSettings(BaseSettings):
     custom_module: CustomModule
     apps_module: AppsModule
     files_module: FilesModule
+    debug: bool
 
     def __str__(self):
         return str(self.__dict__)
@@ -200,5 +201,6 @@ global_settings = GlobalSettings(
         mkdir='mkdir -p "$1"',
         validate_path='[ -e "$1" ]',
         validate_dir='[ -d "$1" ]'
-    )
+    ),
+    debug=False
 )
