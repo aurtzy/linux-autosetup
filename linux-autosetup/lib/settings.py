@@ -1,9 +1,10 @@
+from abc import ABC
 from dataclasses import dataclass
 from os import PathLike
 
 
 @dataclass
-class BaseSettings:
+class BaseSettings(ABC):
     """Base settings class. Meant to be used for recognizing whether a class is a settings-related class."""
     pass
 
