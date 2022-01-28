@@ -2,14 +2,11 @@ import logging
 import subprocess
 import threading
 import time
+from os import PathLike
 
+from lib.settings import global_settings
 from lib.logger import log
 from lib.prompter import get_input
-
-
-# Used for commands that may require superuser elevation, such as PathOps.
-# By default, uses 'sudo'
-su_cmd: str = 'sudo'
 
 
 def sudo_loop():
@@ -72,43 +69,19 @@ def run(cmd: str, args: list[str] = None) -> int:
     return 0
 
 
-class PathOps:
+class Path(PathLike):
     """
     Provides methods in which to manipulate and interact with files on the system.
-
-    The following commands are configured to work on most GNU/Linux systems, but may be changed to
-    work with other systems.
-
-    su_cmd: str
-        Superuser command, used to elevate commands to make sure they have necessary permissions to function.
-        Uses 'sudo' by default.
-    cp_cmd: str
-        Copy command, used for copying files to locations.
-    mv_cmd: str
-        Move command, used for moving files to locations.
-    mkdir_cmd: str
-        Make directory command, used for creating directories.
-
-    validate_path: str
-        Command that checks if a file or directory exists.
-        POSIX compliant by default.
-    validate_dir: str
-        Command that checks if a directory exists.
-        POSIX compliant by default.
 
     Calling these methods will invoke a check for if the path(s) exist, and an error
     is raised if any path does not exist.
     """
 
-    cp_cmd: str = 'cp -at "$1" "${@:2}"'
-    mv_cmd: str = 'mv -t "$1" "${@:2}'
-    mkdir_cmd: str = 'mkdir -p $1'
+    def __init__(self, path: str):
+        self.path = path
 
-    validate_path: str = '[ -e "$1" ]'
-    validate_dir: str = '[ -d "$1" ]'
-
-    @classmethod
-    def copy(cls, dest: str, *args: str) -> bool:
+    @staticmethod
+    def copy(dest: str, *args: str) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
@@ -117,8 +90,8 @@ class PathOps:
         print(f'TEMP: copy {", ".join(str(path) for path in args)} to {dest}')
         return True
 
-    @classmethod
-    def move(cls, dest: str, *args: str) -> bool:
+    @staticmethod
+    def move(dest: str, *args: str) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
@@ -127,8 +100,8 @@ class PathOps:
         print(f'TEMP: move {", ".join(str(path) for path in args)} to {dest}')
         return True
 
-    @classmethod
-    def mkdir(cls, path: str) -> bool:
+    @staticmethod
+    def mkdir(path: str) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
@@ -138,25 +111,24 @@ class PathOps:
         return True
 
     @classmethod
-    def path_exists(cls, path: str, no_confirm: bool = False) -> bool:
+    def existing_path(cls, path: str):
         """
-        Checks if the given path exists.
+        Checks if the given path exists, returning a Path object if it does.
 
-        If no_confirm is true, the method will return false if the path does not exist.
-        Otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
+        If no_confirm is true, the method will automatically return None if the path does not already exist;
+        otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
 
-        Implementations should not use the given path if this method returns False.
-
-        :return: True if the path is valid and exists; false otherwise.
+        :return: A Path object with path passed as an argument if path exists; None otherwise.
         """
         while True:
             log(f'Checking if "{path}" exists...', logging.INFO)
-            if run(f'{su_cmd} {cls.validate_path}', [path]) == 0:
+            if run(f'{global_settings.system_cmds.superuser} '
+                   f'{global_settings.system_cmds.validate_path}', [path]) == 0:
                 log('Path found.', logging.INFO)
-                return True
-            elif no_confirm:
+                return cls(path)
+            elif global_settings.noconfirm:
                 log('Path not found. Ignoring...', logging.INFO)
-                return False
+                return None
             else:
                 log('Path not found. Prompting user to handle...', logging.DEBUG)
                 i = get_input([
@@ -170,32 +142,32 @@ class PathOps:
                         continue
                     case 1:
                         log('Ignoring path.', logging.INFO)
-                        return False
+                        return None
                     case _:
                         log('Aborting.', logging.ERROR)
                         exit(1)
 
     @classmethod
-    def dir_valid(cls, dir_path: str, no_confirm: bool = False) -> bool:
+    def valid_dir(cls, path: str):
         """
         Validates the given directory path. Unlike path_exists, this method allows the given directory path
         to be created if it is not found.
 
-        If no_confirm is true and the path does not exist, automatically create the directory and return True.
+        If no_confirm is true and the path does not exist, automatically create the directory and return its
+        respective Path object.
         Otherwise, prompt the user for options to handle the missing directory.
 
-        Implementations should not use the directory given if this method returns False.
-
-        :return: True if the directory path is valid and exists; False otherwise.
+        :return: A Path object with path pass as an argument if the path is valid; None otherwise.
         """
         while True:
-            log(f'Checking if directory path "{dir_path}" exists...', logging.INFO)
-            if run(f'{su_cmd} {cls.validate_dir}', [dir_path]) == 0:
+            log(f'Checking if directory path "{path}" exists...', logging.INFO)
+            if run(f'{global_settings.system_cmds.superuser} '
+                   f'{global_settings.system_cmds.validate_dir}', [path]) == 0:
                 log(f'Directory path found.', logging.INFO)
-                return True
-            elif no_confirm:
-                log(f'Path is missing - automatically creating directory at "{dir_path}".', logging.INFO)
-                PathOps.mkdir(dir_path)
+                return cls(path)
+            elif global_settings.noconfirm:
+                log(f'Path is missing - automatically creating directory at "{path}".', logging.INFO)
+                cls.mkdir(path)
             else:
                 log('Path could not be found - Prompting user to handle.', logging.DEBUG)
                 i = get_input(
@@ -203,18 +175,24 @@ class PathOps:
                      ['Create a new directory?', 'C'],
                      ['Ignore this path for the session?', 'I'],
                      ['Abort this script?', 'A']],
-                    pre_prompt=f'The directory "{dir_path}" was not found. How do you want to handle this?')
+                    pre_prompt=f'The directory "{path}" was not found. How do you want to handle this?')
                 match i:
                     case 0:
                         log('Attempting to find directory again.', logging.INFO)
                         continue
                     case 1:
                         log(f'Creating new directory.', logging.INFO)
-                        PathOps.mkdir(dir_path)
-                        return True
+                        cls.mkdir(path)
+                        return cls(path)
                     case 2:
                         log(f'Ignoring this path for the session.', logging.INFO)
-                        return False
+                        return None
                     case _:
                         log('Aborting.', logging.INFO)
                         exit(1)
+
+    def __fspath__(self) -> str:
+        return self.path
+
+    def __str__(self) -> str:
+        return self.path
