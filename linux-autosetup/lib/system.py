@@ -81,7 +81,7 @@ class Path(PathLike):
         self.path = path
 
     @staticmethod
-    def copy(dest: str, *args: str) -> bool:
+    def copy(dest: PathLike, *args: PathLike) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
@@ -91,7 +91,7 @@ class Path(PathLike):
         return True
 
     @staticmethod
-    def move(dest: str, *args: str) -> bool:
+    def move(dest: PathLike, *args: PathLike) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
@@ -101,7 +101,7 @@ class Path(PathLike):
         return True
 
     @staticmethod
-    def mkdir(path: str) -> bool:
+    def mkdir(path: PathLike) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
