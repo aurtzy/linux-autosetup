@@ -10,9 +10,12 @@ def get_input(options: list[list[str]], pre_prompt: str = '') -> int:
 
     Expects a list of list[str], in which each element contains an option.
 
-    The first index of each element will be considered the message to be attached.
+    The first index of each element will be considered the description to be attached.
     Any elements of the list[str] after that are assumed as alternative accepted inputs that are associated with
     that option.
+
+    If noconfirm is True, the first option in the list will automatically be chosen, and the method
+    will return 0.
 
     Every option in options is automatically tagged with their respective natural number in the list
     which can also be matched with the user input.
