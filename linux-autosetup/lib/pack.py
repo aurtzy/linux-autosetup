@@ -15,16 +15,16 @@ class BaseModule:
     """
 
     def __post_init__(self):
-        # Assign fields to their default if field is None and a default(_factory) exists
-        for field in fields(self):
-            if getattr(self, field.name) is None:
-                log(f'? {field}', logging.DEBUG)
-                if field.default is not MISSING:
-                    setattr(self, field.name, field.default)
-                elif field.default_factory is not MISSING:
-                    setattr(self, field.name, field.default_factory())
+        # Assign fields to their default if fld is None and a default(_factory) exists
+        for fld in fields(self):
+            if getattr(self, fld.name) is None:
+                log(f'? {fld}', logging.DEBUG)
+                if fld.default is not MISSING:
+                    setattr(self, fld.name, fld.default)
+                elif fld.default_factory is not MISSING:
+                    setattr(self, fld.name, fld.default_factory())
                 else:
-                    log(f'There was a problem assigning a default to {field.name}.\n'
+                    log(f'There was a problem assigning a default to {fld.name}.\n'
                         f'This may produce unexpected results.', logging.WARNING)
 
     # TODO: move to configparser
