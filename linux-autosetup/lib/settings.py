@@ -125,7 +125,7 @@ class GlobalSettings(BaseSettings):
         Designated settings for the custom module.
 
         cmd_presets:
-            Dictionary of keys -> CmdPreset objects.
+            Dictionary of name -> CmdPreset pairs.
         """
         cmd_presets: dict[str, 'GlobalSettings.CmdPreset'] = field(default_factory=dict)
 
@@ -141,10 +141,17 @@ class GlobalSettings(BaseSettings):
         """
         Designated settings for the files module.
 
-        backup_paths:
-
+        backup_dirs:
+            Directories that are used for creating and extracting backups from.
+            Dictionary of name -> PathLike pairs.
+        dump_dirs:
+            Directories that can be used for dumping old backups.
+            Dictionary of name -> PathLike pairs.
+        tmp_dirs:
+            Directories that can be used for storing backups that are in the process of being created.
+            Dictionary of name -> PathLike pairs.
         """
-        backup_paths: dict[str, PathLike] = field(default_factory=dict)
+        backup_dirs: dict[str, PathLike] = field(default_factory=dict)
         dump_dirs: dict[str, PathLike] = field(default_factory=dict)
         tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
 
@@ -192,7 +199,7 @@ global_settings = GlobalSettings(
                             'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
             )
         },
-        backup_paths={},
+        backup_dirs={},
         dump_dirs={},
         tmp_dirs={}
     ),
