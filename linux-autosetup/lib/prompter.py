@@ -1,9 +1,10 @@
 import logging
 
 from lib.logger import log
+from lib.settings import global_settings
 
 
-def get_input(options: list[list[str]], pre_prompt: str = ''):
+def get_input(options: list[list[str]], pre_prompt: str = '') -> int:
     """
     Provides a universal method of getting decently formatted prompts from the user.
 
@@ -19,8 +20,12 @@ def get_input(options: list[list[str]], pre_prompt: str = ''):
     :returns: The index of the first found option which matches user input.
     """
     if not options:
-        log('get_input only expects a non-empty list of options... Exiting.', logging.ERROR)
-        exit(1)
+        log('get_input() only expects a non-empty list of options.', logging.ERROR)
+        raise NotImplementedError
+
+    if global_settings.noconfirm:
+        log(f'Using {options[0]} due to noconfirm.', logging.DEBUG)
+        return 0
     log(f'Attempting to get input from the user with the following:\n'
         f'pre_prompt: {pre_prompt}\n'
         f'options: {options}', logging.DEBUG)
