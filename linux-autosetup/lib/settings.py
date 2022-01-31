@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os import PathLike
 
 
@@ -94,6 +94,8 @@ class GlobalSettings(BaseSettings):
         """
         Miscellaneous shell commands used for interacting with the system.
 
+        Preconfigured to use POSIX-compatible GNU/Linux commands.
+
         superuser:
             Used for elevating commands when appropriate (e.g. sudo).
         cp:
@@ -110,12 +112,12 @@ class GlobalSettings(BaseSettings):
         validate_dir:
             Used to confirm if a path exists to some directory.
         """
-        superuser: str
-        cp: str
-        mv: str
-        mkdir: str
-        validate_path: str
-        validate_dir: str
+        superuser: str = 'sudo'
+        cp: str = 'cp -at "$1" "${@:2}"'
+        mv: str = 'mv -t "$1" "${@:2}"'
+        mkdir: str = 'mkdir -p "$1"'
+        validate_path: str = '[ -e "$1" ]'
+        validate_dir: str = '[ -d "$1" ]'
 
     @dataclass
     class CustomModule(BaseSettings):
@@ -125,7 +127,7 @@ class GlobalSettings(BaseSettings):
         cmd_presets:
             Dictionary of keys -> CmdPreset objects.
         """
-        cmd_presets: dict[str, 'GlobalSettings.CmdPreset']
+        cmd_presets: dict[str, 'GlobalSettings.CmdPreset'] = field(default_factory=dict)
 
     @dataclass
     class AppsModule(CustomModule):
@@ -142,16 +144,16 @@ class GlobalSettings(BaseSettings):
         backup_paths:
 
         """
-        backup_paths: dict[str, PathLike]
-        dump_dirs: dict[str, PathLike]
-        tmp_dirs: dict[str, PathLike]
+        backup_paths: dict[str, PathLike] = field(default_factory=dict)
+        dump_dirs: dict[str, PathLike] = field(default_factory=dict)
+        tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
 
-    noconfirm: bool
-    system_cmds: SystemCmds
-    custom_module: CustomModule
-    apps_module: AppsModule
-    files_module: FilesModule
-    debug: bool
+    noconfirm: bool = False
+    system_cmds: SystemCmds = field(default_factory=lambda: GlobalSettings.SystemCmds())
+    custom_module: CustomModule = field(default_factory=lambda: GlobalSettings.CustomModule())
+    apps_module: AppsModule = field(default_factory=lambda: GlobalSettings.AppsModule())
+    files_module: FilesModule = field(default_factory=lambda: GlobalSettings.FilesModule())
+    debug: bool = False
 
     def __str__(self):
         return str(self.__dict__)
