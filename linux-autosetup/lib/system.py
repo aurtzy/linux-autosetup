@@ -1,4 +1,5 @@
 import logging
+import os.path
 import subprocess
 import threading
 import time
@@ -78,7 +79,7 @@ class Path(PathLike):
     """
 
     def __init__(self, path: str):
-        self.path = path
+        self.path = os.path.expandvars(path)
 
     @staticmethod
     def copy(dest: PathLike, *args: PathLike) -> bool:
