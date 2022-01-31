@@ -4,4 +4,4 @@ linux-autosetup/dump
 linux-autosetup/archives
 linux-autosetup/jotter.md
 
-**/__pycache__
+**/__pycache__/**
