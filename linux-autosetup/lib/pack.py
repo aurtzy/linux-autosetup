@@ -214,9 +214,10 @@ class Module(Enum):
 class Pack:
     """Glues modules together which can be collectively installed/backed up."""
 
-    packs: list["Pack"] = []
+    packs: list['Pack'] = []
+    pinned_packs: list['Pack'] = []
 
-    def __init__(self, name: str, desc: str, modules: list[BaseModule]):
+    def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int):
         # name
         self.name = name
         if self.name == '':
@@ -227,6 +228,12 @@ class Pack:
                 if self.name == pack.name:
                     log(f'Pack {self.name} already exists, causing a name overlap.', logging.ERROR)
                     raise ValueError
+
+        self.pin = pin
+        if self.pin:
+            for i, pack in enumerate(self.pinned_packs):
+                if self.pin < pack.pin:
+                    self.pinned_packs.insert(i, self)
 
         # modules
         self.modules = modules
