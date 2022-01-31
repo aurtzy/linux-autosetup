@@ -31,15 +31,16 @@ settings:
 
 packs:
     pack1:
+        pin: 1
         desc: some pack that has stuff
         modules:
-            - module: depends
-              depends: pack2 pack3
-              alt:
+            - MODULE: packs
+              packs: pack2 pack3
+              ALT:
                 ubuntu:
                     depends: ...
-            - module: apps
+            - MODULE: apps
               apps: app1 app2 ...
               install_type: flatpak
-            - module: files
+            - MODULE: files
               files: path/to/file other/path
