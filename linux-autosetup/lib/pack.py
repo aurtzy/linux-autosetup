@@ -1,213 +1,151 @@
 import logging
-import os.path
-import re
-from abc import abstractmethod, ABC
-from dataclasses import dataclass
-from aenum import Enum, extend_enum
+from dataclasses import dataclass, fields, field, MISSING
+from enum import Enum
 
-from lib.configurable import configurable
-from lib.prompter import get_input
-from lib.system import run, PathOps
 from lib.logger import log
 
 
-class BaseModule(ABC):
+@dataclass
+class BaseModule:
     """
-    Abstract method for creating new modules.
+    Base module, which provides a set of optionally overridable methods that are used in packs.
 
-    The labels "module" and "alt" are reserved for use with configs, and are not recommended
-    as property names.
+    In order to reserve keywords that specify navigational settings (e.g. what module to use),
+    implementations should avoid using all-uppercase property names.
     """
 
-    @staticmethod
-    def convert_to_str_list(arg) -> list[str]:
+    def __post_init__(self):
+        # Assign fields to their default if field is None and a default(_factory) exists
+        for field in fields(self):
+            if getattr(self, field.name) is None:
+                log(f'? {field}', logging.DEBUG)
+                if field.default is not MISSING:
+                    setattr(self, field.name, field.default)
+                elif field.default_factory is not MISSING:
+                    setattr(self, field.name, field.default_factory())
+                else:
+                    log(f'There was a problem assigning a default to {field.name}.\n'
+                        f'This may produce unexpected results.', logging.WARNING)
+
+    # TODO: move to configparser
+    # @staticmethod
+    # def convert_to_str_list(arg) -> list[str]:
+    #     """
+    #     Converts the given arg into a str list.
+    #
+    #     If arg is a list, pass each element through str() and return that;
+    #     otherwise, perform the following on str(arg):
+    #         If arg contains no newline characters, delimit into a list by spaces.
+    #         Otherwise, delimit by newline characters.
+    #     """
+    #     log(f'Got {str(arg)} as arg to convert.', logging.DEBUG)
+    #     if arg is None:
+    #         log('Arg is NoneType - setting to empty list.', logging.DEBUG)
+    #         arg = []
+    #     elif isinstance(arg, list):
+    #         log('Arg is a list - converting any elements to str if not already str.', logging.DEBUG)
+    #         arg = [str(element) for element in arg]
+    #     else:
+    #         arg = str(arg)
+    #         if '\n' in arg:
+    #             arg = arg.split('\n')
+    #         else:
+    #             arg = arg.split(' ')
+    #     log(f'Returning {arg}', logging.DEBUG)
+    #     return arg
+
+    def install(self):
         """
-        Converts the given arg into a str list.
-
-        If arg is a list, pass each element through str() and return that;
-        otherwise, perform the following on str(arg):
-            If arg contains no newline characters, delimit into a list by spaces.
-            Otherwise, delimit by newline characters.
+        Install method, called when performing a pack install.
         """
-        log(f'Got {str(arg)} as arg to convert.', logging.DEBUG)
-        if arg is None:
-            log('Arg is NoneType - setting to empty list.', logging.DEBUG)
-            arg = []
-        elif isinstance(arg, list):
-            log('Arg is a list - converting any elements to str if not already str.', logging.DEBUG)
-            arg = [str(element) for element in arg]
-        else:
-            arg = str(arg)
-            if '\n' in arg:
-                arg = arg.split('\n')
-            else:
-                arg = arg.split(' ')
-        log(f'Returning {arg}', logging.DEBUG)
-        return arg
+        log('Nothing to do here in install()...', logging.DEBUG)
 
-    @abstractmethod
-    def __init__(self, settings: dict):
-        pass
-
-    @abstractmethod
-    def install(self, no_confirm: bool = False):
-        pass
-
-    @abstractmethod
-    def backup(self, no_confirm: bool = False):
-        pass
-
-
-class DependenciesModule(BaseModule):
-    """Handles installation of pack dependencies."""
-
-    def __init__(self, settings: dict):
-        log('Initializing dependencies module...', logging.DEBUG)
-        log(str(settings), logging.DEBUG)
-
-        # dependencies
-        self.dependencies = self.convert_to_str_list(settings.get('dependencies'))
-        if not self.dependencies:
-            log('This DependenciesModule has no dependencies. Is this intentional?', logging.WARNING)
-
-    def install(self, no_confirm: bool = False):
-        pass
-
-    def backup(self, no_confirm: bool = False):
-        pass
-
-
-class CustomCmdsModule(BaseModule):
-    """Handles running custom commands."""
-
-    def __init__(self, settings: dict):
-        # cmd
-        self.cmd: str = settings.get('cmd')
-
-        # args
-        self.args: list[str]
-
-    def install(self, no_confirm: bool = False):
-        pass
-
-    def backup(self, no_confirm: bool = False):
-        pass
-
-
-class AppCmdsModule(CustomCmdsModule):
-    """Handles installation of apps."""
-
-    install_cmds: dict[str, str] = {}
-
-    def __init__(self, settings: dict):
-        log('Initializing apps module...', logging.INFO)
-        log(str(settings), logging.DEBUG)
-
-        # apps
-        self.apps = self.convert_to_str_list(settings.get('apps'))
-        if not self.apps:
-            log('Initializing with no apps. Is this intentional?', logging.WARNING)
-
-        # install_cmd
-        self.install_cmd = settings.get('install_cmd')
-        if self.install_cmd not in configurable['INSTALL_CMDS'].keys():
-            log(f'Could not match {self.install_cmd} with anything in INSTALL_CMDS - Please fix.', logging.ERROR)
-            exit(1)
-
-    def install(self, no_confirm: bool = False):
-        # todo: log('install app . . .)
-        super(no_confirm)
-
-    def backup(self, no_confirm: bool = False):
-        pass
-
-
-class FileCmdsModule(CustomCmdsModule):
-    """Handles installation and backing up of files."""
-
-    def __init__(self, settings: dict):
-        log('Initializing files module...', logging.INFO)
-        log(str(settings), logging.DEBUG)
-
-        # files_location
-        self.files_location = settings.get('files_location')
-        if not isinstance(self.files_location, str):
-            log('Expected files_location to be a string, but it was not. Is this intentional?', logging.WARNING)
-        log('Expanding any variables in files_location', logging.DEBUG)
-        self.files_location = os.path.expandvars(str(self.files_location))
-        log(self.files_location, logging.DEBUG)
-
-        # files
-        self.files = self.convert_to_str_list(settings.get('files'))
-        if not self.files:
-            log('Initializing with an empty list of files. Is this intentional?', logging.WARNING)
-
-        #
-
-    def install(self, no_confirm: bool = False):
-        pass
-
-    def backup(self, no_confirm: bool = False):
-        pass
-
-
-class Module(Enum):
-    dependencies = DependenciesModule
-    custom = CustomCmdsModule
-    apps = AppCmdsModule
-    files = FileCmdsModule
+    def backup(self):
+        """
+        Backup method, called when performing a pack backup.
+        """
+        log('Nothing to do here in backup()...', logging.DEBUG)
 
 
 @dataclass
-class AppSettings:
+class PacksModule(BaseModule):
     """
-    App-specific settings.
+    Calls install and backup methods from other packs as specified.
 
-    apps: list[str]
-        List of app names used in installation.
-    install_type: InstallType
-        Indicates the type of install command to use.
-
-    Implements __iter__, which iterates through the apps list.
+    packs:
+        List of packs to call.
     """
 
-    class InstallType(Enum):
-        """
-        Types of install commands that can be used.
+    packs: list['Pack'] = field(default_factory=list)
 
-        This enum class can be added to.
-        """
+    def __post_init__(self):
+        super()
+        if not self.packs:
+            log(f'This {self.__class__.__name__} has no packs. Is this intentional?', logging.WARNING)
 
-        def __str__(self):
-            return self.name
+    def install(self):
+        for pack in self.packs:
+            pack.install()
 
-        @classmethod
-        def add(cls, install_types: dict[str, str]):
-            """
-            Adds the entries of the given dictionary of install types to this enum class.
-
-            Expects str -> str pairs.
-            """
-            for k, v in install_types.items():
-                if not isinstance(v, str):
-                    log(f'Potential error assigning {v} as the AppInstallType {k}.',
-                        logging.WARNING)
-                extend_enum(cls, k, v)
-
-    apps: list[str]
-    install_type: InstallType
-
-    def __iter__(self):
-        for app in self.apps:
-            yield app
+    def backup(self):
+        for pack in self.packs:
+            pack.backup()
 
 
 @dataclass
-class FileSettings:
+class CustomModule(BaseModule):
     """
-    File-specific settings.
-    # TODO: what if we combined files_dir and files, and made it "backup_args"? better name?
-       install_args for both AppSettings and FileSettings; backup_args for FileSettings too
+    Handles running custom commands.
+
+    install_cmd:
+
+    install_args:
+
+    backup_cmd:
+
+    backup_args:
+
+    """
+
+    install_cmd: str = ''
+    install_args: list[str] = field(default_factory=list)
+    backup_cmd: str = ''
+    backup_args: list[str] = field(default_factory=list)
+
+    def install(self):
+        pass
+
+    def backup(self):
+        pass
+
+
+@dataclass
+class AppsModule(CustomModule):
+    """
+    Handles installation of apps.
+
+    apps:
+        List of apps to
+    install_cmd, install_args, backup_cmd, backup_args:
+        See CustomModule.
+    """
+
+    apps: list[str] = field(default_factory=list)
+
+    def install(self):
+        pass
+
+    def backup(self):
+        pass
+
+
+class FilesModule(CustomModule):
+    """
+    Handles installation and backing up of files.
+
+    fil
+
+    # TODO: below is temp old docs
     files_dir: str
         Optional path that denotes the working directory of the BackupType command, notably used with tar's -C switch.
         Useful for potentially variable directory names like user home folders - substituting variables through
@@ -226,72 +164,51 @@ class FileSettings:
         Number of old backups to keep before dumping.
         If set to -1, script will keep all backups made and not dump old ones.
         If set to 0, only the most recent made one in a backup path is kept.
-
-    Implements __iter__, which iterates through the files list.
     """
 
-    class ArchiveCmds(Enum):
-        """
-        Types of file archive commands that can be used.
+    # def __init__(self, settings: dict):
+    #     # TODO: remove; transfer some of this stuff to configparser if it's useful?
+    #     log('Initializing files module...', logging.INFO)
+    #     log(str(settings), logging.DEBUG)
+    #
+    #     # files_location
+    #     self.files_location = settings.get('files_location')
+    #     if not isinstance(self.files_location, str):
+    #         log('Expected files_location to be a string, but it was not. Is this intentional?', logging.WARNING)
+    #     log('Expanding any variables in files_location', logging.DEBUG)
+    #     self.files_location = os.path.expandvars(str(self.files_location))
+    #     log(self.files_location, logging.DEBUG)
+    #
+    #     # files
+    #     self.files = self.convert_to_str_list(settings.get('files'))
+    #     if not self.files:
+    #         log('Initializing with an empty list of files. Is this intentional?', logging.WARNING)
 
-        This enum class can be added to.
-        """
+    def install(self):
+        pass
 
-        def __str__(self):
-            return self.name
+    def backup(self):
+        pass
 
-        @classmethod
-        def add(cls, archive_cmds: dict[str, dict[str, str]]):
-            """
-            Adds the entries of the given dictionary of backup types to this enum class.
+    # @staticmethod
+    # def get_sorted_backups(backup_dir: str) -> list[str]:
+    #     """
+    #     Returns a list of paths to existing backups in the specified backup_dir for this pack,
+    #     sorted from oldest to newest.
+    #     """
+    #     log(f'Attempting to find any directories that exist in {backup_dir}...', logging.DEBUG)
+    #     # TODO: case where dir doesn't exist, causing StopIteration error
+    #
+    #     return sorted(
+    #         filter(lambda path: re.match('^\\d$', path, flags=re.ASCII) is not None,
+    #                next(os.walk(backup_dir))[1]))
 
-            Expects str -> dict[str, str] dict pairs, with the dict having both a 'CREATE' and 'EXTRACT' key.
-            """
-            for k, v in archive_cmds.items():
-                extract = v.get('EXTRACT')
-                create = v.get('CREATE')
-                if not isinstance(extract, str):
-                    log(f'Potential error assigning {extract} as the {k} EXTRACT command(s).', logging.WARNING)
-                if not isinstance(create, str):
-                    log(f'Potential error assigning {create} as the {k} CREATE command(s).', logging.WARNING)
-                extend_enum(cls, k, dict(EXTRACT=extract, CREATE=create))
 
-    class BackupDir(Enum):
-        """
-        Backup directories that can be used.
-
-        This enum class can be added to.
-        """
-
-        def __str__(self):
-            return f'{self.name} - {self.value}'
-
-        @classmethod
-        def add(cls, backup_dirs: dict[str, str], no_confirm: bool = False):
-            """
-            Adds the entries of the given dictionary of backup directories to this enum class.
-
-            Will perform checks on each path to confirm if they are valid, prompting the user to either create
-            the backup directory or skip adding it if it doesn't exist.
-
-            If the no_confirm param is True, no prompts will be made, and the script will automatically create
-            backup paths if they are missing and add them to the enum class.
-            """
-            for k, dir_path in backup_dirs.items():
-                if PathOps.dir_valid(dir_path):
-                    log(f'Adding FileBackupPath {k}: "{dir_path}"', logging.DEBUG)
-                    extend_enum(cls, k, dir_path)
-
-    files_location: str
-    files: list[str]
-    archive_cmds: ArchiveCmds
-    backup_dirs: list[BackupDir]
-    backup_keep: int
-    tmp_dir: str = ''
-
-    def __iter__(self):
-        for file in self.files:
-            yield file
+class Module(Enum):
+    packs = PacksModule
+    custom = CustomModule
+    apps = AppsModule
+    files = FilesModule
 
 
 class Pack:
@@ -299,17 +216,17 @@ class Pack:
 
     packs: list["Pack"] = []
 
-    def __init__(self, name: str, modules: list[Module], desc: str = ''):
-        log(f'Initializing pack "{name}"...', logging.INFO)
-
+    def __init__(self, name: str, desc: str, modules: list[BaseModule]):
         # name
         self.name = name
         if self.name == '':
-            log('Pack names cannot be empty. Please check config.', logging.ERROR)
-            exit(1)
-        elif self.name in self.packs:
-            log(f'Pack name {self.name} already exists, which is causing an overlap.', logging.ERROR)
-            exit(1)
+            log('Cannot assign empty names to packs. Please check config.', logging.ERROR)
+            raise ValueError
+        else:
+            for pack in self.packs:
+                if self.name == pack.name:
+                    log(f'Pack {self.name} already exists, causing a name overlap.', logging.ERROR)
+                    raise ValueError
 
         # modules
         self.modules = modules
@@ -322,40 +239,41 @@ class Pack:
         self.attempted_install = False
         self.attempted_backup = False
         self.packs.append(self)
-        log(f'Initialized {self.name} with the following settings:\n{str(self)}', logging.DEBUG)
-
-    @staticmethod
-    def get_sorted_backups(backup_dir: str) -> list[str]:
-        """
-        Returns a list of paths to existing backups in the specified backup_dir for this pack,
-        sorted from oldest to newest.
-        """
-        log(f'Attempting to find any directories that exist in {backup_dir}...', logging.DEBUG)
-        # TODO: case where dir doesn't exist, causing StopIteration error
-
-        return sorted(
-            filter(lambda path: re.match('^\\d$', path, flags=re.ASCII) is not None,
-                   next(os.walk(backup_dir))[1]))
+        log(f'Initialized pack {self.name}.', logging.INFO)
+        log(f'{self}', logging.DEBUG)
 
     def install(self):
         """Performs an installation of the pack."""
         if self.attempted_install:
+            log(f'Install was run already for {self.name}. Skipping...', logging.INFO)
             return
 
-        log(f'Successfully installed {self.name}!', logging.INFO)
+        log(f'Installing {self.name}...', logging.INFO)
+        for module in self.modules:
+            log(f'Running {module.__class__.__name__}...', logging.INFO)
+            module.install()
+
+        log(f'Installed {self.name}!', logging.INFO)
 
     def backup(self):
         """Performs a backup of the pack."""
-        # TODO
-        return True
+        if self.attempted_backup:
+            log(f'Backup was run already for {self.name}. Skipping...', logging.INFO)
+            return
+
+        log(f'Backing up {self.name}...', logging.INFO)
+        for module in self.modules:
+            module.backup()
+
+        log(f'Backed up {self.name}!', logging.INFO)
 
     def __str__(self, verbose=True):
         string = f'Pack Name: {self.name}\n' \
-                 f'Description: {self.desc}'
-        if verbose:
+                 f'{self.desc}'
+        if verbose and self.modules:
             string += f'\n' \
                       f'Modules:'
             for module in self.modules:
-                string += f'\n' \
+                string += f'\n\n' \
                           f'{module}'
         return string
