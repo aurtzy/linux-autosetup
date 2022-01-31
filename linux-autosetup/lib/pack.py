@@ -218,6 +218,7 @@ class Pack:
     pinned_packs: list['Pack'] = []
 
     def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int):
+        log(f'Initializing pack "{name}"...', logging.INFO)
         # name
         self.name = name
         if self.name == '':
@@ -229,6 +230,7 @@ class Pack:
                     log(f'Pack {self.name} already exists, causing a name overlap.', logging.ERROR)
                     raise ValueError
 
+        # pin
         self.pin = pin
         if self.pin:
             for i, pack in enumerate(self.pinned_packs):
@@ -241,17 +243,20 @@ class Pack:
             log(f'Modules list for {self.name} is empty. Is this intentional?', logging.WARNING)
 
         # desc
-        self.desc = desc
+        self.desc: str = desc
 
-        self.attempted_install = False
-        self.attempted_backup = False
+        # install_success - indicates success of install; None means install has not been run.
+        self.install_success: bool | None = None
+
+        # backup_success - indicates success of backup; None means backup has not been run.
+        self.backup_success: bool | None = None
+
         self.packs.append(self)
-        log(f'Initialized pack {self.name}.', logging.INFO)
         log(f'{self}', logging.DEBUG)
 
     def install(self):
         """Performs an installation of the pack."""
-        if self.attempted_install:
+        if self.install_success is not None:
             log(f'Install was run already for {self.name}. Skipping...', logging.INFO)
             return
 
@@ -260,19 +265,15 @@ class Pack:
             log(f'Running {module.__class__.__name__}...', logging.INFO)
             module.install()
 
-        log(f'Installed {self.name}!', logging.INFO)
-
     def backup(self):
         """Performs a backup of the pack."""
-        if self.attempted_backup:
+        if self.backup_success is not None:
             log(f'Backup was run already for {self.name}. Skipping...', logging.INFO)
             return
 
         log(f'Backing up {self.name}...', logging.INFO)
         for module in self.modules:
             module.backup()
-
-        log(f'Backed up {self.name}!', logging.INFO)
 
     def __str__(self, verbose=True):
         string = f'Pack Name: {self.name}\n' \
