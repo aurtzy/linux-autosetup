@@ -139,6 +139,7 @@ class AppsModule(CustomModule):
         pass
 
 
+@dataclass
 class FilesModule(CustomModule):
     """
     Handles installation and backing up of files.
