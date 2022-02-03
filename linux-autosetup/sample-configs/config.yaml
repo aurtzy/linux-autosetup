@@ -1,7 +1,9 @@
 
 
 settings:
-    noconfirm: false
+    script_options:
+        debug: false
+        noconfirm: false
     system_cmds:
         superuser: sudo
         cp: cp -at "$1" "${@:2}"

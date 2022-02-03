@@ -13,9 +13,7 @@ def init_settings():
     stream_handler = logging.StreamHandler()
     stream_format = logging.Formatter('[%(levelname)s]: %(message)s')
     stream_handler.setFormatter(stream_format)
-    # TODO: uncomment below, then remove temporary debug level line
-    # stream_handler.setLevel(logging.DEBUG if global_settings.debug else logging.ERROR)
-    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setLevel(logging.DEBUG if global_settings.options.debug else logging.INFO)
 
     logger.addHandler(stream_handler)
 

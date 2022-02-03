@@ -125,7 +125,7 @@ class Path(PathLike):
                    f'{global_settings.system_cmds.validate_path}', [path]) == 0:
                 log('Path found.', logging.INFO)
                 return cls(path)
-            elif global_settings.noconfirm:
+            elif global_settings.options.noconfirm:
                 log('Path not found. Ignoring...', logging.INFO)
                 return None
             else:
@@ -164,7 +164,7 @@ class Path(PathLike):
                    f'{global_settings.system_cmds.validate_dir}', [path]) == 0:
                 log(f'Directory path found.', logging.INFO)
                 return cls(path)
-            elif global_settings.noconfirm:
+            elif global_settings.options.noconfirm:
                 log(f'Path is missing - automatically creating directory at "{path}".', logging.INFO)
                 cls.mkdir(path)
             else:

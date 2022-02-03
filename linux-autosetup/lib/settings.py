@@ -64,8 +64,8 @@ class GlobalSettings(BaseSettings):
     """
     Global settings.
 
-    noconfirm:
-        Indicates whether user should be prompted for input during the script.
+    options:
+        See Options docs.
     system_cmds:
         See SystemCmds docs.
     custom_module:
@@ -77,17 +77,17 @@ class GlobalSettings(BaseSettings):
     """
 
     @dataclass
-    class CmdPreset(BaseSettings):
+    class Options(BaseSettings):
         """
-        A preset of shell commands.
+        Options for the script.
 
-        install_cmd:
-            Meant to be run during pack installs.
-        backup_cmd:
-            Meant to be run during pack backups.
+        debug:
+            If True, then logger will be set to show debug messages.
+        noconfirm:
+            Indicates whether user should be prompted for input during the script.
         """
-        install_cmd: str = ''
-        backup_cmd: str = ''
+        debug: bool = True  # TODO: change back to False when options/configparser implemented, whichever first
+        noconfirm: bool = False
 
     @dataclass
     class SystemCmds(BaseSettings):
@@ -127,7 +127,21 @@ class GlobalSettings(BaseSettings):
         cmd_presets:
             Dictionary of name -> CmdPreset pairs.
         """
-        cmd_presets: dict[str, 'GlobalSettings.CmdPreset'] = field(default_factory=dict)
+
+        @dataclass
+        class CmdPreset(BaseSettings):
+            """
+            A preset of shell commands.
+
+            install_cmd:
+                Meant to be run during pack installs.
+            backup_cmd:
+                Meant to be run during pack backups.
+            """
+            install_cmd: str = ''
+            backup_cmd: str = ''
+
+        cmd_presets: dict[str, 'GlobalSettings.CustomModule.CmdPreset'] = field(default_factory=dict)
 
     @dataclass
     class AppsModule(CustomModule):
@@ -155,12 +169,11 @@ class GlobalSettings(BaseSettings):
         dump_dirs: dict[str, PathLike] = field(default_factory=dict)
         tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
 
-    noconfirm: bool = False
+    options: Options = field(default_factory=lambda: GlobalSettings.Options())
     system_cmds: SystemCmds = field(default_factory=lambda: GlobalSettings.SystemCmds())
     custom_module: CustomModule = field(default_factory=lambda: GlobalSettings.CustomModule())
     apps_module: AppsModule = field(default_factory=lambda: GlobalSettings.AppsModule())
     files_module: FilesModule = field(default_factory=lambda: GlobalSettings.FilesModule())
-    debug: bool = False
 
     def __str__(self):
         return str(self.__dict__)
