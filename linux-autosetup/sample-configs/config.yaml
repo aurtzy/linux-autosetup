@@ -2,25 +2,6 @@
 
 settings:
     noconfirm: false
-    apps_module:
-        install_cmd_types:
-            apt: sudo apt --assume-yes install $@
-            flatpak: flatpak install -y --noninteractive $@
-            pacman: sudo pacman -S --noconfirm --needed $@
-            yay: yay -S --noconfirm --needed $@
-    files_module:
-        install_cmd_types:
-            copy:
-            hardlink:
-            tar_copy: tar -xPf "$1.tar"
-            compress: tar -xPf "$1.tar.xz"
-            encrypt: openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -
-        backup_cmd_types:
-            copy:
-            hardlink:
-            tar_copy: tar -cPf "$1.tar" "${@:2}"
-            compress: tar -cJPf "$1.tar.xz" "${@:2}"
-            encrypt: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
     system_cmds:
         superuser: sudo
         cp: cp -at "$1" "${@:2}"
@@ -28,6 +9,31 @@ settings:
         mkdir: mkdir -p $1
         validate_path: [ -e "$1" ]
         validate_dir: [ -d "$1" ]
+    custom_module:
+        cmd_presets:
+    apps_module:
+        cmd_presets:
+            apt:
+                install_cmd: sudo apt --assume-yes install $@
+            flatpak:
+                install_cmd: flatpak install -y --noninteractive $@
+            pacman:
+                install_cmd: sudo pacman -S --noconfirm --needed $@
+            yay:
+                install_cmd: yay -S --noconfirm --needed $@
+    files_module:
+        cmd_presets:
+            copy:
+            hardlink:
+            tar_copy:
+                install_cmd: tar -xPf "$1.tar"
+                backup_cmd: tar -cPf "$1.tar" "${@:2}"
+            compress:
+                install_cmd: tar -xPf "$1.tar.xz"
+                backup_cmd: tar -cJPf "$1.tar.xz" "${@:2}"
+            encrypt:
+                install_cmd: openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -
+                backup_cmd: tar -cJPf - "${@:2}" | openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"
 
 packs:
     pack1:
