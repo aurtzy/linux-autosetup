@@ -1,7 +1,7 @@
 
 
 settings:
-    script_options:
+    options:
         debug: false
         noconfirm: false
     system_cmds:
