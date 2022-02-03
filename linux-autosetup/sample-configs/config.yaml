@@ -1,6 +1,6 @@
 
 
-settings:
+global_settings:
     options:
         debug: false
         noconfirm: false
