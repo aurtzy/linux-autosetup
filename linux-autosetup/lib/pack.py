@@ -10,8 +10,9 @@ class BaseModule:
     """
     Base module, which provides a set of optionally overridable methods that are used in packs.
 
-    In order to reserve keywords that specify navigational settings (e.g. what module to use),
-    implementations should avoid using all-uppercase property names.
+    Recommended reserved property names:
+        module: for specifying what module to use
+        alt: for specifying alternative configurations to use
     """
 
     def __post_init__(self):

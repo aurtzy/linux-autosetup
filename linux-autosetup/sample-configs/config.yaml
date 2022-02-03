@@ -40,13 +40,13 @@ packs:
         pin: 1
         desc: some pack that has stuff
         modules:
-            - MODULE: packs
+            - module: packs
               packs: pack2 pack3
-              ALT:
+              alt:
                 ubuntu:
-                    depends: ...
-            - MODULE: apps
+                    packs: ...
+            - module: apps
               apps: app1 app2 ...
               install_type: flatpak
-            - MODULE: files
+            - module: files
               files: path/to/file other/path
