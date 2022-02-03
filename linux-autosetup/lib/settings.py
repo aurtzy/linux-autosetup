@@ -166,51 +166,54 @@ class GlobalSettings(BaseSettings):
         return str(self.__dict__)
 
 
-global_settings = GlobalSettings(
-    noconfirm=False,
-    custom_module=GlobalSettings.CustomModule(cmd_presets={}),
-    apps_module=GlobalSettings.AppsModule(
-        cmd_presets={
-            'flatpak': GlobalSettings.CmdPreset(install_cmd='flatpak install -y --noninteractive $@'),
-            'apt': GlobalSettings.CmdPreset(install_cmd='sudo apt --assume-yes install $@'),
-            'pacman': GlobalSettings.CmdPreset(install_cmd='sudo pacman -S --noconfirm --needed $@'),
-            'yay': GlobalSettings.CmdPreset(install_cmd='yay -S --noconfirm --needed $@')
-        }
-    ),
-    files_module=GlobalSettings.FilesModule(
-        cmd_presets={
-            'copy': GlobalSettings.CmdPreset(
+# TODO: move to configparser as an "update".
+# global_settings = GlobalSettings(
+#     noconfirm=False,
+#     custom_module=GlobalSettings.CustomModule(cmd_presets={}),
+#     apps_module=GlobalSettings.AppsModule(
+#         cmd_presets={
+#             'flatpak': GlobalSettings.CmdPreset(install_cmd='flatpak install -y --noninteractive $@'),
+#             'apt': GlobalSettings.CmdPreset(install_cmd='sudo apt --assume-yes install $@'),
+#             'pacman': GlobalSettings.CmdPreset(install_cmd='sudo pacman -S --noconfirm --needed $@'),
+#             'yay': GlobalSettings.CmdPreset(install_cmd='yay -S --noconfirm --needed $@')
+#         }
+#     ),
+#     files_module=GlobalSettings.FilesModule(
+#         cmd_presets={
+#             'copy': GlobalSettings.CmdPreset(
+#
+#             ),
+#             'hardlink': GlobalSettings.CmdPreset(
+#
+#             ),
+#             'tar_copy': GlobalSettings.CmdPreset(
+#                 install_cmd='tar -xPf "$1.tar"',
+#                 backup_cmd='tar -cPf "$1.tar" "${@:2}"'
+#             ),
+#             'compress': GlobalSettings.CmdPreset(
+#                 install_cmd='tar -xPf "$1.tar.xz"',
+#                 backup_cmd='tar -cJPf "$1.tar.xz" "${@:2}"'
+#             ),
+#             'encrypt': GlobalSettings.CmdPreset(
+#                 install_cmd='openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -',
+#                 backup_cmd='tar -cJPf - "${@:2}" | '
+#                             'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
+#             )
+#         },
+#         backup_dirs={},
+#         dump_dirs={},
+#         tmp_dirs={}
+#     ),
+#     # Preconfigured to use GNU/Linux and POSIX-compatible commands.
+#     system_cmds=GlobalSettings.SystemCmds(
+#         superuser='sudo',
+#         cp='cp -at "$1" "${@:2}"',
+#         mv='mv -t "$1" "${@:2}"',
+#         mkdir='mkdir -p "$1"',
+#         validate_path='[ -e "$1" ]',
+#         validate_dir='[ -d "$1" ]'
+#     ),
+#     debug=False
+# )
 
-            ),
-            'hardlink': GlobalSettings.CmdPreset(
-
-            ),
-            'tar_copy': GlobalSettings.CmdPreset(
-                install_cmd='tar -xPf "$1.tar"',
-                backup_cmd='tar -cPf "$1.tar" "${@:2}"'
-            ),
-            'compress': GlobalSettings.CmdPreset(
-                install_cmd='tar -xPf "$1.tar.xz"',
-                backup_cmd='tar -cJPf "$1.tar.xz" "${@:2}"'
-            ),
-            'encrypt': GlobalSettings.CmdPreset(
-                install_cmd='openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -',
-                backup_cmd='tar -cJPf - "${@:2}" | '
-                            'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
-            )
-        },
-        backup_dirs={},
-        dump_dirs={},
-        tmp_dirs={}
-    ),
-    # Preconfigured to use GNU/Linux and POSIX-compatible commands.
-    system_cmds=GlobalSettings.SystemCmds(
-        superuser='sudo',
-        cp='cp -at "$1" "${@:2}"',
-        mv='mv -t "$1" "${@:2}"',
-        mkdir='mkdir -p "$1"',
-        validate_path='[ -e "$1" ]',
-        validate_dir='[ -d "$1" ]'
-    ),
-    debug=False
-)
+global_settings = GlobalSettings()
