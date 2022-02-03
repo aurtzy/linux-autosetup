@@ -9,7 +9,7 @@ class ConfigParser:
         Starts the parsing process.
 
         :param option_overrides: Dictionary of "overrides." This will match against any setting keys in
-                                 config['options'] and override the original value from the config file.
+                                 global_settings['options'] and override the original value from the config file.
                                  This lets the script prefer script arguments over config settings.
         """
         # TODO: parse config here!!
