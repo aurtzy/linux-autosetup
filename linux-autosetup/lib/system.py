@@ -110,43 +110,6 @@ class Path(PathLike):
         return True
 
     @classmethod
-    def existing_path(cls, path: str):
-        """
-        Checks if the given path exists, returning a Path object if it does.
-
-        If no_confirm is true, the method will automatically return None if the path does not already exist;
-        otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
-
-        :return: A Path object with path passed as an argument if path exists; None otherwise.
-        """
-        while True:
-            log(f'Checking if "{path}" exists...', logging.INFO)
-            if run(f'{global_settings.system_cmds.superuser} '
-                   f'{global_settings.system_cmds.validate_path}', [path]) == 0:
-                log('Path found.', logging.INFO)
-                return cls(path)
-            elif global_settings.options.noconfirm:
-                log('Path not found. Ignoring...', logging.INFO)
-                return None
-            else:
-                log('Path not found. Prompting user to handle...', logging.DEBUG)
-                i = get_input([
-                    ['Try searching for it again?', 'T'],
-                    ['Ignore this path for the session?', 'I'],
-                    ['Abort this script?', 'A']
-                ], f'The path "{path}" could not be found. How do you want to handle this?')
-                match i:
-                    case 0:
-                        log('Trying again to find path...', logging.INFO)
-                        continue
-                    case 1:
-                        log('Ignoring path.', logging.INFO)
-                        return None
-                    case _:
-                        log('Aborting.', logging.ERROR)
-                        exit(1)
-
-    @classmethod
     def valid_dir(cls, path: str):
         """
         Validates the given directory path. Unlike path_exists, this method allows the given directory path
@@ -188,6 +151,43 @@ class Path(PathLike):
                         return None
                     case _:
                         log('Aborting.', logging.INFO)
+                        exit(1)
+
+    @classmethod
+    def existing_path(cls, path: str):
+        """
+        Checks if the given path exists, returning a Path object if it does.
+
+        If no_confirm is true, the method will automatically return None if the path does not already exist;
+        otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
+
+        :return: A Path object with path passed as an argument if path exists; None otherwise.
+        """
+        while True:
+            log(f'Checking if "{path}" exists...', logging.INFO)
+            if run(f'{global_settings.system_cmds.superuser} '
+                   f'{global_settings.system_cmds.validate_path}', [path]) == 0:
+                log('Path found.', logging.INFO)
+                return cls(path)
+            elif global_settings.options.noconfirm:
+                log('Path not found. Ignoring...', logging.INFO)
+                return None
+            else:
+                log('Path not found. Prompting user to handle...', logging.DEBUG)
+                i = get_input([
+                    ['Try searching for it again?', 'T'],
+                    ['Ignore this path for the session?', 'I'],
+                    ['Abort this script?', 'A']
+                ], f'The path "{path}" could not be found. How do you want to handle this?')
+                match i:
+                    case 0:
+                        log('Trying again to find path...', logging.INFO)
+                        continue
+                    case 1:
+                        log('Ignoring path.', logging.INFO)
+                        return None
+                    case _:
+                        log('Aborting.', logging.ERROR)
                         exit(1)
 
     def __fspath__(self) -> str:
