@@ -8,56 +8,6 @@ class BaseSettings(ABC):
     """Base settings class. Meant to be used for recognizing whether a class is a settings-related class."""
     pass
 
-    # TODO: move EVERYTHING to configparser
-    # @staticmethod
-    # def log_update_error(attr, new):
-    #     """Logs update error for the given attr and new setting which will be ignored."""
-    #     log(f'Encountered error trying to set {attr} with {new}; ignoring this setting.', logging.ERROR)
-
-    # def update(self, new: dict):
-    #     log(f'Updating {self.__class__.__name__} with:\n'
-    #         f'{new}', logging.DEBUG)
-    #
-    #     def log_update_error(s, ignored):
-    #         log(f'Encountered an unexpected value for {s}:\n'
-    #             f'Ignoring setting {ignored}', logging.ERROR)
-    #     for setting, tp in self.__annotations__.items():
-    #         if new.get(setting) is None:
-    #             continue
-    #
-    #         if tp.__subclasscheck__(dict):
-    #             try:
-    #                 dict_args: tuple = tp.__args__
-    #             except AttributeError:
-    #                 dict_args: tuple = ()
-    #             log(f'dict_args: {dict_args}', logging.DEBUG)
-    #             if isinstance(new.get(setting), dict):
-    #                 log(f'Updating {setting}: {new.get(setting)}',logging.INFO)
-    #                 for k, v in new.get(setting).items():
-    #                     if len(dict_args) > 0:
-    #                         k = dict_args[0](k)
-    #                         if len(dict_args) > 1:
-    #                             if is_dataclass(dict_args[1]):
-    #                                 if isinstance(v, dict):
-    #                                     v = dict_args[1].from_dict(v)
-    #                                 else:
-    #                                     log_update_error(setting, v)
-    #                             else:
-    #                                 v = dict_args[1](v)
-    #                     self.__dict__[setting][k] = v
-    #         elif is_dataclass(tp):
-    #             if isinstance(new.get(setting), dict):
-    #                 log(f'Updating {setting}...', logging.INFO)
-    #                 self.__dict__[setting].update(new.get(setting))
-    #             else:
-    #                 log_update_error(setting, new.get(setting))
-    #         else:
-    #             if isinstance(new.get(setting), tp):
-    #                 log(f'Updating {setting}: {new.get(setting)}', logging.INFO)
-    #                 self.__dict__[setting] = new.get(setting)
-    #             else:
-    #                 log_update_error(setting, new.get(setting))
-
 
 @dataclass
 class GlobalSettings(BaseSettings):
@@ -81,12 +31,9 @@ class GlobalSettings(BaseSettings):
         """
         Options for the script.
 
-        debug:
-            If True, then logger will be set to show debug messages.
         noconfirm:
             Indicates whether user should be prompted for input during the script.
         """
-        debug: bool = True  # TODO: change back to False when options/configparser implemented, whichever first
         noconfirm: bool = False
 
     @dataclass
@@ -178,55 +125,5 @@ class GlobalSettings(BaseSettings):
     def __str__(self):
         return str(self.__dict__)
 
-
-# TODO: move to configparser as an "update".
-# global_settings = GlobalSettings(
-#     noconfirm=False,
-#     custom_module=GlobalSettings.CustomModule(cmd_presets={}),
-#     apps_module=GlobalSettings.AppsModule(
-#         cmd_presets={
-#             'flatpak': GlobalSettings.CmdPreset(install_cmd='flatpak install -y --noninteractive $@'),
-#             'apt': GlobalSettings.CmdPreset(install_cmd='sudo apt --assume-yes install $@'),
-#             'pacman': GlobalSettings.CmdPreset(install_cmd='sudo pacman -S --noconfirm --needed $@'),
-#             'yay': GlobalSettings.CmdPreset(install_cmd='yay -S --noconfirm --needed $@')
-#         }
-#     ),
-#     files_module=GlobalSettings.FilesModule(
-#         cmd_presets={
-#             'copy': GlobalSettings.CmdPreset(
-#
-#             ),
-#             'hardlink': GlobalSettings.CmdPreset(
-#
-#             ),
-#             'tar_copy': GlobalSettings.CmdPreset(
-#                 install_cmd='tar -xPf "$1.tar"',
-#                 backup_cmd='tar -cPf "$1.tar" "${@:2}"'
-#             ),
-#             'compress': GlobalSettings.CmdPreset(
-#                 install_cmd='tar -xPf "$1.tar.xz"',
-#                 backup_cmd='tar -cJPf "$1.tar.xz" "${@:2}"'
-#             ),
-#             'encrypt': GlobalSettings.CmdPreset(
-#                 install_cmd='openssl enc -d -aes-256-cbc -md sha512 -pbkdf2 -salt -in "$1.tar.xz.enc" | tar -xPf -',
-#                 backup_cmd='tar -cJPf - "${@:2}" | '
-#                             'openssl enc -e -aes-256-cbc -md sha512 -pbkdf2 -salt -out "$1.tar.xz.enc"'
-#             )
-#         },
-#         backup_dirs={},
-#         dump_dirs={},
-#         tmp_dirs={}
-#     ),
-#     # Preconfigured to use GNU/Linux and POSIX-compatible commands.
-#     system_cmds=GlobalSettings.SystemCmds(
-#         superuser='sudo',
-#         cp='cp -at "$1" "${@:2}"',
-#         mv='mv -t "$1" "${@:2}"',
-#         mkdir='mkdir -p "$1"',
-#         validate_path='[ -e "$1" ]',
-#         validate_dir='[ -d "$1" ]'
-#     ),
-#     debug=False
-# )
 
 global_settings = GlobalSettings()
