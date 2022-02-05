@@ -1,12 +1,15 @@
 import logging
-from dataclasses import dataclass, fields, field, MISSING
+from dataclasses import dataclass, field
+
+from lib.settings import BaseSettings
+
 from enum import Enum
 
 from lib.logger import log
 
 
 @dataclass
-class BaseModule:
+class BaseModule(BaseSettings):
     """
     Base module, which provides a set of optionally overridable methods that are used in packs.
 
@@ -14,19 +17,7 @@ class BaseModule:
         module: for specifying what module to use
         alt: for specifying alternative configurations to use
     """
-
-    def __post_init__(self):
-        # Assign fields to their default if fld is None and a default(_factory) exists
-        for fld in fields(self):
-            if getattr(self, fld.name) is None:
-                log(f'? {fld}', logging.DEBUG)
-                if fld.default is not MISSING:
-                    setattr(self, fld.name, fld.default)
-                elif fld.default_factory is not MISSING:
-                    setattr(self, fld.name, fld.default_factory())
-                else:
-                    log(f'There was a problem assigning a default to {fld.name}.\n'
-                        f'This may produce unexpected results.', logging.WARNING)
+    pass
 
     # TODO: move to configparser
     # @staticmethod

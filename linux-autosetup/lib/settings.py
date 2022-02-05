@@ -1,12 +1,39 @@
+import logging
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, MISSING, fields
 from os import PathLike
+
+from lib.logger import log
 
 
 @dataclass
 class BaseSettings(ABC):
-    """Base settings class. Meant to be used for recognizing whether a class is a settings-related class."""
-    pass
+    """Base settings class."""
+    def __post_init__(self):
+        # Assign fields to their default if fld is None and a default(_factory) exists
+        for fld in fields(self):
+            if getattr(self, fld.name) is None:
+                if fld.default is not MISSING:
+                    setattr(self, fld.name, fld.default)
+                elif fld.default_factory is not MISSING:
+                    setattr(self, fld.name, fld.default_factory())
+                else:
+                    log(f'There was a problem assigning a default to {fld.name}.\n'
+                        f'This may produce unexpected results.', logging.WARNING)
+
+
+@dataclass
+class CmdPreset(BaseSettings):
+    """
+    A preset of shell commands.
+
+    install_cmd:
+        Meant to be run during pack installs.
+    backup_cmd:
+        Meant to be run during pack backups.
+    """
+    install_cmd: str = ''
+    backup_cmd: str = ''
 
 
 @dataclass
@@ -74,21 +101,7 @@ class GlobalSettings(BaseSettings):
         cmd_presets:
             Dictionary of name -> CmdPreset pairs.
         """
-
-        @dataclass
-        class CmdPreset(BaseSettings):
-            """
-            A preset of shell commands.
-
-            install_cmd:
-                Meant to be run during pack installs.
-            backup_cmd:
-                Meant to be run during pack backups.
-            """
-            install_cmd: str = ''
-            backup_cmd: str = ''
-
-        cmd_presets: dict[str, 'GlobalSettings.CustomModule.CmdPreset'] = field(default_factory=dict)
+        cmd_presets: dict[str, CmdPreset] = field(default_factory=dict)
 
     @dataclass
     class AppsModule(CustomModule):
