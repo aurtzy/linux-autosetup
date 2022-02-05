@@ -50,7 +50,7 @@ class ConfigParser:
     @classmethod
     def update_global_settings(cls, new_settings: dict):
         """Recursively parses s to update global_settings."""
-        log('Updating global settings...', logging.INFO)
+        log('Parsing global settings...', logging.INFO)
         log(str(new_settings), logging.DEBUG)
 
         def update_level(settings: BaseSettings, new: dict):
@@ -72,7 +72,6 @@ class ConfigParser:
                         dict_args: tuple = tp.__args__
                     except AttributeError:
                         dict_args: tuple = ()
-                    log(f'dict_args: {dict_args}', logging.DEBUG)
                     if isinstance(new.get(setting), dict):
                         log(f'Updating {setting} dictionary...', logging.DEBUG)
                         for k, v in new.get(setting).items():
@@ -103,14 +102,13 @@ class ConfigParser:
                         list_args: tuple = tp.__args__
                     except AttributeError:
                         list_args: tuple = ()
-                    log(f'list_args: {list_args}', logging.DEBUG)
                     if list_args[0] is str:
                         setattr(settings, setting, cls.convert_to_str_list(new.get(setting)))
                         log(f'Updated {setting}:\n'
                             f'{getattr(settings, setting)}', logging.INFO)
                     else:
-                        log(f'Support for global setting lists with types {tp} does not exist. '
-                            f'Add it in the {__name__} module.', logging.ERROR)
+                        log(f'Support for global setting lists with types {tp} is not implemented. '
+                            f'Implement in {__name__}.', logging.ERROR)
                         raise NotImplementedError
                 else:
                     # Update misc. types
@@ -127,11 +125,12 @@ class ConfigParser:
     @classmethod
     def init_packs(cls, p: dict):
         """Specifically parses for and creates packs from the given dict p."""
-        log('Initializing packs...', logging.INFO)
+        log('Parsing packs...', logging.INFO)
         log(str(p), logging.DEBUG)
 
         for name, pack_settings in p.items():
             if isinstance(pack_settings, dict) and pack_settings:
+                log(f'Initializing pack {name}...', logging.INFO)
                 # desc
                 desc = str(pack_settings.get('desc'))
 
@@ -144,10 +143,30 @@ class ConfigParser:
                     elif not hasattr(Module, module_settings.get('module')):
                         cls.unexpected_val_error(name,
                                                  f'Module {pack_settings.get("module")} could not be found.')
-                    module_tp = Module[module_settings.get('module')].value
+                    module_tp: BaseModule.__class__ = getattr(Module, module_settings.get('module')).value
 
-                    module: BaseModule = module_tp(*(module_settings.get(fld.name) for fld in fields(module_tp)))
-                    log(f'Initialized {module_settings.get("module")} module for {name}:\n'
+                    module_fields: list = []
+                    for setting, tp in module_tp.__annotations__.items():
+                        if tp.__subclasscheck__(list):
+                            # list types
+                            try:
+                                list_args: tuple = tp.__args__
+                            except AttributeError:
+                                list_args: tuple = ()
+                            if len(list_args) > 0:
+                                if list_args[0] is str:
+                                    module_fields.append(cls.convert_to_str_list(module_settings.get(setting)))
+                                else:
+                                    log(f'Converting to list with type {list_args[0]} is not implemented.\n'
+                                        f'Implement in {__name__}.', logging.ERROR)
+                                    raise NotImplementedError
+                            else:
+                                module_fields.append(list(module_settings.get(setting)))
+                        else:
+                            # misc. types
+                            module_fields.append(tp(module_settings.get(setting)))
+                    module: BaseModule = module_tp(*module_fields)
+                    log(f'Initialized {module.__class__.__name__} for {name}:\n'
                         f'{module}', logging.DEBUG)
                     modules.append(module)
 
@@ -160,10 +179,13 @@ class ConfigParser:
                 else:
                     pin = 0
 
-                log(f'Initializing {name}...', logging.INFO)
                 Pack(name=name, desc=desc, modules=modules, pin=pin)
             else:
                 cls.unexpected_val_error(name, 'Pack settings were incorrectly formatted?')
+
+        log(f'Finishing up initializing packs...', logging.INFO)
+        for pack in Pack.packs:
+            pack.__post_packs_init__()
         log('Finished initializing packs.', logging.INFO)
 
     def start(self):
