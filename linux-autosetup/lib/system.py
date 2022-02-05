@@ -76,6 +76,8 @@ class Path(PathLike):
     is raised if any path does not exist.
     """
 
+    os.environ.update({'DOLLARSIGN': '$'})
+
     def __init__(self, path: str):
         self.path = os.path.expandvars(path)
 
@@ -131,9 +133,9 @@ class Path(PathLike):
                 log('Path could not be found.', logging.WARNING)
                 i = get_input(
                     [['Create a new directory?', 'C'],
-                     ['Try to find it again? If it\'s on another drive, check if it is mounted.', 'T'],
-                     ['Ignore this path for the session?', 'I'],
-                     ['Abort this script?', 'A']],
+                     ['Try to find it again? If it\'s on another drive, check if it is mounted.', 't'],
+                     ['Ignore this path for the session?', 'i'],
+                     ['Abort this script?', 'a']],
                     pre_prompt=f'The directory "{path}" was not found. How do you want to handle this?')
                 match i:
                     case 0:
@@ -148,40 +150,6 @@ class Path(PathLike):
                         return None
                     case _:
                         log('Aborting.', logging.INFO)
-                        exit(1)
-
-    @classmethod
-    def existing_path(cls, path: str):
-        """
-        Checks if the given path exists, returning a Path object if it does.
-
-        If no_confirm is true, the method will automatically return None if the path does not already exist;
-        otherwise, when no_confirm is false, it prompts the user with various options to attempt to resolve this.
-
-        :return: A Path object with path passed as an argument if path exists; None otherwise.
-        """
-        while True:
-            log(f'Checking if "{path}" exists...', logging.INFO)
-            if run(f'{global_settings.system_cmds.superuser} '
-                   f'{global_settings.system_cmds.validate_path}', [path]) == 0:
-                log('Path found.', logging.INFO)
-                return cls(path)
-            else:
-                log('Path not found.', logging.WARNING)
-                i = get_input([
-                    ['Ignore this path for the session?', 'I'],
-                    ['Try searching for it again?', 'T'],
-                    ['Abort this script?', 'A']
-                ], f'The path "{path}" could not be found. How do you want to handle this?')
-                match i:
-                    case 0:
-                        log('Ignoring path.', logging.INFO)
-                        return None
-                    case 1:
-                        log('Trying again to find path...', logging.INFO)
-                        continue
-                    case _:
-                        log('Aborting.', logging.ERROR)
                         exit(1)
 
     def __fspath__(self) -> str:
