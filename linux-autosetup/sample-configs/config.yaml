@@ -1,7 +1,5 @@
 
 global_settings:
-    options:
-        noconfirm: false
     system_cmds:
         superuser: 'sudo'
         cp: 'cp -at "$1" "${@:2}"'
@@ -46,8 +44,11 @@ packs:
             - module: apps
               cmd_preset: apt
               apps: app1 app2
-              alt:
-                  server:
-                      apps: app1 app3 important_server_app
             - module: files
               files: path/to/file other/path
+    unimportant:
+        desc: some random things that i may or may not want to install or back up
+        modules:
+            - module: apps
+              cmd_preset:
+              apps:
