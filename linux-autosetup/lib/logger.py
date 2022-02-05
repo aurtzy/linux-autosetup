@@ -1,4 +1,5 @@
 import logging
+from os import PathLike
 
 logger = logging.getLogger('linux-autosetup')
 logger.setLevel(logging.DEBUG)
@@ -6,9 +7,15 @@ logger.setLevel(logging.DEBUG)
 
 def set_stream(debug: bool):
     stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(logging.Formatter('[%(levelname)s]: %(message)s'))
     stream_handler.setLevel(logging.DEBUG if debug else logging.INFO)
     logger.addHandler(stream_handler)
+
+
+def set_file(path: str | PathLike):
+    file_handler = logging.FileHandler(path)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter('[%(levelname)s]: %(message)s'))
+    logger.addHandler(file_handler)
 
 
 def log(msg: str, lvl: int):
