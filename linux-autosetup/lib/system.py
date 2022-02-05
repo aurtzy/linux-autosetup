@@ -86,7 +86,7 @@ class Path(PathLike):
 
         :return: True if the copy was successful; False otherwise.
         """
-        success = run(global_settings.system_cmds.cp, list(args))
+        success = run(global_settings.system_cmds.cp, [dest] + list(args))
         return bool(success)
 
     @staticmethod
@@ -96,7 +96,7 @@ class Path(PathLike):
 
         :return: True if the move was successful; False otherwise.
         """
-        success = run(global_settings.system_cmds.mv, list(args))
+        success = run(global_settings.system_cmds.mv, [dest] + list(args))
         return bool(success)
 
     @staticmethod
