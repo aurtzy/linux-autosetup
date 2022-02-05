@@ -13,38 +13,9 @@ class BaseModule(BaseSettings):
     """
     Base module, which provides a set of optionally overridable methods that are used in packs.
 
-    Recommended reserved property names:
-        module: for specifying what module to use
-        alt: for specifying alternative configurations to use
+    The property name "module" should be reserved for config parsers, so they can properly discern
+    which modules should be initialized.
     """
-    pass
-
-    # TODO: move to configparser
-    # @staticmethod
-    # def convert_to_str_list(arg) -> list[str]:
-    #     """
-    #     Converts the given arg into a str list.
-    #
-    #     If arg is a list, pass each element through str() and return that;
-    #     otherwise, perform the following on str(arg):
-    #         If arg contains no newline characters, delimit into a list by spaces.
-    #         Otherwise, delimit by newline characters.
-    #     """
-    #     log(f'Got {str(arg)} as arg to convert.', logging.DEBUG)
-    #     if arg is None:
-    #         log('Arg is NoneType - setting to empty list.', logging.DEBUG)
-    #         arg = []
-    #     elif isinstance(arg, list):
-    #         log('Arg is a list - converting any elements to str if not already str.', logging.DEBUG)
-    #         arg = [str(element) for element in arg]
-    #     else:
-    #         arg = str(arg)
-    #         if '\n' in arg:
-    #             arg = arg.split('\n')
-    #         else:
-    #             arg = arg.split(' ')
-    #     log(f'Returning {arg}', logging.DEBUG)
-    #     return arg
 
     def install(self):
         """
@@ -210,7 +181,7 @@ class Pack:
     packs: list['Pack'] = []
     pinned_packs: list['Pack'] = []
 
-    def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int):
+    def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int = 0):
         log(f'Initializing pack "{name}"...', logging.INFO)
         # name
         self.name = name

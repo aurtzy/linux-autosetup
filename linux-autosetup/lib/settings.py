@@ -41,8 +41,6 @@ class GlobalSettings(BaseSettings):
     """
     Global settings.
 
-    options:
-        See Options docs.
     system_cmds:
         See SystemCmds docs.
     custom_module:
@@ -52,16 +50,6 @@ class GlobalSettings(BaseSettings):
     files_module:
         See FilesModule docs.
     """
-
-    @dataclass
-    class Options(BaseSettings):
-        """
-        Options for the script.
-
-        noconfirm:
-            Indicates whether user should be prompted for input during the script.
-        """
-        noconfirm: bool = False
 
     @dataclass
     class SystemCmds(BaseSettings):
@@ -129,7 +117,6 @@ class GlobalSettings(BaseSettings):
         dump_dirs: dict[str, PathLike] = field(default_factory=dict)
         tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
 
-    options: Options = field(default_factory=lambda: GlobalSettings.Options())
     system_cmds: SystemCmds = field(default_factory=lambda: GlobalSettings.SystemCmds())
     custom_module: CustomModule = field(default_factory=lambda: GlobalSettings.CustomModule())
     apps_module: AppsModule = field(default_factory=lambda: GlobalSettings.AppsModule())
