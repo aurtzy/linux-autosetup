@@ -1,7 +1,6 @@
 
 global_settings:
     options:
-        debug: false
         noconfirm: false
     system_cmds:
         superuser: 'sudo'
