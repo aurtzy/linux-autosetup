@@ -1,7 +1,6 @@
 import logging
 
 from lib.logger import log
-from lib.settings import global_settings
 
 
 noconfirm: bool = False
