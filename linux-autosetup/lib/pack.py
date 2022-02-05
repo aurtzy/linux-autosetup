@@ -15,17 +15,17 @@ class BaseModule(BaseSettings):
     which modules should be initialized.
     """
 
+    def __post_packs_init__(self, owner: 'Pack'):
+        """Method that is called after all packs have been initialized."""
+        pass
+
     def install(self):
-        """
-        Install method, called when performing a pack install.
-        """
-        log('Nothing to do here in install()...', logging.DEBUG)
+        """Install method, called when performing a pack install."""
+        pass
 
     def backup(self):
-        """
-        Backup method, called when performing a pack backup.
-        """
-        log('Nothing to do here in backup()...', logging.DEBUG)
+        """Backup method, called when performing a pack backup."""
+        pass
 
 
 @dataclass
@@ -37,20 +37,44 @@ class PacksModule(BaseModule):
         List of packs to call.
     """
 
-    packs: list['Pack'] = field(default_factory=list)
+    packs: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         super()
         if not self.packs:
-            log(f'This {self.__class__.__name__} has no packs. Is this intentional?', logging.WARNING)
+            log(f'{self.__class__.__name__} has no packs. Is this intentional?', logging.WARNING)
+
+    def __post_packs_init__(self, owner: 'Pack'):
+        log(f'Error-checking packs in PacksModule from {owner.name}...', logging.DEBUG)
+        for pack_name in self.packs:
+            # Check if pack name can be found/exists in Pack.packs
+            for pack in Pack.packs:
+                if pack.name == pack_name:
+                    # Check if any pack modules from these packs reference the owner pack
+                    # which may cause an infinite loop
+                    for module in pack.modules:
+                        if isinstance(module, PacksModule):
+                            for other_pack_name in module.packs:
+                                if other_pack_name == owner.name:
+                                    log(f'Encountered a potential infinite loop that may occur '
+                                        f'with {owner.name} and {pack.name}.', logging.CRITICAL)
+                                    raise RecursionError
+                    break
+            else:
+                log(f'Could not match the pack name {pack_name} with any existing packs.', logging.ERROR)
+                raise LookupError
 
     def install(self):
-        for pack in self.packs:
-            pack.install()
+        for pack_name in self.packs:
+            for pack in Pack.packs:
+                if pack.name == pack_name:
+                    pack.install()
 
     def backup(self):
-        for pack in self.packs:
-            pack.backup()
+        for pack_name in self.packs:
+            for pack in Pack.packs:
+                if pack.name == pack_name:
+                    pack.backup()
 
 
 @dataclass
@@ -213,9 +237,16 @@ class Pack:
         self.backup_success: bool | None = None
 
         self.packs.append(self)
-        log(f'Initialized {self.name}.', logging.INFO)
+        log(f'Initialized pack {self.name}.', logging.INFO)
         log(f'{self}', logging.DEBUG)
 
+    def __post_packs_init__(self):
+        """Method called after all packs are initialized, which does miscellaneous things."""
+        log(f'Running post initializations method for {self.name}...', logging.DEBUG)
+        for module in self.modules:
+            module.__post_packs_init__(self)
+
+    # TODO: implement install/backup success detection - success = False at start of method; success = True only at end
     def install(self):
         """Performs an installation of the pack."""
         if self.install_success is not None:
@@ -224,7 +255,6 @@ class Pack:
 
         log(f'Installing {self.name}...', logging.INFO)
         for module in self.modules:
-            log(f'Running {module.__class__.__name__}...', logging.INFO)
             module.install()
 
     def backup(self):
