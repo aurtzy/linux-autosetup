@@ -127,25 +127,22 @@ class Path(PathLike):
                    f'{global_settings.system_cmds.validate_dir}', [path]) == 0:
                 log(f'Directory path found.', logging.INFO)
                 return cls(path)
-            elif global_settings.options.noconfirm:
-                log(f'Path is missing - automatically creating directory at "{path}".', logging.INFO)
-                cls.mkdir(path)
             else:
-                log('Path could not be found - Prompting user to handle.', logging.DEBUG)
+                log('Path could not be found.', logging.WARNING)
                 i = get_input(
-                    [['Try to find it again? If it\'s on another drive, check if it is mounted.', 'T'],
-                     ['Create a new directory?', 'C'],
+                    [['Create a new directory?', 'C'],
+                     ['Try to find it again? If it\'s on another drive, check if it is mounted.', 'T'],
                      ['Ignore this path for the session?', 'I'],
                      ['Abort this script?', 'A']],
                     pre_prompt=f'The directory "{path}" was not found. How do you want to handle this?')
                 match i:
                     case 0:
-                        log('Attempting to find directory again.', logging.INFO)
-                        continue
-                    case 1:
                         log(f'Creating new directory.', logging.INFO)
                         cls.mkdir(path)
                         return cls(path)
+                    case 1:
+                        log('Attempting to find directory again.', logging.INFO)
+                        continue
                     case 2:
                         log(f'Ignoring this path for the session.', logging.INFO)
                         return None
@@ -169,23 +166,20 @@ class Path(PathLike):
                    f'{global_settings.system_cmds.validate_path}', [path]) == 0:
                 log('Path found.', logging.INFO)
                 return cls(path)
-            elif global_settings.options.noconfirm:
-                log('Path not found. Ignoring...', logging.INFO)
-                return None
             else:
-                log('Path not found. Prompting user to handle...', logging.DEBUG)
+                log('Path not found.', logging.WARNING)
                 i = get_input([
-                    ['Try searching for it again?', 'T'],
                     ['Ignore this path for the session?', 'I'],
+                    ['Try searching for it again?', 'T'],
                     ['Abort this script?', 'A']
                 ], f'The path "{path}" could not be found. How do you want to handle this?')
                 match i:
                     case 0:
-                        log('Trying again to find path...', logging.INFO)
-                        continue
-                    case 1:
                         log('Ignoring path.', logging.INFO)
                         return None
+                    case 1:
+                        log('Trying again to find path...', logging.INFO)
+                        continue
                     case _:
                         log('Aborting.', logging.ERROR)
                         exit(1)

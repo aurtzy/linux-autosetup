@@ -4,6 +4,9 @@ from lib.logger import log
 from lib.settings import global_settings
 
 
+noconfirm: bool = False
+
+
 def get_input(options: list[list[str]], pre_prompt: str = '') -> int:
     """
     Provides a universal method of getting decently formatted prompts from the user.
@@ -26,7 +29,7 @@ def get_input(options: list[list[str]], pre_prompt: str = '') -> int:
         log('get_input() only expects a non-empty list of options.', logging.ERROR)
         raise NotImplementedError
 
-    if global_settings.options.noconfirm:
+    if noconfirm:
         log(f'Using {options[0]} due to noconfirm.', logging.DEBUG)
         return 0
     log(f'Attempting to get input from the user with the following:\n'
