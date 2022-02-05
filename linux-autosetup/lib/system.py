@@ -86,8 +86,8 @@ class Path(PathLike):
 
         :return: True if the copy was successful; False otherwise.
         """
-        print(f'TEMP: copy {", ".join(str(path) for path in args)} to {dest}')
-        return True
+        success = run(global_settings.system_cmds.cp, list(args))
+        return bool(success)
 
     @staticmethod
     def move(dest: str, *args: str) -> bool:
@@ -96,8 +96,8 @@ class Path(PathLike):
 
         :return: True if the move was successful; False otherwise.
         """
-        print(f'TEMP: move {", ".join(str(path) for path in args)} to {dest}')
-        return True
+        success = run(global_settings.system_cmds.mv, list(args))
+        return bool(success)
 
     @staticmethod
     def mkdir(path: str) -> bool:
@@ -106,8 +106,8 @@ class Path(PathLike):
 
         :return: True if the directory creation was successful or if it already exists; False otherwise.
         """
-        print(f'TEMP: Create directory to path {path} if it doesn\'t exist.')
-        return True
+        success = run(global_settings.system_cmds.mkdir, [path])
+        return bool(success)
 
     @classmethod
     def valid_dir(cls, path: str):
