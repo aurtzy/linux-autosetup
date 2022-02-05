@@ -5,7 +5,7 @@ from os import PathLike
 from ruamel.yaml import YAML, YAMLError
 
 from lib.logger import log
-from lib.pack import Module, BaseModule
+from lib.pack import Module, BaseModule, Pack
 from lib.settings import global_settings, BaseSettings
 from lib.system import Path
 
@@ -137,26 +137,31 @@ class ConfigParser:
 
                 # modules
                 modules: list[BaseModule] = []
-                for module in pack_settings.get('modules'):
-                    if not isinstance(module, dict):
+                for module_settings in pack_settings.get('modules'):
+                    if not isinstance(module_settings, dict):
                         cls.unexpected_val_error(name,
                                                  f'Module settings were incorrectly formatted?')
-                    elif not hasattr(Module, module.get('module')):
+                    elif not hasattr(Module, module_settings.get('module')):
                         cls.unexpected_val_error(name,
                                                  f'Module {pack_settings.get("module")} could not be found.')
-                    module_type: BaseModule = Module[module.get('module')].value
+                    module_tp = Module[module_settings.get('module')].value
 
-                    # todo: initialize module
+                    module: BaseModule = module_tp(*(module_settings.get(fld.name) for fld in fields(module_tp)))
+                    log(f'Initialized {module_settings.get("module")} module for {name}:\n'
+                        f'{module}', logging.DEBUG)
+                    modules.append(module)
 
                 # pin
                 if pack_settings.get('pin'):
-                    if isinstance(pack_settings.get('pin'), int):
-                        pin = pack_settings.get('pin')
-                    else:
+                    if not isinstance(pack_settings.get('pin'), int):
                         cls.unexpected_val_error(name,
                                                  f'Expected type {int} but got {pack_settings.get("pin")}.')
+                    pin = pack_settings.get('pin')
                 else:
                     pin = 0
+
+                log(f'Initializing {name}...', logging.INFO)
+                Pack(name=name, desc=desc, modules=modules, pin=pin)
             else:
                 cls.unexpected_val_error(name, 'Pack settings were incorrectly formatted?')
         log('Finished initializing packs.', logging.INFO)
