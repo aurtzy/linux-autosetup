@@ -17,10 +17,11 @@ class ConfigParser:
     @staticmethod
     def update_global_settings(new_settings: dict):
         """Recursively parses s to update global_settings."""
+        log('Updating global settings...', logging.INFO)
+        log(str(new_settings), logging.DEBUG)
+
         def update_level(settings: BaseSettings, new: dict):
             for setting, tp in settings.__annotations__.items():
-                log(f'LEVEL:\n'
-                    f'{setting}: {new.get(setting)}', logging.DEBUG)
                 if new.get(setting) is None:
                     log(f'No setting found for {setting}.', logging.DEBUG)
                     continue
@@ -76,12 +77,15 @@ class ConfigParser:
                             f'{new.get(setting)}\n'
                             f'Ignoring...', logging.ERROR)
         update_level(global_settings, new_settings)
+        log('Finished updating global settings.', logging.INFO)
 
     @staticmethod
     def init_packs(p: dict):
         """Specifically parses for and creates packs from the given dict p."""
-        # TODO: parse given dictionary of packs
-        pass
+        log('Initializing packs...', logging.INFO)
+        log(str(p), logging.DEBUG)
+
+        log('Finished initializing packs.', logging.INFO)
 
     def start(self):
         """
@@ -113,8 +117,6 @@ class ConfigParser:
                     logging.ERROR)
             exit(1)
 
-        log('Registering global settings...', logging.DEBUG)
         self.update_global_settings(config.get('global_settings'))
 
-        log('Parsing packs...', logging.DEBUG)
         self.init_packs(config.get('packs'))
