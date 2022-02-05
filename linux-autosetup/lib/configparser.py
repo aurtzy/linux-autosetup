@@ -204,7 +204,7 @@ class ConfigParser:
         except YAMLError as error:
             log('Encountered an error reading config.', logging.CRITICAL)
             log(str(error), logging.CRITICAL)
-            exit(1)
+            raise
         log(str(config), logging.DEBUG)
 
         try:
@@ -216,7 +216,7 @@ class ConfigParser:
             else:
                 log(f'Encountered an unexpected error trying to parse {self.config_path}.',
                     logging.ERROR)
-            exit(1)
+            raise
 
         self.update_global_settings(config.get('global_settings'))
 
