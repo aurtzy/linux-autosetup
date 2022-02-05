@@ -182,7 +182,6 @@ class Pack:
     pinned_packs: list['Pack'] = []
 
     def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int = 0):
-        log(f'Initializing pack "{name}"...', logging.INFO)
         # name
         self.name = name
         if self.name == '':
@@ -216,6 +215,7 @@ class Pack:
         self.backup_success: bool | None = None
 
         self.packs.append(self)
+        log(f'Initialized {self.name}.', logging.INFO)
         log(f'{self}', logging.DEBUG)
 
     def install(self):
@@ -241,11 +241,11 @@ class Pack:
 
     def __str__(self, verbose=True):
         string = f'Pack Name: {self.name}\n' \
-                 f'{self.desc}'
+                 f'Desc: {self.desc}'
         if verbose and self.modules:
             string += f'\n' \
                       f'Modules:'
             for module in self.modules:
-                string += f'\n\n' \
+                string += f'\n\t' \
                           f'{module}'
         return string
