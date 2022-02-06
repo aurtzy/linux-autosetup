@@ -1,8 +1,4 @@
-linux-autosetup/app-backups
-linux-autosetup/test
-linux-autosetup/dump
-linux-autosetup/archives
-linux-autosetup/jotter.md
+propellant.pex
 
 **/__pycache__
 **/.idea
