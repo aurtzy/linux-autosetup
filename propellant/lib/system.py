@@ -5,9 +5,9 @@ import threading
 import time
 from os import PathLike
 
-from lib.settings import global_settings
-from lib.logger import log
-from lib.user_input import get_custom_option
+from .settings import global_settings
+from .logger import log
+from .user_input import get_custom_option
 
 
 def run(cmd: str, args: list[str] = None) -> int:

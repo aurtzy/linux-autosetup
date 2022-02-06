@@ -1,7 +1,7 @@
 import logging
 import re
 
-from lib.logger import log
+from .logger import log
 
 noconfirm: bool = False
 

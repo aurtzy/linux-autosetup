@@ -2,8 +2,8 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
-from lib.settings import BaseSettings
-from lib.logger import log
+from .settings import BaseSettings
+from .logger import log
 
 
 @dataclass

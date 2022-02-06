@@ -40,7 +40,7 @@ packs:
         desc: essential programs for ubuntu - default ubuntu might have different essentials than ubuntu server.
         modules:
             - module: packs
-              packs: pack2 pack3
+              packs: unimportant
             - module: apps
               cmd_preset: apt
               apps: app1 app2

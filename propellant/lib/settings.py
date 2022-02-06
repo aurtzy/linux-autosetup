@@ -3,7 +3,7 @@ from abc import ABC
 from dataclasses import dataclass, field, MISSING, fields
 from os import PathLike
 
-from lib.logger import log
+from .logger import log
 
 
 @dataclass

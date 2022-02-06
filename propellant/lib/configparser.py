@@ -4,10 +4,10 @@ from os import PathLike
 
 from ruamel.yaml import YAML, YAMLError
 
-from lib.logger import log
-from lib.pack import Module, BaseModule, Pack
-from lib.settings import global_settings, BaseSettings
-from lib.system import Path
+from .logger import log
+from .pack import Module, BaseModule, Pack
+from .settings import global_settings, BaseSettings
+from .system import Path
 
 
 class ConfigParser:
