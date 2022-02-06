@@ -7,7 +7,7 @@ from os import PathLike
 
 from lib.settings import global_settings
 from lib.logger import log
-from lib.prompter import get_input
+from lib.user_input import get_custom_option
 
 
 def run(cmd: str, args: list[str] = None) -> int:
@@ -131,20 +131,20 @@ class Path(PathLike):
                 return cls(path)
             else:
                 log('Path could not be found.', logging.WARNING)
-                i = get_input(
-                    [['Create a new directory?', 'C'],
-                     ['Try to find it again? If it\'s on another drive, check if it is mounted.', 't'],
-                     ['Ignore this path for the session?', 'i'],
-                     ['Abort this script?', 'a']],
-                    pre_prompt=f'The directory "{path}" was not found. How do you want to handle this?')
+                i = get_custom_option([('Attempt to find the directory again',),
+                                       ('Create a new directory',),
+                                       ('Ignore this path for the session',),
+                                       ('Abort this script',)],
+                                      prompt=f'The directory "{path} could not be found.\n'
+                                             f'Please choose how this should be handled')
                 match i:
                     case 0:
+                        log('Attempting to find directory again.', logging.INFO)
+                        continue
+                    case 1:
                         log(f'Creating new directory.', logging.INFO)
                         cls.mkdir(path)
                         return cls(path)
-                    case 1:
-                        log('Attempting to find directory again.', logging.INFO)
-                        continue
                     case 2:
                         log(f'Ignoring this path for the session.', logging.INFO)
                         return None
