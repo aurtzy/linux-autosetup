@@ -1,3 +1,3 @@
 
 build:
-	pex . -r requirements.txt -c __main__.py -o propellant.pex
+	pex -o propellant.pex --python-shebang='/usr/bin/env python3' -D . -r requirements.txt -e propellant
