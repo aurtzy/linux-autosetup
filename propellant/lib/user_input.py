@@ -29,7 +29,8 @@ def get_custom_option(options: list[tuple], prompt: str = ': ', default: int = N
         f'default: {default}', logging.DEBUG)
     if noconfirm:
         if default is None:
-            log('A value must be set for this option.', logging.ERROR)
+            log('This option does not have a default value.', logging.ERROR)
+            raise NotImplementedError
         log(f'Automatically choosing default option {default}.', logging.DEBUG)
         return default
 
