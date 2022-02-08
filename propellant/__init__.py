@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 from .lib import logger, user_input, system, configparser
 
@@ -44,10 +45,19 @@ def run_autosetup(**kwargs):
     an error will be raised.
     """
     # Set path of config to be used
-    config_path = system.Path('../sample-configs/config.yaml')
+    config_path = system.Path('./sample-configs/config.yaml')
 
     # Parse config
+    # todo: if not provided, scan for .yaml in pwd
     configparser.ConfigParser(config_path).start()
+
+    # Pick autosetup mode
+
+    # Choose packs for autosetup
+
+    # Run autosetup!
+
+    # Scan for errors; misc.?
 
 
 def run():
@@ -63,6 +73,10 @@ def run():
     user_input.noconfirm = args.noconfirm
     if args.noconfirm:
         logger.log('Enabled noconfirm.', logging.DEBUG)
+
+    if os.geteuid() == 0:
+        logger.log('Warning: It is not recommended to run this script as root '
+                   'unless you know what you\'re doing.', logging.WARNING)
 
     # autosetup
     run_autosetup(**args.__dict__)
