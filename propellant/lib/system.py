@@ -79,7 +79,7 @@ class Path(PathLike):
     os.environ.update({'DOLLARSIGN': '$'})
 
     def __init__(self, path: str):
-        self.path = os.path.expandvars(path)
+        self.path = path
 
     @staticmethod
     def copy(dest: str, *args: str) -> bool:
@@ -123,6 +123,7 @@ class Path(PathLike):
 
         :return: A Path object with path pass as an argument if the path is valid; None otherwise.
         """
+        path = os.path.expandvars(path)
         while True:
             log(f'Checking if directory path "{path}" exists...', logging.INFO)
             if run(f'{global_settings.system_cmds.superuser} '
