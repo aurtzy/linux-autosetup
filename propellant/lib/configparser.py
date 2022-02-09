@@ -18,8 +18,7 @@ class ConfigParser:
     @staticmethod
     def unexpected_val_error(setting: str, debug):
         log(f'Unexpected value given for {setting}:\n'
-            f'{debug}\n'
-            f'Exiting...', logging.ERROR)
+            f'{debug}', logging.ERROR)
         raise ValueError
 
     @staticmethod
