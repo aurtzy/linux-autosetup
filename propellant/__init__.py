@@ -53,9 +53,9 @@ def get_config_path(config_path) -> str:
 
 def get_autosetup_mode() -> str:
     """Gets the autosetup mode."""
-    mode = get_user_option([('install', 'Run the autosetup in installer mode'),
-                            ('backup', 'Run the autosetup in backup mode')],
-                           prompt='Choose an autosetup mode: ')
+    mode = get_option_i([('install', 'Run the autosetup in installer mode'),
+                         ('backup', 'Run the autosetup in backup mode')],
+                        prompt='Choose an autosetup mode: ')
     if mode == 0:
         return 'install'
     elif mode == 1:

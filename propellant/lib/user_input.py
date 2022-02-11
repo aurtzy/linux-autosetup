@@ -13,7 +13,11 @@ def set_noconfirm(setting: bool):
         log(f'Set noconfirm to {noconfirm}.', logging.DEBUG)
 
 
-def get_user_option(options: list[tuple], prompt: str = ': ', default: int = None) -> int:
+def get_input(prompt: str) -> str:
+    return input(prompt)
+
+
+def get_option_i(options: list[tuple], prompt: str = ': ', default: int = None) -> int:
     """
     Provides a universal method of getting decently formatted prompts from the user.
 
