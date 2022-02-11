@@ -6,7 +6,14 @@ from .logger import log
 noconfirm: bool = False
 
 
-def get_custom_option(options: list[tuple], prompt: str = ': ', default: int = None) -> int:
+def set_noconfirm(setting: bool):
+    global noconfirm
+    noconfirm = setting
+    if noconfirm:
+        log(f'Set noconfirm to {noconfirm}.', logging.DEBUG)
+
+
+def get_user_option(options: list[tuple], prompt: str = ': ', default: int = None) -> int:
     """
     Provides a universal method of getting decently formatted prompts from the user.
 
@@ -45,12 +52,3 @@ def get_custom_option(options: list[tuple], prompt: str = ': ', default: int = N
                     f'^({"|".join(str(matcher).lower() for matcher in option)}).*', user_in.lower()):
                 log(f'Matched:\n{option}', logging.DEBUG)
                 return i
-
-
-def get_setup_mode():
-    """Gets the autosetup mode."""
-    return get_custom_option([('install', 'Run the autosetup in installer mode'),
-                              ('backup', 'Run the autosetup in backup mode')],
-                             prompt='Choose an autosetup mode: ')
-
-

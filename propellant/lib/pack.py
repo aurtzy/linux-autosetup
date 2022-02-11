@@ -203,6 +203,16 @@ class Pack:
     packs: list['Pack'] = []
     pinned_packs: list['Pack'] = []
 
+    @classmethod
+    def pack_exists(cls, pack_name: str):
+        """Checks if the given pack name exists matches any packs in cls.packs"""
+        for p in cls.packs:
+            if p.name == pack_name:
+                return True
+        else:
+            log(f'Could not find any packs with the name {pack_name}.', logging.ERROR)
+            return False
+
     def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int = 0):
         # name
         self.name = name

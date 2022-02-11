@@ -9,6 +9,8 @@ def init_stream(debug: bool):
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG if debug else logging.INFO)
     logger.addHandler(stream_handler)
+    if debug:
+        log('Enabled debug log.', logging.INFO)
 
 
 def init_file(path: str | PathLike):

@@ -1,8 +1,11 @@
 import argparse
-import logging
 import os
 
-from .lib import logger, user_input, system, configparser
+from .lib.logger import *
+from .lib.user_input import *
+from .lib.system import *
+from .lib.configparser import *
+from .lib.pack import *
 
 __version__ = '0.0.0-dev'
 
@@ -27,7 +30,7 @@ def parse_args(*args) -> argparse.Namespace:
                                    help='Configuration file to use')
     autosetup_options.add_argument('-m', '--mode', choices=['install', 'backup'],
                                    help='Autosetup mode to run')
-    autosetup_options.add_argument('-p', '--pack', nargs='+',
+    autosetup_options.add_argument('packs', nargs='*',
                                    help='Packs to use in the autosetup')
 
     interactive_options = parser.add_argument_group('interactive options')
@@ -37,6 +40,36 @@ def parse_args(*args) -> argparse.Namespace:
     return parser.parse_args(*args)
 
 
+def get_config_path(config_path) -> str:
+    """
+    Gets the config file path to load settings from.
+
+    Will automatically detect .yaml files in the current directory,
+    but users can optionally choose to input a relative/absolute path
+    to the config instead.
+    """
+    return '../sample-configs/config.yaml'
+
+
+def get_autosetup_mode() -> str:
+    """Gets the autosetup mode."""
+    mode = get_user_option([('install', 'Run the autosetup in installer mode'),
+                            ('backup', 'Run the autosetup in backup mode')],
+                           prompt='Choose an autosetup mode: ')
+    if mode == 0:
+        return 'install'
+    elif mode == 1:
+        return 'backup'
+
+
+def get_packs(*args: str) -> list:
+    """
+    Gets the packs to run autosetup on.
+
+    """
+    pass  # todo
+
+
 def run_autosetup(**kwargs):
     """
     Start autosetup process.
@@ -44,38 +77,67 @@ def run_autosetup(**kwargs):
     Prompt for missing arguments as needed. If noconfirm is True with needed but missing arguments,
     an error will be raised.
     """
-    # Set path of config to be used
-    config_path = system.Path('./sample-configs/config.yaml')
+    # Get config file path to be used
+    print(kwargs.get('config'))
+    config_path: Path = Path(get_config_path(kwargs.get('config')))
 
     # Parse config
-    # todo: if not provided, scan for .yaml in pwd
-    configparser.ConfigParser(config_path).start()
+    ConfigParser(config_path).start()
 
-    # Pick autosetup mode
+    # Get autosetup mode
+    mode = (kwargs.get('mode') if kwargs.get('mode')
+            else get_autosetup_mode())
 
-    # Choose packs for autosetup
+    # Get packs to do autosetup on
+    packs = get_packs(kwargs.get('packs'))
+
+    # If packs were passed as arguments, check if all are valid names
+    if kwargs.get('packs'):
+        for pack_name in kwargs.get('packs'):
+            if not Pack.pack_exists(pack_name):
+                packs = None
+        if packs is None:
+            raise LookupError
 
     # Run autosetup!
+    if mode == 'install':
+        for p in packs:
+            p.install()
+        # Check for bad installs
 
-    # Scan for errors; misc.?
+        all_success = True
+        for p in Pack.packs:
+            if not p.install_success:
+                if all_success:
+                    all_success = False
+                    log('The following pack(s) failed to install:', logging.ERROR)
+                log(p.name, logging.ERROR)
+    elif mode == 'backup':
+        for p in packs:
+            p.backup()
+
+        all_success = True
+        for p in Pack.packs:
+            if not p.install_success:
+                if all_success:
+                    all_success = False
+                    log('The following pack(s) failed to be backed up:', logging.ERROR)
+                log(p.name, logging.ERROR)
 
 
 def run():
     """Entry point."""
     args = parse_args()
 
-    # set up logger
-    logger.init_stream(args.debug)
-    if args.debug:
-        logger.log('Enabled debug stream log.', logging.INFO)
+    # Set up logger
+    init_stream(args.debug)
 
-    # noconfirm
-    user_input.noconfirm = args.noconfirm
-    if args.noconfirm:
-        logger.log('Enabled noconfirm.', logging.DEBUG)
+    # Set noconfirm
+    set_noconfirm(args.noconfirm)
 
+    # Check if script is being run as root
     if os.geteuid() == 0:
-        logger.log('Warning: It is not recommended to run this script as root '
+        log('Warning: It is not recommended to run this script as root '
                    'unless you know what you\'re doing.', logging.WARNING)
 
     # autosetup

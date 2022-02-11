@@ -7,7 +7,7 @@ from os import PathLike
 
 from .settings import global_settings
 from .logger import log
-from .user_input import get_custom_option
+from .user_input import get_user_option
 
 
 def run(cmd: str, args: list[str] = None) -> int:
@@ -132,11 +132,11 @@ class Path(PathLike):
                 return cls(path)
             else:
                 log('Path could not be found.', logging.WARNING)
-                i = get_custom_option([('Attempt to find the directory again',),
-                                       ('Create a new directory',),
-                                       ('Ignore this path for the session',),
-                                       ('Abort this script',)],
-                                      prompt=f'The directory "{path} could not be found.\n'
+                i = get_user_option([('Attempt to find the directory again',),
+                                     ('Create a new directory',),
+                                     ('Ignore this path for the session',),
+                                     ('Abort this script',)],
+                                    prompt=f'The directory "{path} could not be found.\n'
                                              f'Please choose how this should be handled')
                 match i:
                     case 0:
