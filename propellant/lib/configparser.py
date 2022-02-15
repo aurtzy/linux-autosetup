@@ -12,7 +12,7 @@ from .system import Path
 
 class ConfigParser:
 
-    def __init__(self, config_path: PathLike):
+    def __init__(self, config_path: PathLike | str):
         self.config_path = config_path
 
     @staticmethod
