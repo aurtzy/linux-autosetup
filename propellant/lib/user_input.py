@@ -14,6 +14,9 @@ def set_noconfirm(setting: bool):
 
 
 def get_input(prompt: str) -> str:
+    if noconfirm:
+        log('Cannot get input: noconfirm is True.', logging.ERROR)
+        raise NotImplementedError
     return input(prompt)
 
 
@@ -24,10 +27,8 @@ def get_option_i(options: list[tuple], prompt: str = ': ', default: int = None) 
     Expects argument options to be a list of tuples. Each tuple is an option, with the last element being
     the option description. All elements of the tuple are used as match cases with user input.
 
-    If noconfirm is True, the first option in the list will automatically be chosen, and the method
-    will return 0.
-
-    :returns: The list index of matched option from user input.
+    :returns: The list index of matched option from user input. If noconfirm is True, return default if
+              it is not None; otherwise, an error is raised.
     """
 
     if not options:
@@ -50,7 +51,7 @@ def get_option_i(options: list[tuple], prompt: str = ': ', default: int = None) 
 
     while True:
         log('Prompting user.', logging.DEBUG)
-        user_in = input(formatted)
+        user_in = get_input(formatted)
         for i, option in enumerate(options):
             if user_in == str(i) or re.match(
                     f'^({"|".join(str(matcher).lower() for matcher in option)}).*', user_in.lower()):
