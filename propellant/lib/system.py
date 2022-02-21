@@ -127,7 +127,7 @@ class Path(PathLike):
         while True:
             log(f'Checking if directory path "{path}" exists...', logging.INFO)
             if run(f'{global_settings.system_cmds.superuser} '
-                   f'{global_settings.system_cmds.validate_dir}', [path]) == 0:
+                   f'{global_settings.system_cmds.check_dir}', [path]) == 0:
                 log(f'Directory path found.', logging.INFO)
                 return cls(path)
             else:
@@ -137,7 +137,7 @@ class Path(PathLike):
                                   ('Ignore this path for the session',),
                                   ('Abort this script',)],
                                  prompt=f'The directory "{path} could not be found.\n'
-                                             f'Please choose how this should be handled')
+                                        f'Please choose how this should be handled')
                 match i:
                     case 0:
                         log('Attempting to find directory again.', logging.INFO)

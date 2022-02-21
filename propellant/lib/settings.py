@@ -69,17 +69,17 @@ class GlobalSettings(BaseSettings):
         mkdir:
             Used to create directories at specified paths.
             Expects: $1 = Path of directory to be made.
-        validate_path:
+        check_path:
             Used to confirm if a path exists to some file/directory.
-        validate_dir:
+        check_dir:
             Used to confirm if a path exists to some directory.
         """
-        superuser: str = 'sudo'
-        cp: str = 'cp -at "$1" "${@:2}"'
-        mv: str = 'mv -t "$1" "${@:2}"'
-        mkdir: str = 'mkdir -p "$1"'
-        validate_path: str = '[ -e "$1" ]'
-        validate_dir: str = '[ -d "$1" ]'
+        superuser: str = None
+        cp: str = None
+        mv: str = None
+        mkdir: str = None
+        check_path: str = None
+        check_dir: str = None
 
     @dataclass
     class CustomModule(BaseSettings):

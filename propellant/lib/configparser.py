@@ -48,14 +48,23 @@ class ConfigParser:
 
     @classmethod
     def update_global_settings(cls, new_settings: dict):
-        """Recursively parses s to update global_settings."""
+        """
+        Recursively parses the passed dictionary to update global_settings.
+
+        In the case that a setting is not present, but is set to None,
+        a warning will be logged.
+        """
         log('Parsing global settings...', logging.INFO)
         log(str(new_settings), logging.DEBUG)
 
         def update_level(settings: BaseSettings, new: dict):
             for setting, tp in settings.__annotations__.items():
                 if new.get(setting) is None:
-                    log(f'No setting found for {setting}.', logging.DEBUG)
+                    if getattr(settings, setting) is None:
+                        log(f'The {setting} setting does not any setting.\n'
+                            f'This may or may not result in issues.', logging.WARNING)
+                    else:
+                        log(f'No setting found for {setting}.', logging.DEBUG)
                     continue
 
                 if is_dataclass(tp):
@@ -123,7 +132,7 @@ class ConfigParser:
 
     @classmethod
     def init_packs(cls, p: dict):
-        """Specifically parses for and creates packs from the given dict p."""
+        """Specifically parses for and creates packs from the given dict."""
         log('Parsing packs...', logging.INFO)
         log(str(p), logging.DEBUG)
 

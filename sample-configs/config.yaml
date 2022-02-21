@@ -5,8 +5,8 @@ global_settings:
         cp: 'cp -at "$1" "${@:2}"'
         mv: 'mv -t "$1" "${@:2}"'
         mkdir: 'mkdir -p $1'
-        validate_path: '[ -e "$1" ]'
-        validate_dir: '[ -d "$1" ]'
+        check_path: '[ -e "$1" ]'
+        check_dir: '[ -d "$1" ]'
     custom_module:
         cmd_presets:
     apps_module:
