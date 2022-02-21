@@ -3,14 +3,14 @@ import os.path
 import subprocess
 import threading
 import time
-from os import PathLike
+from os import PathLike, fspath
 
 from .settings import global_settings
 from .logger import log
 from .user_input import get_option_i
 
 
-def run(cmd: str, args: list[str] = None) -> int:
+def run(cmd: str, *args: str) -> int:
     """
     Run the given command(s) through the shell along with any arguments.
 
@@ -24,7 +24,7 @@ def run(cmd: str, args: list[str] = None) -> int:
     try:
         pass
         # TODO: temporary; remove when appropriate
-        # subprocess.run([cmd, ''] + args, check=True, text=True, shell=True)
+        # subprocess.run([cmd, ''] + list(args), check=True, text=True, shell=True)
     except subprocess.CalledProcessError as error:
         log(f'Encountered an error running shell commands:\n'
             f'{error}\n', logging.ERROR)
@@ -74,6 +74,10 @@ class Path(PathLike):
 
     Calling these methods will invoke a check for if the path(s) exist, and an error
     is raised if any path does not exist.
+
+    File manipulation commands will be elevated with permissions as necessary.
+    Note that this may have side effects due to how open() works (e.g. 'w' causing 0-byte
+    files) but decided that was worth it over potential file permission issues.
     """
 
     os.environ.update({'DOLLARSIGN': '$'})
@@ -82,37 +86,61 @@ class Path(PathLike):
         self.path = path
 
     @staticmethod
-    def copy(dest: str, *args: str) -> bool:
+    def files_need_perms(mode: str = 'r', *paths: str):
+        """Tests passed paths for a PermissionError when trying to open."""
+        for path in paths:
+            try:
+                open(path, mode).close()
+            except PermissionError:
+                return True
+            except IOError:
+                continue
+            else:
+                continue
+        else:
+            return False
+
+    @classmethod
+    def copy(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
         :return: True if the copy was successful; False otherwise.
         """
-        success = run(global_settings.system_cmds.cp, [dest] + list(args))
+        cmd = global_settings.system_cmds.cp
+        if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
+            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
+        success = run(cmd, dest, *map(fspath, args))
         return bool(success)
 
-    @staticmethod
-    def move(dest: str, *args: str) -> bool:
+    @classmethod
+    def move(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
         :return: True if the move was successful; False otherwise.
         """
-        success = run(global_settings.system_cmds.mv, [dest] + list(args))
+        cmd = global_settings.system_cmds.mv
+        if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
+            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
+        success = run(cmd, dest, *map(fspath, args))
         return bool(success)
 
-    @staticmethod
-    def mkdir(path: str) -> bool:
+    @classmethod
+    def mkdir(cls, path: str | PathLike) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
         :return: True if the directory creation was successful or if it already exists; False otherwise.
         """
-        success = run(global_settings.system_cmds.mkdir, [path])
+        cmd = global_settings.system_cmds.mkdir
+        if cls.files_need_perms('w', path):
+            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
+        success = run(cmd, *map(fspath, path))
         return bool(success)
 
     @classmethod
-    def valid_dir(cls, path: str):
+    def valid_dir(cls, path: str | PathLike):
         """
         Validates the given directory path. Unlike path_exists, this method allows the given directory path
         to be created if it is not found.
@@ -123,11 +151,11 @@ class Path(PathLike):
 
         :return: A Path object with path pass as an argument if the path is valid; None otherwise.
         """
-        path = os.path.expandvars(path)
+        path: str = os.path.expandvars(fspath(path))
         while True:
             log(f'Checking if directory path "{path}" exists...', logging.INFO)
             if run(f'{global_settings.system_cmds.superuser} '
-                   f'{global_settings.system_cmds.check_dir}', [path]) == 0:
+                   f'{global_settings.system_cmds.check_dir}', path) == 0:
                 log(f'Directory path found.', logging.INFO)
                 return cls(path)
             else:

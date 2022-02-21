@@ -2,7 +2,7 @@
 global_settings:
     system_cmds:
         superuser: 'sudo'
-        cp: 'cp -at "$1" "${@:2}"'
+        cp: 'cp -t "$1" "${@:2}"'
         mv: 'mv -t "$1" "${@:2}"'
         mkdir: 'mkdir -p $1'
         check_path: '[ -e "$1" ]'
