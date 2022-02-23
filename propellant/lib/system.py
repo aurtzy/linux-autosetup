@@ -80,8 +80,6 @@ class Path(PathLike):
     files) but decided that was worth it over potential file permission issues.
     """
 
-    os.environ.update({'DOLLARSIGN': '$'})
-
     def __init__(self, path: str):
         self.path = path
 
@@ -151,7 +149,6 @@ class Path(PathLike):
 
         :return: A Path object with path pass as an argument if the path is valid; None otherwise.
         """
-        path: str = os.path.expandvars(fspath(path))
         while True:
             log(f'Checking if "{path}" is an existing directory...', logging.DEBUG)
             if run(f'{global_settings.system_cmds.superuser} '

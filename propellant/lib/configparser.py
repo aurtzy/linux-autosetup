@@ -1,6 +1,6 @@
 import logging
 from dataclasses import is_dataclass, fields
-from os import PathLike
+from os import PathLike, path, fspath, environ
 
 from ruamel.yaml import YAML, YAMLError
 
@@ -8,6 +8,9 @@ from .logger import log
 from .pack import Module, BaseModule, Pack
 from .settings import global_settings, BaseSettings
 from .system import Path
+
+
+environ.update({'DOLLARSIGN': '$'})
 
 
 class ConfigParser:
@@ -96,7 +99,7 @@ class ConfigParser:
                                         else:
                                             cls.unexpected_val_error(setting, f'{k}: {v}')
                                     elif dict_args[1] is PathLike:
-                                        v = Path.valid_dir(str(v))
+                                        v = Path.valid_dir(path.expandvars(fspath(v)))
                                     else:
                                         v = dict_args[1](v)
                             getattr(settings, setting).update({k: v})
