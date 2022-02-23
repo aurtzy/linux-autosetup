@@ -214,6 +214,7 @@ class Pack:
             return False
 
     def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int = 0):
+        log(f'Initializing pack {name}...', logging.DEBUG)
         # name
         self.name = name
         if self.name == '':
@@ -247,7 +248,6 @@ class Pack:
         self.backup_success: bool | None = None
 
         self.packs.append(self)
-        log(f'Initialized pack {self.name}.', logging.INFO)
         log(f'{self}', logging.DEBUG)
 
     def __post_packs_init__(self):

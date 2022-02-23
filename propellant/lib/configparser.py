@@ -70,7 +70,7 @@ class ConfigParser:
                 if is_dataclass(tp):
                     # Update dataclass
                     if isinstance(new.get(setting), dict):
-                        log(f'Updating {setting}...', logging.INFO)
+                        log(f'Updating {setting}...', logging.DEBUG)
                         update_level(getattr(settings, setting), new.get(setting))
                     else:
                         cls.unexpected_val_error(setting, new.get(setting))
@@ -101,7 +101,7 @@ class ConfigParser:
                                         v = dict_args[1](v)
                             getattr(settings, setting).update({k: v})
                             log(f'Updated {setting}:\n'
-                                f'{k}: {v}', logging.INFO)
+                                f'{k}: {v}', logging.DEBUG)
                     else:
                         cls.unexpected_val_error(setting, new.get(setting))
                 elif tp.__subclasscheck__(list):
@@ -113,7 +113,7 @@ class ConfigParser:
                     if list_args[0] is str:
                         setattr(settings, setting, cls.convert_to_str_list(new.get(setting)))
                         log(f'Updated {setting}:\n'
-                            f'{getattr(settings, setting)}', logging.INFO)
+                            f'{getattr(settings, setting)}', logging.DEBUG)
                     else:
                         log(f'Support for global setting lists with types {tp} is not implemented. '
                             f'Implement in {__name__}.', logging.ERROR)
@@ -123,7 +123,7 @@ class ConfigParser:
                     if isinstance(new.get(setting), tp):
                         setattr(settings, setting, new.get(setting))
                         log(f'Updated {setting}:\n'
-                            f'{getattr(settings, setting)}', logging.INFO)
+                            f'{getattr(settings, setting)}', logging.DEBUG)
                     else:
                         cls.unexpected_val_error(setting,
                                                  f'Expected {tp} but got {type(new.get(settings))}')
@@ -133,12 +133,12 @@ class ConfigParser:
     @classmethod
     def init_packs(cls, p: dict):
         """Specifically parses for and creates packs from the given dict."""
-        log('Parsing packs...', logging.INFO)
+        log('Initializing packs...', logging.INFO)
         log(str(p), logging.DEBUG)
 
         for name, pack_settings in p.items():
             if isinstance(pack_settings, dict) and pack_settings:
-                log(f'Initializing pack {name}...', logging.INFO)
+                log(f'Initializing pack {name}...', logging.DEBUG)
                 # desc
                 desc = str(pack_settings.get('desc'))
 
@@ -213,7 +213,6 @@ class ConfigParser:
             log('Encountered an error reading config.', logging.CRITICAL)
             log(str(error), logging.CRITICAL)
             raise
-        log(str(config), logging.DEBUG)
 
         try:
             assert isinstance(config, dict)

@@ -44,7 +44,7 @@ def sudo_loop():
 
     Raises PermissionError if the first sudo call is not successful.
     """
-    log('Starting sudo loop.', logging.INFO)
+    log('Starting sudo loop.', logging.DEBUG)
 
     # TODO: FIX SUDO COMMENTS WHEN NOT A NUISANCE
     # if run('sudo -v') != 0:
@@ -65,7 +65,7 @@ def sudo_loop():
                 i += 0.5
 
     threading.Thread(target=sudo_loop_thread).start()
-    log('Started sudo_loop_thread.', logging.DEBUG)
+    log('Started sudo loop thread.', logging.DEBUG)
 
 
 class Path(PathLike):
@@ -153,13 +153,13 @@ class Path(PathLike):
         """
         path: str = os.path.expandvars(fspath(path))
         while True:
-            log(f'Checking if directory path "{path}" exists...', logging.INFO)
+            log(f'Checking if "{path}" is an existing directory...', logging.DEBUG)
             if run(f'{global_settings.system_cmds.superuser} '
                    f'{global_settings.system_cmds.check_dir}', path) == 0:
-                log(f'Directory path found.', logging.INFO)
+                log(f'Found.', logging.DEBUG)
                 return cls(path)
             else:
-                log('Path could not be found.', logging.WARNING)
+                log(f'The following path could not be found: {path}', logging.WARNING)
                 i = get_option_i(('Attempt to find the directory again',),
                                  ('Create a new directory',),
                                  ('Ignore this path for the session',),
