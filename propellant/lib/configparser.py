@@ -156,7 +156,7 @@ class ConfigParser:
                                                  f'Module {pack_settings.get("module")} could not be found.')
                     module_tp: BaseModule.__class__ = getattr(Module, module_settings.get('module')).value
 
-                    module_fields: list = []
+                    module_fields: dict = {}
                     for setting, tp in module_tp.__annotations__.items():
                         if tp.__subclasscheck__(list):
                             # list types
@@ -165,18 +165,19 @@ class ConfigParser:
                             except AttributeError:
                                 list_args: tuple = ()
                             if len(list_args) > 0:
-                                if list_args[0] is str:
-                                    module_fields.append(cls.convert_to_str_list(module_settings.get(setting)))
+                                if list_args[0] is str:  # TODO: bug; arguments aren't being correctly assigned; also **module_fields instead
+                                    module_fields.update(
+                                        {setting: cls.convert_to_str_list(module_settings.get(setting))})
                                 else:
                                     log(f'Converting to list with type {list_args[0]} is not implemented.\n'
                                         f'Implement in {__name__}.', logging.ERROR)
                                     raise NotImplementedError
                             else:
-                                module_fields.append(list(module_settings.get(setting)))
+                                module_fields.update({setting: list(module_settings.get(setting))})
                         else:
                             # misc. types
-                            module_fields.append(tp(module_settings.get(setting)))
-                    module: BaseModule = module_tp(*module_fields)
+                            module_fields.update({setting: tp(module_settings.get(setting))})
+                    module: BaseModule = module_tp(**module_fields)
                     log(f'Initialized {module.__class__.__name__} for {name}:\n'
                         f'{module}', logging.DEBUG)
                     modules.append(module)
