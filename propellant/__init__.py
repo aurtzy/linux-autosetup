@@ -70,7 +70,7 @@ def get_config_path(config_path: str = None) -> str:
                 config_paths = glob.glob('*.yaml', root_dir=config_path)
                 i = get_option_i(
                     ('manual', 'Manually input a path'),
-                    *((os.path.split(path)[1].removesuffix('.yaml'), path) for path in config_paths),
+                    *((path.removesuffix('.yaml'), path) for path in config_paths),
                     prompt='Select a config path option: '
                 )
                 match i:
@@ -80,7 +80,7 @@ def get_config_path(config_path: str = None) -> str:
                         while not os.path.isfile(config_path):
                             new_path = get_input(f'[{config_path}] ')
                             if not new_path:
-                                for path in os.listdir(config_path):
+                                for path in glob.iglob('*', root_dir=config_path):
                                     print(path)
                             else:
                                 new_path = os.path.join(config_path, new_path)
@@ -88,7 +88,7 @@ def get_config_path(config_path: str = None) -> str:
                                     config_path = new_path
                                     break
                                 elif os.path.exists(new_path):
-                                    config_path = new_path
+                                    config_path = os.path.abspath(new_path)
                                 else:
                                     log(f'Invalid path: {new_path}', logging.ERROR)
                     case _:
