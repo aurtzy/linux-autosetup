@@ -1,4 +1,6 @@
 import argparse
+import glob
+import logging
 import os
 
 from .lib.logger import *
@@ -40,6 +42,9 @@ def parse_args(*args) -> argparse.Namespace:
     return parser.parse_args(*args)
 
 
+arguments = parse_args()
+
+
 def get_config_path(config_path: str = None) -> str:
     """
     Gets the config file path to load settings from.
@@ -52,27 +57,58 @@ def get_config_path(config_path: str = None) -> str:
         # Default to current directory
         config_path = '.'
 
-    # then from here on, config_path is treated the same regardless of whether it was passed.
-    # loop/while
-    # if config_path is a file
-    #  return that
-    # else if config_path is a directory
-    #  prompt with .yaml files in directory or input manual path
-    #  set that to config_path if valid and try again
+    config_path = os.path.abspath(config_path)
+    if not os.path.isfile(config_path):
+        if arguments.noconfirm:
+            log(f'Could not find a config file from the specified path: {config_path}', logging.ERROR)
+            raise FileNotFoundError
+        else:
+            while not os.path.exists(config_path):
+                log(f'Encountered an error trying to read {config_path}.', logging.ERROR)
+                config_path = get_input('Please input a valid directory/file to read config from.\n: ')
+            if os.path.isdir(config_path):
+                config_paths = glob.glob('*.yaml', root_dir=config_path)
+                i = get_option_i(
+                    ('manual', 'Manually input a path'),
+                    *((os.path.split(path)[1].removesuffix('.yaml'), path) for path in config_paths),
+                    prompt='Select a config path option: '
+                )
+                match i:
+                    case 0:
+                        print('Entering file chooser.\n'
+                              'An empty input will print all files in the current directory.')
+                        while not os.path.isfile(config_path):
+                            new_path = get_input(f'[{config_path}] ')
+                            if not new_path:
+                                for path in os.listdir(config_path):
+                                    print(path)
+                            else:
+                                new_path = os.path.join(config_path, new_path)
+                                if os.path.isfile(new_path):
+                                    config_path = new_path
+                                    break
+                                elif os.path.exists(new_path):
+                                    config_path = new_path
+                                else:
+                                    log(f'Invalid path: {new_path}', logging.ERROR)
+                    case _:
+                        config_path = os.path.join(config_path, config_paths[i - 1])
 
-    # todo: TEMP
-    return '../sample-configs/config.yaml'
+    log(config_path, logging.DEBUG)
+    return config_path
 
 
 def get_autosetup_mode(mode: str = None) -> str:
     """Gets the autosetup mode."""
     log('Getting autosetup mode...', logging.DEBUG)
     if not mode:
-        match get_option_i([('install', 'Run the autosetup in installer mode'),
-                             ('backup', 'Run the autosetup in backup mode')],
-                            prompt='Choose an autosetup mode: '):
-            case 0: mode = 'install'
-            case 1: mode = 'backup'
+        match get_option_i(('install', 'Run the autosetup in installer mode'),
+                           ('backup', 'Run the autosetup in backup mode'),
+                           prompt='Choose an autosetup mode: '):
+            case 0:
+                mode = 'install'
+            case 1:
+                mode = 'backup'
     elif mode not in {'install', 'backup'}:
         log(f'Could not match "{mode}" with any known autosetup option.', logging.ERROR)
         raise LookupError
@@ -84,6 +120,7 @@ def get_packs(pack_names: list[str] = None) -> list:
     """Gets the packs to run autosetup on."""
     log('Getting packs for autosetup...', logging.DEBUG)
     if not pack_names:
+        #todo
         # prompt for packs from Pack.packs names
         # write generic, decent looping prompting system similar to bash version's pack prompting
         pass
@@ -107,16 +144,18 @@ def run_autosetup(**kwargs):
     an error will be raised.
     """
     # Get config file path to be used
-    config_path = Path(get_config_path(kwargs.get('config')))
+    config_path = get_config_path(kwargs.get('config'))
 
     # Parse config
     ConfigParser(config_path).start()
 
     # Get autosetup mode
-    mode = (get_autosetup_mode(kwargs.get('mode')))
+    mode = get_autosetup_mode(kwargs.get('mode'))
 
     # Get packs to do autosetup on
     packs: list = get_packs(kwargs.get('packs'))
+
+    # todo: Run sudoloop
 
     # Run autosetup!
     match mode:
@@ -147,18 +186,17 @@ def run_autosetup(**kwargs):
 
 def run():
     """Entry point."""
-    args = parse_args()
 
     # Set up logger
-    init_stream(args.debug)
+    init_stream(arguments.debug)
 
     # Set noconfirm
-    set_noconfirm(args.noconfirm)
+    set_noconfirm(arguments.noconfirm)
 
     # Check if script is being run as root
     if os.geteuid() == 0:
         log('Warning: It is not recommended to run this script as root '
-                   'unless you know what you\'re doing.', logging.WARNING)
+            'unless you know what you\'re doing.', logging.WARNING)
 
     # autosetup
-    run_autosetup(**args.__dict__)
+    run_autosetup(**arguments.__dict__)

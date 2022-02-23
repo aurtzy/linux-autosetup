@@ -160,10 +160,10 @@ class Path(PathLike):
                 return cls(path)
             else:
                 log('Path could not be found.', logging.WARNING)
-                i = get_option_i([('Attempt to find the directory again',),
-                                  ('Create a new directory',),
-                                  ('Ignore this path for the session',),
-                                  ('Abort this script',)],
+                i = get_option_i(('Attempt to find the directory again',),
+                                 ('Create a new directory',),
+                                 ('Ignore this path for the session',),
+                                 ('Abort this script',),
                                  prompt=f'The directory "{path} could not be found.\n'
                                         f'Please choose how this should be handled')
                 match i:
