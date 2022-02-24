@@ -63,6 +63,7 @@ def get_config_path(config_path: str = None) -> str:
             log(f'Could not find a config file from the specified path: {config_path}', logging.ERROR)
             raise FileNotFoundError
         else:
+            print('Please select a config file.')
             while not os.path.exists(config_path):
                 log(f'Encountered an error trying to read {config_path}.', logging.ERROR)
                 config_path = get_input('Please input a valid directory/file to read config from.\n: ')
@@ -75,7 +76,7 @@ def get_config_path(config_path: str = None) -> str:
                 )
                 match i:
                     case 0:
-                        print('Entering file chooser.\n'
+                        print('Entering file system navigator.\n'
                               'An empty input will print all files in the current directory.')
                         while not os.path.isfile(config_path):
                             new_path = get_input(f'[{config_path}] ')
