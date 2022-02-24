@@ -136,7 +136,7 @@ def get_packs(pack_names: list[str] = None) -> list:
     return pack_names
 
 
-def run_autosetup(**kwargs):
+def run_autosetup():
     """
     Start autosetup process.
 
@@ -144,16 +144,16 @@ def run_autosetup(**kwargs):
     an error will be raised.
     """
     # Get config file path to be used
-    config_path = get_config_path(kwargs.get('config'))
+    config_path = get_config_path(arguments.config)
 
     # Parse config
     ConfigParser(config_path).start()
 
     # Get autosetup mode
-    mode = get_autosetup_mode(kwargs.get('mode'))
+    mode = get_autosetup_mode(arguments.mode)
 
     # Get packs to do autosetup on
-    packs: list = get_packs(kwargs.get('packs'))
+    packs: list = get_packs(arguments.packs)
 
     # todo: Run sudoloop
 
@@ -199,4 +199,4 @@ def run():
             'unless you know what you\'re doing.', logging.WARNING)
 
     # autosetup
-    run_autosetup(**arguments.__dict__)
+    run_autosetup()
