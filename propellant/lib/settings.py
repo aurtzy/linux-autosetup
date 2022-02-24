@@ -10,7 +10,7 @@ from .logger import log
 class BaseSettings(ABC):
     """Base settings class."""
     def __post_init__(self):
-        # Assign fields to their default if fld is None and a default(_factory) exists
+        """Assign fields to their default if fld is None and a default(_factory) exists."""
         for fld in fields(self):
             if getattr(self, fld.name) is None:
                 if fld.default is not MISSING:
@@ -27,11 +27,16 @@ class CmdPreset(BaseSettings):
     """
     A preset of shell commands.
 
+    pipe:
+        Indicates that data should be piped into the shell.
+        If True, then the user will be prompted for what will be piped.
+        If pipe is a str, then this string will always be piped into the commands.
     install_cmd:
         Meant to be run during pack installs.
     backup_cmd:
         Meant to be run during pack backups.
     """
+    pipe: bool | str = False
     install_cmd: str = ''
     backup_cmd: str = ''
 
@@ -89,6 +94,8 @@ class GlobalSettings(BaseSettings):
         cmd_presets:
             Dictionary of name -> CmdPreset pairs.
         """
+        # TODO: current issue with checking types - __annotations__ only show from the
+        #  specified class instead of from it + parent(s). Use fields() instead to resolve?
         cmd_presets: dict[str, CmdPreset] = field(default_factory=dict)
 
     @dataclass

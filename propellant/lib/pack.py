@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .settings import BaseSettings
+from .settings import BaseSettings, CmdPreset
 from .logger import log
 
 
@@ -91,11 +91,20 @@ class CustomModule(BaseModule):
     backup_args:
 
     """
-
+    # todo: rethink how to organize this with cmds to reduce overlaps
+    #  - add install_args and backup_args in CmdPreset as well?
+    #  - rename cmd_preset here to cmds?
+    #  - keep cmd_preset as cmd_preset, with any overrides present here? meaning - keep all of these vars?
+    #  - could also do cmds = { preset: "cmd_preset", install_cmd: ..., ... } for overrides
+    cmd_preset: str = None
     install_cmd: str = ''
     install_args: list[str] = field(default_factory=list)
     backup_cmd: str = ''
     backup_args: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        # todo: automatically
+        pass
 
     def install(self):
         pass
