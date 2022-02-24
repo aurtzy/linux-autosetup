@@ -95,7 +95,8 @@ class ConfigParser:
                                     log(f'Converting {v} to {dict_args[1]}...', logging.DEBUG)
                                     if is_dataclass(dict_args[1]):
                                         if isinstance(v, dict):
-                                            v = dict_args[1](*(v.get(fld.name) for fld in fields(dict_args[1])))
+                                            v = dict_args[1](**{fld.name: v.get(fld.name)
+                                                                for fld in fields(dict_args[1])})
                                         else:
                                             cls.unexpected_val_error(setting, f'{k}: {v}')
                                     elif dict_args[1] is PathLike:
