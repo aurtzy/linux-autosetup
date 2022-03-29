@@ -1,10 +1,69 @@
+import abc
 import logging
-from abc import ABC
 from dataclasses import dataclass, field, MISSING, fields
 from os import PathLike
 
 from .logger import log
 
+
+config: dict[str, dict]
+
+
+class Settings(abc.ABC):
+    """
+    Implementing this Settings class:
+        - Settings must be a direct superclass in order for the initializing hooks to work. Inheritance
+          of other Settings subclasses is not a problem as long as Settings is also directly inherited from.
+
+        - The "category" argument keyword must be given a value,
+          which will indicate the category of settings it will belong to.
+
+        - Subclasses of Settings can be of the same category, however an error will occur if the elements
+          within these categories overlap.
+
+        - The initialize method must be implemented, which should parse the given dictionary
+          of values, performing any necessary extra checks and actions,
+          and return the desired format of setting-value pairs in a dictionary.
+    """
+
+    __settings_category__: str
+
+    def __init_subclass__(cls, category, **kwargs):
+        """
+        Assigns a config category to the subclass of settings.
+        """
+        super().__init_subclass__(**kwargs)
+        cls.__settings_category__ = category
+
+    @classmethod
+    def initialize(cls, config_dict):
+        """
+        Initializes settings for all subclasses of Settings
+        and adds each configuration to the corresponding category in config.
+
+        Categories may overlap and will simply combine, however elements within categories are not permitted.
+
+        :raises AssertionError: if there is an overlap with elements in the categories.
+        """
+        for subclass in cls.__subclasses__():
+            subclass_settings = subclass.initialize_settings(config_dict.get(subclass.__settings_category__, {}))
+            if config.get(subclass.category) is not None:
+                assert (key not in config[subclass.__settings_category__].keys() for key in subclass_settings.keys())
+                config[subclass.__settings_category__].update(subclass_settings)
+            else:
+                config[subclass.__settings_category__] = subclass_settings
+
+    @classmethod
+    @abc.abstractmethod
+    def initialize_settings(cls, category_dict) -> dict:
+        """
+        Parses the given category dict and performs any necessary initialization actions.
+        :return: A formatted dictionary to be added to config.
+        """
+        pass
+
+
+# TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
 
 @dataclass
 class BaseSettings(ABC):
@@ -36,6 +95,7 @@ class CmdPreset(BaseSettings):
     backup_cmd:
         Meant to be run during pack backups.
     """
+    # TODO: merge with pack module as part of the Basic Pack Module settings (renamed commands module)
     pipe: bool | str = False
     install_cmd: str = ''
     backup_cmd: str = ''
@@ -79,6 +139,7 @@ class GlobalSettings(BaseSettings):
         check_dir:
             Used to confirm if a path exists to some directory.
         """
+        # TODO: move to system module settings
         superuser: str = None
         cp: str = None
         mv: str = None
@@ -94,8 +155,7 @@ class GlobalSettings(BaseSettings):
         cmd_presets:
             Dictionary of name -> CmdPreset pairs.
         """
-        # TODO: current issue with checking types - __annotations__ only show from the
-        #  specified class instead of from it + parent(s). Use fields() instead to resolve?
+        # TODO: move to Basic Pack Module settings
         cmd_presets: dict[str, CmdPreset] = field(default_factory=dict)
 
     @dataclass
@@ -120,6 +180,7 @@ class GlobalSettings(BaseSettings):
             Directories that can be used for storing backups that are in the process of being created.
             Dictionary of name -> PathLike pairs.
         """
+        # TODO: move to Files Pack Module settings
         backup_dirs: dict[str, PathLike] = field(default_factory=dict)
         dump_dirs: dict[str, PathLike] = field(default_factory=dict)
         tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
