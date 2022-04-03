@@ -1,5 +1,6 @@
 import abc
 import logging
+import typing
 from dataclasses import dataclass, field, MISSING, fields
 from os import PathLike
 
@@ -12,9 +13,6 @@ config: dict[str, dict]
 class Settings(abc.ABC):
     """
     Implementing this Settings class:
-        - Settings must be a direct superclass in order for the initializing hooks to work. Inheritance
-          of other Settings subclasses is not a problem as long as Settings is also directly inherited from.
-
         - The "category" argument keyword must be given a value,
           which will indicate the category of settings it will belong to.
 
@@ -26,36 +24,44 @@ class Settings(abc.ABC):
           and return the desired format of setting-value pairs in a dictionary.
     """
 
-    __settings_category__: str
+    __hooks__: list[typing.Type["Settings"]] = []
+
+    __category__: str
 
     def __init_subclass__(cls, category, **kwargs):
         """
-        Assigns a config category to the subclass of settings.
+        Assigns a config category to the subclass of settings
+        and adds a hook to the Settings hooks list.
         """
         super().__init_subclass__(**kwargs)
-        cls.__settings_category__ = category
+        cls.__category__ = category
+        cls.__hooks__ += cls
 
     @classmethod
-    def initialize(cls, config_dict):
+    def initialize(cls, config_dict: dict):
         """
-        Initializes settings for all subclasses of Settings
-        and adds each configuration to the corresponding category in config.
+        Initializes settings for all Settings hooks and adds
+        each configuration dictionary to the corresponding category in config.
 
-        Categories may overlap and will simply combine, however elements within categories are not permitted.
+        Categories may overlap and will simply combine, however
+        overlapping elements within categories are not permitted.
 
         :raises AssertionError: if there is an overlap with elements in the categories.
         """
-        for subclass in cls.__subclasses__():
-            subclass_settings = subclass.initialize_settings(config_dict.get(subclass.__settings_category__, {}))
-            if config.get(subclass.category) is not None:
-                assert (key not in config[subclass.__settings_category__].keys() for key in subclass_settings.keys())
-                config[subclass.__settings_category__].update(subclass_settings)
+        for hook in cls.__hooks__:
+            new_settings = hook.initialize_settings(config_dict.get(hook.__category__, {}))
+            if config.get(hook.category) is not None:
+                for key in new_settings.keys():
+                    assert key not in config[hook.__category__].keys(), (f'Tried to update config with {hook.__name__}'
+                                                                         f' settings, but there was an overlap with'
+                                                                         f' the key {key}.')
+                config[hook.__category__].update(new_settings)
             else:
-                config[subclass.__settings_category__] = subclass_settings
+                config[hook.__category__] = new_settings
 
     @classmethod
     @abc.abstractmethod
-    def initialize_settings(cls, category_dict) -> dict:
+    def initialize_settings(cls, category_dict: dict) -> dict:
         """
         Parses the given category dict and performs any necessary initialization actions.
         :return: A formatted dictionary to be added to config.
@@ -64,22 +70,6 @@ class Settings(abc.ABC):
 
 
 # TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
-
-@dataclass
-class BaseSettings(ABC):
-    """Base settings class."""
-    def __post_init__(self):
-        """Assign fields to their default if fld is None and a default(_factory) exists."""
-        for fld in fields(self):
-            if getattr(self, fld.name) is None:
-                if fld.default is not MISSING:
-                    setattr(self, fld.name, fld.default)
-                elif fld.default_factory is not MISSING:
-                    setattr(self, fld.name, fld.default_factory())
-                else:
-                    log(f'There was a problem assigning a default to {fld.name}.\n'
-                        f'This may produce unexpected results.', logging.WARNING)
-
 
 @dataclass
 class CmdPreset(BaseSettings):
