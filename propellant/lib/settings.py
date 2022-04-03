@@ -38,7 +38,7 @@ class Settings(abc.ABC):
         cls.__hooks__ += cls
 
     @classmethod
-    def initialize(cls, config_dict: dict):
+    def initialize(cls, new_config: dict):
         """
         Initializes settings for all Settings hooks and adds
         each configuration dictionary to the corresponding category in config.
@@ -49,8 +49,8 @@ class Settings(abc.ABC):
         :raises AssertionError: if there is an overlap with elements in the categories.
         """
         for hook in cls.__hooks__:
-            new_settings = hook.initialize_settings(config_dict.get(hook.__category__, {}))
-            if config.get(hook.category) is not None:
+            new_settings = hook.initialize_settings(new_config.get(hook.__category__, {}))
+            if config.get(hook.__category__) is not None:
                 for key in new_settings.keys():
                     assert key not in config[hook.__category__].keys(), (f'Tried to update config with {hook.__name__}'
                                                                          f' settings, but there was an overlap with'
