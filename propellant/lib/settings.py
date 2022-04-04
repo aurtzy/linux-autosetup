@@ -12,15 +12,15 @@ config: dict[str, dict] = {}
 
 class Settings(abc.ABC):
     """
-    This class provides an API for using settings with the script.
+    This class provides an API for implementing settings in the script.
 
-    It is meant to allow an initialization period for additional actions to take place when
+    Its purpose is to add an initialization period for additional actions to take place when
     translating from the configparser to settings that are to be used during runtime,
     as some data written to config files should and have to be checked in order for other things to function.
 
     The Settings class mainly provides the following:
-        - A class argument "keys", which can be used when creating subclasses to
-          easily designate the location that settings for a particular class will be found.
+        - A required class argument "keys", which is used when creating subclasses to
+          designate the location that settings for a particular class will be found.
 
         - Hooks to this class for initialization that are automatically ordered
           based on which subclass is imported first from modules.
@@ -31,7 +31,7 @@ class Settings(abc.ABC):
     an error will occur if the elements within these key configs overlap.
     """
 
-    __keys__: tuple[str] = tuple()
+    __keys__: tuple[str]
 
     __hooks__: list[typing.Type["Settings"]] = []
 
@@ -93,6 +93,11 @@ class Settings(abc.ABC):
         :return: A formatted dictionary to be added to config.
         """
         pass
+
+    @staticmethod
+    def assert_type(item, tp):
+        log(f'Asserting {item} is of type {tp}...', logging.DEBUG)
+        assert isinstance(item, tp), f'{item} did not match the type {tp}.'
 
 
 # TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
