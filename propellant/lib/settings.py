@@ -7,88 +7,95 @@ from os import PathLike
 from .logger import log
 
 
-config: dict[str, dict]
+config: dict[str, dict] = {}
 
 
 class Settings(abc.ABC):
     """
-    Implementing this Settings class:
-        - The "category" argument keyword must be given a value,
-          which will indicate the category of settings it will belong to.
+    This class provides an API for using settings with the script.
 
-        - Subclasses of Settings can be of the same category, however an error will occur if the elements
-          within these categories overlap.
+    It is meant to allow an initialization period for additional actions to take place when
+    translating from the configparser to settings that are to be used during runtime,
+    as some data written to config files should and have to be checked in order for other things to function.
 
-        - The initialize method must be implemented, which should parse the given dictionary
-          of values, performing any necessary extra checks and actions,
-          and return the desired format of setting-value pairs in a dictionary.
+    The Settings class mainly provides the following:
+        - A class argument "keys", which can be used when creating subclasses to
+          easily designate the location that settings for a particular class will be found.
+
+        - Hooks to this class for initialization that are automatically ordered
+          based on which subclass is imported first from modules.
+
+        - An implementable initialize_settings method that is to be called during the initialization period.
+
+    Subclasses of Settings can have the same key configuration; however
+    an error will occur if the elements within these key configs overlap.
     """
+
+    __keys__: tuple[str] = tuple()
 
     __hooks__: list[typing.Type["Settings"]] = []
 
-    __category__: str
-
-    def __init_subclass__(cls, category, **kwargs):
+    def __init_subclass__(cls, keys: tuple[str], **kwargs):
         """
-        Assigns a config category to the subclass of settings
-        and adds a hook to the Settings hooks list.
+        Assigns keys to the subclass of Settings
+        and adds a hook to the list of hooks in Settings.
         """
         super().__init_subclass__(**kwargs)
-        cls.__category__ = category
-        cls.__hooks__ += cls
+        cls.__keys__ = keys
+        cls.__hooks__.append(cls)
 
     @classmethod
-    def initialize(cls, new_config: dict):
+    def __initialize__(cls, new_config: dict):
         """
         Initializes settings for all Settings hooks and adds
-        each configuration dictionary to the corresponding category in config.
+        each configuration dictionary to the corresponding key config in config.
 
-        Categories may overlap and will simply combine, however
-        overlapping elements within categories are not permitted.
+        Settings may be part of the same key configs and will simply combine; however
+        overlapping elements within key configs are not permitted.
 
-        :raises AssertionError: if there is an overlap with elements in the categories.
+        :raises AssertionError: if there is an overlap of elements in at least one key config.
         """
         for hook in cls.__hooks__:
-            new_settings = hook.initialize_settings(new_config.get(hook.__category__, {}))
-            if config.get(hook.__category__) is not None:
-                for key in new_settings.keys():
-                    assert key not in config[hook.__category__].keys(), (f'Tried to update config with {hook.__name__}'
-                                                                         f' settings, but there was an overlap with'
-                                                                         f' the key {key}.')
-                config[hook.__category__].update(new_settings)
-            else:
-                config[hook.__category__] = new_settings
+            key_config = hook.get_key_config()
+
+            new_key_config = hook.initialize_settings(hook.get_key_config(new_config))
+            if key_config:
+                for key in new_key_config.keys():
+                    assert key not in key_config.keys(), (
+                            f'Tried to update config with {hook.__name__} settings, '
+                            f'but there was an overlap with the key {key}.')
+            key_config.update(new_key_config)
+
+    @classmethod
+    def get_key_config(cls, settings: dict = None) -> dict:
+        """
+        Gets the relevant key config from a dictionary of settings, returning the dict result
+        of parsing through __keys__ levels of settings.
+
+        If the settings argument is not specified, global config will be used.
+        """
+        if settings is None:
+            settings = config
+
+        for key in cls.__keys__:
+            settings = settings.setdefault(key, {})
+            if not isinstance(settings, dict):
+                log(f'Expected a dict while retrieving the key {key} value from given settings.\n'
+                    f'{settings}', logging.ERROR)
+                raise ValueError
+        return settings
 
     @classmethod
     @abc.abstractmethod
-    def initialize_settings(cls, category_dict: dict) -> dict:
+    def initialize_settings(cls, new_settings: dict) -> dict:
         """
-        Parses the given category dict and performs any necessary initialization actions.
+        Parses the given dict of new settings and performs any necessary initialization actions.
         :return: A formatted dictionary to be added to config.
         """
         pass
 
 
 # TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
-
-@dataclass
-class CmdPreset(BaseSettings):
-    """
-    A preset of shell commands.
-
-    pipe:
-        Indicates that data should be piped into the shell.
-        If True, then the user will be prompted for what will be piped.
-        If pipe is a str, then this string will always be piped into the commands.
-    install_cmd:
-        Meant to be run during pack installs.
-    backup_cmd:
-        Meant to be run during pack backups.
-    """
-    # TODO: merge with pack module as part of the Basic Pack Module settings (renamed commands module)
-    pipe: bool | str = False
-    install_cmd: str = ''
-    backup_cmd: str = ''
 
 
 @dataclass
