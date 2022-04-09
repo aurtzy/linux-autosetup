@@ -1,36 +1,144 @@
 import logging
-from dataclasses import dataclass, field
-from enum import Enum
 
-from .settings import BaseSettings, CmdPreset
+from . import system
+from .settings import *
 from .logger import log
 
 
-@dataclass
-class BaseModule(BaseSettings):
-    """
-    Base module, which provides a set of optionally overridable methods that are used in packs.
+class PackModule(Settings, keys=('pack_modules',)):
 
-    The property name "module" should be reserved for config parsers, so they can properly discern
-    which modules should be initialized.
-    """
+    pack_modules: dict = {}
 
-    def __post_packs_init__(self, owner: 'Pack'):
-        """Method that is called after all packs have been initialized."""
+    def __init_subclass__(cls, keys: tuple[str], **kwargs):
+        super().__init_subclass__(keys, **kwargs)
+        cls.pack_modules.update({keys[-1]: cls})
+
+    @classmethod
+    def initialize_settings(cls, **new_settings):
+        pass
+
+    def __init__(self, **module_settings):
+        pass
+
+    def pre_install(self):
+        """This method is called immediately before the script begins installing packs."""
+        pass
+
+    def pre_backup(self):
+        """This method is called immediately before the script begins backing up packs."""
         pass
 
     def install(self):
-        """Install method, called when performing a pack install."""
+        """This method is called when installing packs."""
         pass
 
     def backup(self):
-        """Backup method, called when performing a pack backup."""
+        """This method is called when backing up backs."""
+        pass
+
+
+class BasicPackModule(PackModule, keys=('basic',)):
+    """
+
+    Settings:
+        cmd_presets: dict
+            Presets of shell commands.
+
+            pipe: str | bool
+                Indicates whether data should be piped into the shell.
+                If pipe is a str, then this string will always be piped into the commands.
+                If True, then the user will be prompted for what will be piped. Otherwise, pipe is ignored.
+            install_cmd: str
+                Commands to run during pack installs.
+            backup_cmd: str
+                Commands to run during pack backups.
+    
+    """
+
+    cmd_presets: dict = {}
+
+    @classmethod
+    def initialize_settings(cls, **new_settings):
+
+        # cmd_presets
+        cmd_presets: dict = cls.assert_tp(new_settings.get('cmd_presets', {}), dict)
+        for cmd_preset, values in cmd_presets.items():
+            values: dict = cls.assert_tp(values, dict)
+            cls.cmd_presets[cmd_preset] = {
+                'pipe': cls.assert_tp(values.get('pipe', False), str | bool),
+                'install_cmd': cls.assert_tp(values.get('install_cmd', ''), str),
+                'backup_cmd': cls.assert_tp(values.get('backup_cmd', ''), str)
+            }
+
+    def __init__(self, **module_settings):
+        super().__init__(**module_settings)
+        # cmd_preset
+
+        # pipe
+
+        # install_cmd
+
+        # backup_cmd
+
+        # install_args
+
+        # backup_args
+
+        # todo
+        # cmd_preset: str = None
+        # pipe: str | bool = False
+        # install_cmd: str = ''
+        # backup_cmd: str = ''
+        # install_args: list[str] = field(default_factory=list)
+        # backup_args: list[str] = field(default_factory=list)
+
+
+class FilesPackModule(BasicPackModule, keys=('files',)):
+    """
+
+    Settings:
+        cmd_presets: dict
+            See BasicPackModule.
+        backup_dirs: dict
+            todo
+        dump_dirs: dict
+            todo
+        tmp_dirs: dict
+            todo
+    """
+
+    backup_dirs: dict = {}
+    dump_dirs: dict = {}
+    tmp_dirs: dict = {}
+
+    @classmethod
+    def initialize_settings(cls, **new_settings):
+        super().initialize_settings(**new_settings)
+
+        # backup_dirs
+        backup_dirs: dict = cls.assert_tp(new_settings.get('backup_dirs', {}), dict)
+        for backup_dir, value in backup_dirs.items():
+            cls.backup_dirs[backup_dir] = system.Path.valid_dir(str(value))
+
+        # dump_dirs
+        dump_dirs: dict = cls.assert_tp(new_settings.get('dump_dirs', {}), dict)
+        for dump_dir, value in dump_dirs.items():
+            cls.dump_dirs[dump_dir] = system.Path.valid_dir(str(value))
+
+        # tmp_dirs
+        tmp_dirs: dict = cls.assert_tp(new_settings.get('tmp_dirs', {}), dict)
+        for tmp_dir, value in tmp_dirs.items():
+            cls.tmp_dirs[tmp_dir] = system.Path.valid_dir(str(value))
+
+    def __init__(self, **module_settings):
+        super().__init__(**module_settings)
+        # todo
         pass
 
 
 @dataclass
-class PacksModule(BaseModule):
-    """
+class PacksModule:
+    """ TODO: OLD
     Calls install and backup methods from other packs as specified.
 
     packs:
@@ -78,64 +186,8 @@ class PacksModule(BaseModule):
 
 
 @dataclass
-class CustomModule(BaseModule):
-    """
-    Handles running custom commands.
-
-    install_cmd:
-
-    install_args:
-
-    backup_cmd:
-
-    backup_args:
-
-    """
-    # todo: rethink how to organize this with cmds to reduce overlaps
-    #  - add install_args and backup_args in CmdPreset as well?
-    #  - rename cmd_preset here to cmds?
-    #  - keep cmd_preset as cmd_preset, with any overrides present here? meaning - keep all of these vars?
-    #  - could also do cmds = { preset: "cmd_preset", install_cmd: ..., ... } for overrides
-    cmd_preset: str = None
-    install_cmd: str = ''
-    install_args: list[str] = field(default_factory=list)
-    backup_cmd: str = ''
-    backup_args: list[str] = field(default_factory=list)
-
-    def __post_init__(self):
-        # todo: automatically
-        pass
-
-    def install(self):
-        pass
-
-    def backup(self):
-        pass
-
-
-@dataclass
-class AppsModule(CustomModule):
-    """
-    Handles installation of apps.
-
-    apps:
-        List of apps to
-    install_cmd, install_args, backup_cmd, backup_args:
-        See CustomModule.
-    """
-
-    apps: list[str] = field(default_factory=list)
-
-    def install(self):
-        pass
-
-    def backup(self):
-        pass
-
-
-@dataclass
-class FilesModule(CustomModule):
-    """
+class FilesModule:
+    """ TODO: OLD
     Handles installation and backing up of files.
 
     fil
@@ -199,18 +251,22 @@ class FilesModule(CustomModule):
     #                next(os.walk(backup_dir))[1]))
 
 
-class Module(Enum):
-    packs = PacksModule
-    custom = CustomModule
-    apps = AppsModule
-    files = FilesModule
+class Pack(Settings, keys=('packs',)):
+    """
+    Glues modules together which can be collectively installed/backed up.
 
-
-class Pack:
-    """Glues modules together which can be collectively installed/backed up."""
+    Settings:
+        packs: list[Pack]
+            A list of all initialized Pack objects.
+    """
 
     packs: list['Pack'] = []
-    pinned_packs: list['Pack'] = []
+
+    @classmethod
+    def initialize_settings(cls, **new_settings):
+        # Initialize packs
+        for pack_name, pack_settings in cls.assert_tp(new_settings.get('packs', {}), dict):
+            Pack(pack_name, **pack_settings)
 
     @classmethod
     def pack_exists(cls, pack_name: str):
@@ -222,7 +278,7 @@ class Pack:
             log(f'Could not find any packs with the name {pack_name}.', logging.ERROR)
             return False
 
-    def __init__(self, name: str, desc: str, modules: list[BaseModule], pin: int = 0):
+    def __init__(self, name: str, **pack_settings):
         log(f'Initializing pack {name}...', logging.DEBUG)
         # name
         self.name = name
@@ -235,20 +291,17 @@ class Pack:
                     log(f'Pack {self.name} already exists, causing a name overlap.', logging.ERROR)
                     raise ValueError
 
-        # pin
-        self.pin = pin
-        if self.pin:
-            for i, pack in enumerate(self.pinned_packs):
-                if self.pin < pack.pin:
-                    self.pinned_packs.insert(i, self)
+        # desc
+        self.desc: str = pack_settings.get('desc', '')
 
         # modules
-        self.modules = modules
+        self.modules: list[PackModule] = []
+        for module_settings in self.assert_tp(pack_settings.get('modules', []), list):
+            module_settings: dict = self.assert_tp(module_settings, dict)
+            module_tp = self.assert_tp(PackModule.pack_modules.get(module_settings.get('module')), PackModule)
+            self.modules.append(module_tp(**module_settings))
         if not self.modules:
             log(f'Modules list for {self.name} is empty. Is this intentional?', logging.WARNING)
-
-        # desc
-        self.desc: str = desc
 
         # install_success - indicates success of install; None means install has not been run.
         self.install_success: bool | None = None
@@ -259,13 +312,8 @@ class Pack:
         self.packs.append(self)
         log(f'{self}', logging.DEBUG)
 
-    def __post_packs_init__(self):
-        """Method called after all packs are initialized, which does miscellaneous things."""
-        log(f'Running post initializations method for {self.name}...', logging.DEBUG)
-        for module in self.modules:
-            module.__post_packs_init__(self)
-
     # TODO: implement install/backup success detection - success = False at start of method; success = True only at end
+    #  ALSO: add pre_install and pre_backup method calls
     def install(self):
         """Performs an installation of the pack."""
         if self.install_success is not None:

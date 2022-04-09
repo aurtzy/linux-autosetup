@@ -12,28 +12,29 @@ config: dict[str, dict] = {}
 
 class Settings(abc.ABC):
     """
-    This class provides an API for implementing settings in the script.
+    This class provides a simple API for implementing user_config-to-script settings.
 
     Its purpose is to add an initialization period for additional actions to take place when
-    translating from the configparser to settings that are to be used during runtime,
-    as some data written to config files should and have to be checked in order for other things to function.
+    translating from the configparser to settings that are to be used during runtime, as some
+    data written to config files may have to be checked prematurely for the script to function as desired.
 
     The Settings class mainly provides the following:
         - A required class argument "keys", which is used when creating subclasses to
-          designate the location that settings for a particular class will be found.
+          designate the location that settings for a particular class will be found in the
+          user configuration file.
 
         - Hooks to this class for initialization that are automatically ordered
           based on which subclass is imported first from modules.
 
-        - An implementable initialize_settings method that is to be called during the initialization period.
-
-    Subclasses of Settings can have the same key configuration; however
-    an error will occur if the elements within these key configs overlap.
+        - An abstract method initialize_settings() that is called during the initialization period.
     """
+    # TODO: is this all necessary? can't i just... put needed settings in respective modules in
+    #  whatever classes, which will extend this class, but instead of initialize_settings
+    #  requiring a dictionary to merge into config just keep it as a class variable?
 
-    __keys__: tuple[str]
+    _keys: tuple[str] = tuple()
 
-    __hooks__: list[typing.Type["Settings"]] = []
+    hooks: list[typing.Type["Settings"]] = []
 
     def __init_subclass__(cls, keys: tuple[str], **kwargs):
         """
@@ -41,44 +42,17 @@ class Settings(abc.ABC):
         and adds a hook to the list of hooks in Settings.
         """
         super().__init_subclass__(**kwargs)
-        cls.__keys__ = keys
-        cls.__hooks__.append(cls)
+        cls._keys = cls._keys + keys
+        cls.hooks.append(cls)
 
     @classmethod
-    def __initialize__(cls, new_config: dict):
+    def get_key_config(cls, **settings) -> dict:
         """
-        Initializes settings for all Settings hooks and adds
-        each configuration dictionary to the corresponding key config in config.
-
-        Settings may be part of the same key configs and will simply combine; however
-        overlapping elements within key configs are not permitted.
-
-        :raises AssertionError: if there is an overlap of elements in at least one key config.
+        Gets the relevant key config from a given dictionary of settings.
+        :return: A dict obtained from parsing through _keys levels of settings.
         """
-        for hook in cls.__hooks__:
-            key_config = hook.get_key_config()
-
-            new_key_config = hook.initialize_settings(hook.get_key_config(new_config))
-            if key_config:
-                for key in new_key_config.keys():
-                    assert key not in key_config.keys(), (
-                            f'Tried to update config with {hook.__name__} settings, '
-                            f'but there was an overlap with the key {key}.')
-            key_config.update(new_key_config)
-
-    @classmethod
-    def get_key_config(cls, settings: dict = None) -> dict:
-        """
-        Gets the relevant key config from a dictionary of settings, returning the dict result
-        of parsing through __keys__ levels of settings.
-
-        If the settings argument is not specified, global config will be used.
-        """
-        if settings is None:
-            settings = config
-
-        for key in cls.__keys__:
-            settings = settings.setdefault(key, {})
+        for key in cls._keys:
+            settings = settings.get(key, {})
             if not isinstance(settings, dict):
                 log(f'Expected a dict while retrieving the key {key} value from given settings.\n'
                     f'{settings}', logging.ERROR)
@@ -87,17 +61,23 @@ class Settings(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def initialize_settings(cls, new_settings: dict) -> dict:
-        """
-        Parses the given dict of new settings and performs any necessary initialization actions.
-        :return: A formatted dictionary to be added to config.
-        """
+    def initialize_settings(cls, **new_settings):
+        """Parses the new_settings argument and performs any initialization actions."""
         pass
 
     @staticmethod
-    def assert_type(item, tp):
+    def assert_tp(item, tp):
         log(f'Asserting {item} is of type {tp}...', logging.DEBUG)
         assert isinstance(item, tp), f'{item} did not match the type {tp}.'
+        return item
+
+
+def initialize_settings(**new_config):
+    """
+    Initializes all settings for the subclasses that have hooks in the Settings class.
+    """
+    for hook in Settings.hooks:
+        hook.initialize_settings(**hook.get_key_config(**new_config))
 
 
 # TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
@@ -149,48 +129,7 @@ class GlobalSettings(BaseSettings):
         check_path: str = None
         check_dir: str = None
 
-    @dataclass
-    class CustomModule(BaseSettings):
-        """
-        Designated settings for the custom module.
-
-        cmd_presets:
-            Dictionary of name -> CmdPreset pairs.
-        """
-        # TODO: move to Basic Pack Module settings
-        cmd_presets: dict[str, CmdPreset] = field(default_factory=dict)
-
-    @dataclass
-    class AppsModule(CustomModule):
-        """
-        Designated settings for the apps module.
-        """
-        pass
-
-    @dataclass
-    class FilesModule(CustomModule):
-        """
-        Designated settings for the files module.
-
-        backup_dirs:
-            Directories that are used for creating and extracting backups from.
-            Dictionary of name -> PathLike pairs.
-        dump_dirs:
-            Directories that can be used for dumping old backups.
-            Dictionary of name -> PathLike pairs.
-        tmp_dirs:
-            Directories that can be used for storing backups that are in the process of being created.
-            Dictionary of name -> PathLike pairs.
-        """
-        # TODO: move to Files Pack Module settings
-        backup_dirs: dict[str, PathLike] = field(default_factory=dict)
-        dump_dirs: dict[str, PathLike] = field(default_factory=dict)
-        tmp_dirs: dict[str, PathLike] = field(default_factory=dict)
-
     system_cmds: SystemCmds = field(default_factory=lambda: GlobalSettings.SystemCmds())
-    custom_module: CustomModule = field(default_factory=lambda: GlobalSettings.CustomModule())
-    apps_module: AppsModule = field(default_factory=lambda: GlobalSettings.AppsModule())
-    files_module: FilesModule = field(default_factory=lambda: GlobalSettings.FilesModule())
 
     def __str__(self):
         return str(self.__dict__)
