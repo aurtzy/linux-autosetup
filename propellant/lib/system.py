@@ -1,11 +1,10 @@
 import logging
-import os.path
 import subprocess
 import threading
 import time
 from os import PathLike, fspath
 
-from .settings import global_settings
+from .settings import Settings
 from .logger import log
 from .user_input import get_option_i
 
@@ -68,23 +67,44 @@ def sudo_loop():
     log('Started sudo loop thread.', logging.DEBUG)
 
 
-class Path(PathLike):
+class Path(PathLike, Settings, keys=('system_cmds',)):
     """
     Provides methods in which to manipulate and interact with files on the system.
 
-    Calling these methods will invoke a check for if the path(s) exist, and an error
-    is raised if any path does not exist.
+    Calling these methods will invoke a check for whether the path(s) exists, and an error
+    is raised if a path does not exist.
 
     File manipulation commands will be elevated with permissions as necessary.
-    Note that this may have side effects due to how open() works (e.g. 'w' causing 0-byte
-    files) but decided that was worth it over potential file permission issues.
+
+    Settings:
+        superuser: str
+            Command used for elevating commands when appropriate (e.g. "sudo").
+        cp: str
+            Used to copy files from one path to another.
+            Expects: $1 = target directory; ${@:2} = files to move to target directory
+        mv: str
+            Used to move files from one path to another.
+            Expects: $1 = target directory; ${@:2} = files to move to target directory
+        mkdir: str
+            Used to create directories at specified paths.
+            Expects: $1 = Path of directory to be made
+        check_path: str
+            Used to confirm if a path exists to some file/directory.
+            Excepts: $1 = Path to check
+        check_dir: str
+            Used to confirm if a path exists to some directory.
+            Excepts: $1 = Path to check
     """
 
-    def __init__(self, path: str):
-        self.path = path
+    superuser: str
+    cp: str
+    mv: str
+    mkdir: str
+    check_path: str
+    check_dir: str
 
     @staticmethod
-    def files_need_perms(mode: str = 'r', *paths: str):
+    def files_need_perms(mode: str = 'r', *paths: str | PathLike):
         """Tests passed paths for a PermissionError when trying to open."""
         for path in paths:
             try:
@@ -99,17 +119,45 @@ class Path(PathLike):
             return False
 
     @classmethod
+    def initialize_settings(cls, **key_config):
+
+        def assert_cmd(key) -> str:
+            return cls.assert_tp(key_config.get(key), str)
+
+        try:
+            # superuser
+            cls.superuser = assert_cmd('superuser')
+
+            # cp
+            cls.cp = assert_cmd('cp')
+
+            # mv
+            cls.mv = assert_cmd('mv')
+
+            # mkdir
+            cls.mkdir = assert_cmd('mkdir')
+
+            # check_path
+            cls.check_path = assert_cmd('check_path')
+
+            # check_dir
+            cls.check_dir = assert_cmd('check_dir')
+        except TypeError:
+            log('Values must be specified for system commands in the config to avoid ambiguity.', logging.ERROR)
+            raise
+
+    @classmethod
     def copy(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
         :return: True if the copy was successful; False otherwise.
         """
-        cmd = global_settings.system_cmds.cp
+        cmd = cls.cp
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
-            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
-        success = run(cmd, dest, *map(fspath, args))
-        return bool(success)
+            cmd = f'{cls.superuser} {cmd}'
+        exit_code = run(cmd, dest, *map(fspath, args))
+        return not bool(exit_code)
 
     @classmethod
     def move(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
@@ -118,11 +166,11 @@ class Path(PathLike):
 
         :return: True if the move was successful; False otherwise.
         """
-        cmd = global_settings.system_cmds.mv
+        cmd = cls.mv
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
-            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
-        success = run(cmd, dest, *map(fspath, args))
-        return bool(success)
+            cmd = f'{cls.superuser} {cmd}'
+        exit_code = run(cmd, dest, *map(fspath, args))
+        return not bool(exit_code)
 
     @classmethod
     def mkdir(cls, path: str | PathLike) -> bool:
@@ -131,11 +179,11 @@ class Path(PathLike):
 
         :return: True if the directory creation was successful or if it already exists; False otherwise.
         """
-        cmd = global_settings.system_cmds.mkdir
+        cmd = cls.mkdir
         if cls.files_need_perms('w', path):
-            cmd = f'{global_settings.system_cmds.superuser} {cmd}'
-        success = run(cmd, *map(fspath, path))
-        return bool(success)
+            cmd = f'{cls.superuser} {cmd}'
+        exit_code = run(cmd, *map(fspath, path))
+        return not bool(exit_code)
 
     @classmethod
     def valid_dir(cls, path: str | PathLike):
@@ -151,8 +199,7 @@ class Path(PathLike):
         """
         while True:
             log(f'Checking if "{path}" is an existing directory...', logging.DEBUG)
-            if run(f'{global_settings.system_cmds.superuser} '
-                   f'{global_settings.system_cmds.check_dir}', path) == 0:
+            if run(f'{cls.superuser} {cls.check_dir}', path) == 0:
                 log(f'Found.', logging.DEBUG)
                 return cls(path)
             else:
@@ -177,6 +224,9 @@ class Path(PathLike):
                     case _:
                         log('Aborting.', logging.INFO)
                         exit(1)
+
+    def __init__(self, path: str):
+        self.path = path
 
     def __fspath__(self) -> str:
         return self.path

@@ -14,7 +14,7 @@ class PackModule(Settings, keys=('pack_modules',)):
         cls.pack_modules.update({keys[-1]: cls})
 
     @classmethod
-    def initialize_settings(cls, **new_settings):
+    def initialize_settings(cls, **key_config):
         pass
 
     def __init__(self, **module_settings):
@@ -58,10 +58,10 @@ class BasicPackModule(PackModule, keys=('basic',)):
     cmd_presets: dict = {}
 
     @classmethod
-    def initialize_settings(cls, **new_settings):
+    def initialize_settings(cls, **key_config):
 
         # cmd_presets
-        cmd_presets: dict = cls.assert_tp(new_settings.get('cmd_presets', {}), dict)
+        cmd_presets: dict = cls.assert_tp(key_config.get('cmd_presets', {}), dict)
         for cmd_preset, values in cmd_presets.items():
             values: dict = cls.assert_tp(values, dict)
             cls.cmd_presets[cmd_preset] = {
@@ -112,23 +112,24 @@ class FilesPackModule(BasicPackModule, keys=('files',)):
     tmp_dirs: dict = {}
 
     @classmethod
-    def initialize_settings(cls, **new_settings):
-        super().initialize_settings(**new_settings)
+    def initialize_settings(cls, **key_config):
+        super().initialize_settings(**key_config)
+
+        def assert_dirs(dirs) -> dict:
+            dirs: dict = cls.assert_tp(key_config.get(dirs, {}), dict)
+            result = {}
+            for dir_name, dir_path in dirs.items():
+                result.update({dir_name: system.Path.valid_dir(str(dir_path))})
+            return result
 
         # backup_dirs
-        backup_dirs: dict = cls.assert_tp(new_settings.get('backup_dirs', {}), dict)
-        for backup_dir, value in backup_dirs.items():
-            cls.backup_dirs[backup_dir] = system.Path.valid_dir(str(value))
+        cls.backup_dirs.update(assert_dirs('backup_dirs'))
 
         # dump_dirs
-        dump_dirs: dict = cls.assert_tp(new_settings.get('dump_dirs', {}), dict)
-        for dump_dir, value in dump_dirs.items():
-            cls.dump_dirs[dump_dir] = system.Path.valid_dir(str(value))
+        cls.dump_dirs.update(assert_dirs('dump_dirs'))
 
         # tmp_dirs
-        tmp_dirs: dict = cls.assert_tp(new_settings.get('tmp_dirs', {}), dict)
-        for tmp_dir, value in tmp_dirs.items():
-            cls.tmp_dirs[tmp_dir] = system.Path.valid_dir(str(value))
+        cls.tmp_dirs.update(assert_dirs('tmp_dirs'))
 
     def __init__(self, **module_settings):
         super().__init__(**module_settings)
@@ -263,9 +264,9 @@ class Pack(Settings, keys=('packs',)):
     packs: list['Pack'] = []
 
     @classmethod
-    def initialize_settings(cls, **new_settings):
+    def initialize_settings(cls, **key_config):
         # Initialize packs
-        for pack_name, pack_settings in cls.assert_tp(new_settings.get('packs', {}), dict):
+        for pack_name, pack_settings in cls.assert_tp(key_config.get('packs', {}), dict):
             Pack(pack_name, **pack_settings)
 
     @classmethod

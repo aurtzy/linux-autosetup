@@ -1,13 +1,8 @@
 import abc
 import logging
 import typing
-from dataclasses import dataclass, field, MISSING, fields
-from os import PathLike
 
 from .logger import log
-
-
-config: dict[str, dict] = {}
 
 
 class Settings(abc.ABC):
@@ -27,11 +22,25 @@ class Settings(abc.ABC):
           based on the import sequence of Python modules.
 
         - An abstract method initialize_settings() that is called during the initialization period.
+
+        - Miscellaneous helper methods for parsing settings from the given user config.
     """
 
     _keys: tuple[str] = ()
 
     hooks: list[typing.Type["Settings"]] = []
+
+    @staticmethod
+    def assert_tp(item, tp):
+        """
+        Asserts that item is of type tp.
+
+        Raises a TypeError if a type does not match.
+        """
+        log(f'Asserting {item} is of type {tp}...', logging.DEBUG)
+        if not isinstance(item, tp):
+            raise TypeError(f'{item} did not match the type {tp}.')
+        return item
 
     def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
         """
@@ -61,15 +70,14 @@ class Settings(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def initialize_settings(cls, **new_settings):
-        """Parses the new_settings argument and performs any initialization actions."""
-        pass
+    def initialize_settings(cls, **key_config):
+        """
+        Run during the settings initialization period.
 
-    @staticmethod
-    def assert_tp(item, tp):
-        log(f'Asserting {item} is of type {tp}...', logging.DEBUG)
-        assert isinstance(item, tp), f'{item} did not match the type {tp}.'
-        return item
+        Used for parsing the class's designated settings from a user config - that being
+        the argument key_config - in order to perform any necessary preliminary actions.
+        """
+        pass
 
 
 def initialize_settings(**new_config):
@@ -78,61 +86,3 @@ def initialize_settings(**new_config):
     """
     for hook in Settings.hooks:
         hook.initialize_settings(**hook.get_key_config(**new_config))
-
-
-# TODO: EVERYTHING BELOW DEPRECATED. Begin refactoring and following todos.
-
-
-@dataclass
-class GlobalSettings(BaseSettings):
-    """
-    Global settings.
-
-    system_cmds:
-        See SystemCmds docs.
-    custom_module:
-        See CustomModule docs.
-    apps_module:
-        See AppsModule docs.
-    files_module:
-        See FilesModule docs.
-    """
-
-    @dataclass
-    class SystemCmds(BaseSettings):
-        """
-        Miscellaneous shell commands used for interacting with the system.
-
-        Preconfigured to use POSIX-compatible GNU/Linux commands.
-
-        superuser:
-            Used for elevating commands when appropriate (e.g. sudo).
-        cp:
-            Used to copy files from one path to another.
-            Expects: $1 = target directory; ${@:2} = files to move to target directory
-        mv:
-            Used to move files from one path to another.
-            Expects: $1 = target directory; ${@:2} = files to move to target directory
-        mkdir:
-            Used to create directories at specified paths.
-            Expects: $1 = Path of directory to be made.
-        check_path:
-            Used to confirm if a path exists to some file/directory.
-        check_dir:
-            Used to confirm if a path exists to some directory.
-        """
-        # TODO: move to system module settings
-        superuser: str = None
-        cp: str = None
-        mv: str = None
-        mkdir: str = None
-        check_path: str = None
-        check_dir: str = None
-
-    system_cmds: SystemCmds = field(default_factory=lambda: GlobalSettings.SystemCmds())
-
-    def __str__(self):
-        return str(self.__dict__)
-
-
-global_settings = GlobalSettings()
