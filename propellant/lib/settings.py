@@ -19,29 +19,29 @@ class Settings(abc.ABC):
     data written to config files may have to be checked prematurely for the script to function as desired.
 
     The Settings class mainly provides the following:
-        - A required class argument "keys", which is used when creating subclasses to
+        - A class argument "keys", which is used when creating subclasses to
           designate the location that settings for a particular class will be found in the
           user configuration file.
 
         - Hooks to this class for initialization that are automatically ordered
-          based on which subclass is imported first from modules.
+          based on the import sequence of Python modules.
 
         - An abstract method initialize_settings() that is called during the initialization period.
     """
-    # TODO: is this all necessary? can't i just... put needed settings in respective modules in
-    #  whatever classes, which will extend this class, but instead of initialize_settings
-    #  requiring a dictionary to merge into config just keep it as a class variable?
 
-    _keys: tuple[str] = tuple()
+    _keys: tuple[str] = ()
 
     hooks: list[typing.Type["Settings"]] = []
 
-    def __init_subclass__(cls, keys: tuple[str], **kwargs):
+    def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
         """
         Assigns keys to the subclass of Settings
         and adds a hook to the list of hooks in Settings.
         """
         super().__init_subclass__(**kwargs)
+        for hook in cls.hooks:
+            if keys == hook._keys[0:len(keys)]:
+                log(f'Overlap with existing keys {keys}! Is this intentional?', logging.DEBUG)
         cls._keys = cls._keys + keys
         cls.hooks.append(cls)
 
