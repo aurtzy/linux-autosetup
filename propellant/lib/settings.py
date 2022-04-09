@@ -37,7 +37,6 @@ class Settings(abc.ABC):
 
         Raises a TypeError if a type does not match.
         """
-        log(f'Asserting {item} is of type {tp}...', logging.DEBUG)
         if not isinstance(item, tp):
             raise TypeError(f'{item} did not match the type {tp}.')
         return item
