@@ -2,19 +2,27 @@ import logging
 import re
 
 from .logger import log
+from .. import Settings
 
-noconfirm: bool = False
 
+class CLI(Settings):
+    """
+    Settings:
+        noconfirm: bool
+            Indicates whether the script is allowed to prompt the user.
+    """
 
-def set_noconfirm(setting: bool):
-    global noconfirm
-    noconfirm = setting
-    if noconfirm:
-        log(f'Set noconfirm to {noconfirm}.', logging.DEBUG)
+    noconfirm: bool
+
+    @classmethod
+    def initialize_settings(cls, **key_config):
+
+        # noconfirm
+        cls.noconfirm = cls.assert_tp(key_config.get('noconfirm', False), bool)
 
 
 def get_input(prompt: str = ': ') -> str:
-    if noconfirm:
+    if CLI.noconfirm:
         log('Cannot get input: noconfirm is True.', logging.ERROR)
         raise NotImplementedError
     return input(prompt)
@@ -41,7 +49,7 @@ def get_option_i(*options: tuple, prompt: str = ': ', default: int = None) -> in
         log(f'Defaulting to {options[0]} due to being the only option.', logging.DEBUG)
         return 0
 
-    if noconfirm:
+    if CLI.noconfirm:
         if default is None:
             log('This option does not have a default value.', logging.ERROR)
             raise NotImplementedError
