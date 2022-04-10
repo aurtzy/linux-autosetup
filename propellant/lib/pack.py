@@ -9,7 +9,7 @@ class PackModule(Settings, keys=('pack_modules',)):
 
     pack_modules: dict = {}
 
-    def __init_subclass__(cls, keys: tuple[str], **kwargs):
+    def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
         super().__init_subclass__(keys, **kwargs)
         cls.pack_modules.update({keys[-1]: cls})
 

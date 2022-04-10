@@ -2,7 +2,7 @@ import logging
 import subprocess
 import threading
 import time
-from os import PathLike, fspath
+from os import PathLike, fspath, environ
 
 from .settings import Settings
 from .logger import log
@@ -95,6 +95,8 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
             Used to confirm if a path exists to some directory.
             Excepts: $1 = Path to check
     """
+
+    environ.update({'DOLLARSIGN': '$'})
 
     superuser: str
     cp: str

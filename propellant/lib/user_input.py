@@ -10,15 +10,18 @@ class CLI(Settings):
     Settings:
         noconfirm: bool
             Indicates whether the script is allowed to prompt the user.
+
+            User config will be ignored if noconfirm is already set to True.
     """
 
-    noconfirm: bool
+    noconfirm: bool = False
 
     @classmethod
     def initialize_settings(cls, **key_config):
 
         # noconfirm
-        cls.noconfirm = cls.assert_tp(key_config.get('noconfirm', False), bool)
+        if not cls.noconfirm:
+            cls.noconfirm = cls.assert_tp(key_config.get('noconfirm'), bool)
 
 
 def get_input(prompt: str = ': ') -> str:

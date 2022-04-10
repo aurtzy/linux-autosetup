@@ -147,8 +147,8 @@ def run_autosetup():
     # Get config file path to be used
     config_path = get_config_path(arguments.config)
 
-    # Parse config
-    ConfigParser(config_path).start()
+    # Initialize settings from user config
+    initialize_settings(**ConfigParser(config_path).load())
 
     # Get autosetup mode
     mode = get_autosetup_mode(arguments.mode)
@@ -192,7 +192,7 @@ def run():
     init_stream(arguments.debug)
 
     # Set noconfirm
-    set_noconfirm(arguments.noconfirm)
+    CLI.noconfirm = arguments.noconfirm
 
     # Check if script is being run as root
     if os.geteuid() == 0:
