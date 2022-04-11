@@ -38,7 +38,8 @@ class Settings(abc.ABC):
         Raises a TypeError if a type does not match.
         """
         if not isinstance(item, tp):
-            raise TypeError(f'{item} did not match the type {tp}.')
+            log(f'Unexpected type: {item} did not match the type {tp}.', logging.ERROR)
+            raise TypeError
         return item
 
     def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
