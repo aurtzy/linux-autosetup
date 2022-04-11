@@ -6,7 +6,7 @@ from os import PathLike, fspath, environ
 
 from .settings import Settings
 from .logger import log
-from .user_input import get_option_i
+from .cli import get_option_i
 
 
 def run(cmd: str, *args: str) -> int:

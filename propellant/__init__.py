@@ -4,7 +4,7 @@ import logging
 import os
 
 from .lib.logger import *
-from .lib.user_input import *
+from .lib.cli import *
 from .lib.system import *
 from .lib.configparser import *
 from .lib.pack import *
