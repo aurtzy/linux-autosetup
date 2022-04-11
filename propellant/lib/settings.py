@@ -50,7 +50,8 @@ class Settings(abc.ABC):
         super().__init_subclass__(**kwargs)
         for hook in cls.hooks:
             if keys == hook._keys[0:len(keys)]:
-                log(f'Overlap with existing keys {keys}! Is this intentional?', logging.DEBUG)
+                log(f'{hook.__name__} has an overlap with existing keys {keys}! Is this intentional?', logging.DEBUG)
+                break
         cls._keys = cls._keys + keys
         cls.hooks.append(cls)
 
