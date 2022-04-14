@@ -9,8 +9,40 @@ from .logger import log
 from .cli import get_option_i
 
 
-def run(cmd: str, *args: str) -> int:
+def run(cmd: list | str, pipe: list | str = None):
     """
+    Run the given command cmd.
+
+    If given a pipe value, it is piped into cmd.
+
+    :param cmd: The command to be run. This will be passed as-is into subprocess.run().
+    :param pipe: Disabled if pipe is None.
+                 If pipe is a list, it is interpreted as a command that is piped into cmd.
+                 Otherwise, str(pipe) is piped into cmd.
+    :return: Return code of cmd (or pipe_cmd). Note that 0 means success, while any other
+             integer indicates that the command was unsuccessful.
+    """
+    log(f'Running command:\n{cmd}', logging.DEBUG)
+    try:
+        if isinstance(pipe, list):
+            pipe_cmd = subprocess.Popen(pipe, stdout=subprocess.PIPE)
+            main_cmd = subprocess.Popen(cmd, stdin=pipe_cmd.stdout)
+            main_cmd.communicate()
+        elif pipe:
+            main_cmd = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+            main_cmd.communicate(bytes(pipe, encoding='utf-8'))
+        else:
+            subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as error:
+        log(f'Encountered an error running shell commands:\n'
+            f'{error}', logging.ERROR)
+        return error.returncode
+    return 0
+
+
+def shell_run(cmd: str, *args: str) -> int:
+    """
+    todo: DEPRECATED
     Run the given command(s) through the shell along with any arguments.
 
     :param cmd:     String of command(s) to run.
@@ -46,8 +78,8 @@ def sudo_loop():
     log('Starting sudo loop.', logging.DEBUG)
 
     # TODO: FIX SUDO COMMENTS WHEN NOT A NUISANCE
-    # if run('sudo -v') != 0:
-    #     raise PermissionError('sudo could not validate.')
+    #if run(['sudo', '-v']) != 0:
+    #    raise PermissionError('sudo could not validate.')
 
     def sudo_loop_thread():
         i = 0.0
@@ -158,7 +190,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         cmd = cls.cp
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
             cmd = f'{cls.superuser} {cmd}'
-        exit_code = run(cmd, dest, *map(fspath, args))
+        exit_code = shell_run(cmd, dest, *map(fspath, args))
         return not bool(exit_code)
 
     @classmethod
@@ -171,7 +203,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         cmd = cls.mv
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
             cmd = f'{cls.superuser} {cmd}'
-        exit_code = run(cmd, dest, *map(fspath, args))
+        exit_code = shell_run(cmd, dest, *map(fspath, args))
         return not bool(exit_code)
 
     @classmethod
@@ -184,7 +216,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         cmd = cls.mkdir
         if cls.files_need_perms('w', path):
             cmd = f'{cls.superuser} {cmd}'
-        exit_code = run(cmd, *map(fspath, path))
+        exit_code = shell_run(cmd, *map(fspath, path))
         return not bool(exit_code)
 
     @classmethod
@@ -201,7 +233,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         """
         while True:
             log(f'Checking if "{path}" is an existing directory...', logging.DEBUG)
-            if run(f'{cls.superuser} {cls.check_dir}', path) == 0:
+            if shell_run(f'{cls.superuser} {cls.check_dir}', path) == 0:
                 log(f'Found.', logging.DEBUG)
                 return cls(path)
             else:
