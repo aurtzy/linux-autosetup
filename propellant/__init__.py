@@ -154,7 +154,7 @@ def run_autosetup():
     config_path = get_config_path(arguments.config)
 
     # Initialize settings from user config
-    initialize_settings(**ConfigParser(config_path).load())
+    initialize_settings(ConfigParser(config_path).load())
 
     # Get autosetup mode
     mode = get_autosetup_mode(arguments.mode)

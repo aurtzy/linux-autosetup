@@ -37,7 +37,7 @@ class Settings(abc.ABC):
 
         Raises a TypeError if a type does not match.
         """
-        value = settings.get('key', default)
+        value = settings.get(key, default)
         if not isinstance(value, tp):
             log(f'Unexpected type {type(value)}: {key} did not match the type {tp}.', logging.ERROR)
             raise TypeError
@@ -57,7 +57,7 @@ class Settings(abc.ABC):
         cls.hooks.append(cls)
 
     @classmethod
-    def get_key_config(cls, **settings) -> dict:
+    def get_key_config(cls, settings: dict) -> dict:
         """
         Gets the relevant key config from a given dictionary of settings.
         :return: A dict obtained from parsing through _keys levels of settings.
@@ -82,9 +82,9 @@ class Settings(abc.ABC):
         pass
 
 
-def initialize_settings(**new_config):
+def initialize_settings(new_config: dict):
     """
     Initializes all settings for the subclasses that have hooks in the Settings class.
     """
     for hook in Settings.hooks:
-        hook.initialize_settings(**hook.get_key_config(**new_config))
+        hook.initialize_settings(**hook.get_key_config(new_config))
