@@ -1,15 +1,14 @@
 
-global_settings:
-    system_cmds:
-        superuser: 'sudo'
-        cp: 'cp -t "$1" "${@:2}"'
-        mv: 'mv -t "$1" "${@:2}"'
-        mkdir: 'mkdir -p $1'
-        check_path: '[ -e "$1" ]'
-        check_dir: '[ -d "$1" ]'
-    custom_module:
-        cmd_presets:
-    apps_module:
+system_cmds:
+    superuser: 'sudo'
+    cp: 'cp -t "$1" "${@:2}"'
+    mv: 'mv -t "$1" "${@:2}"'
+    mkdir: 'mkdir -p $1'
+    check_path: '[ -e "$1" ]'
+    check_dir: '[ -d "$1" ]'
+
+pack_modules:
+    basic:
         cmd_presets:
             apt:
                 install_cmd: sudo apt --assume-yes install $@
@@ -19,12 +18,12 @@ global_settings:
                 install_cmd: sudo pacman -S --noconfirm --needed $@
             yay:
                 install_cmd: yay -S --noconfirm --needed $@
-    files_module:
+    files:
         backup_dirs:
             something: a
         cmd_presets:
-#            raw_copy:
-#            hardlink:
+    #       raw_copy:
+    #       hardlink:
             copy:
                 install_cmd: tar -xPf "$1.tar"
                 backup_cmd: tar -cPf "$1.tar" "${@:2}"
