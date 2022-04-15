@@ -27,22 +27,21 @@ def parse_args(*args) -> argparse.Namespace:
                                 f'License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n'
                                 f'This is free software: you are free to change and redistribute it.\n'
                                 f'There is NO WARRANTY, to the extent permitted by law.')
-    parser.add_argument('--chdir', metavar='DIRECTORY', type=str, default=sys.path[0],
-                        help='Set the working directory\n'
-                             'By default, this is set to the script directory path')
+    parser.add_argument('-C', '--directory', metavar='DIRECTORY', type=str, default=sys.path[0],
+                        help='Change the directory. By default, this is set to the script directory path.')
 
     autosetup_options = parser.add_argument_group('autosetup options')
     autosetup_options.add_argument('-c', '--config', metavar='CONFIG_PATH', type=str,
-                                   help='Configuration file to use')
+                                   help='Configuration file to use.')
     autosetup_options.add_argument('-m', '--mode', choices=['install', 'backup'],
-                                   help='Autosetup mode to run')
+                                   help='Autosetup mode to run.')
     autosetup_options.add_argument('PACKS', nargs='*',
-                                   help='Packs to use in the autosetup')
+                                   help='Packs to use in the autosetup.')
 
     interactive_options = parser.add_argument_group('interactive options')
     interactive_options.add_argument('--noconfirm', action='store_true',
-                                     help='Assume default values for prompts.\n'
-                                          'Requires all autosetup arguments to be defined')
+                                     help='Assume default values for prompts.'
+                                          ' Requires all autosetup arguments to be defined.')
     return parser.parse_args(*args)
 
 
@@ -149,7 +148,7 @@ def run_autosetup():
     an error will be raised.
     """
     # Change working directory
-    os.chdir(arguments.chdir)
+    os.chdir(arguments.directory)
 
     # Get config file path to be used
     config_path = get_config_path(arguments.config)
