@@ -2,7 +2,7 @@ import logging
 import re
 
 from .logger import log
-from .. import Settings
+from .settings import Settings
 
 
 class CLI(Settings):
@@ -21,7 +21,7 @@ class CLI(Settings):
 
         # noconfirm
         if not cls.noconfirm:
-            cls.noconfirm = cls.assert_tp(key_config.get('noconfirm'), bool)
+            cls.noconfirm = cls.assert_tp(key_config, 'noconfirm', bool, default=False)
 
 
 def get_input(prompt: str = ': ') -> str:

@@ -31,16 +31,17 @@ class Settings(abc.ABC):
     hooks: list[typing.Type["Settings"]] = []
 
     @staticmethod
-    def assert_tp(item, tp):
+    def assert_tp(settings: dict, key, tp, default=None):
         """
         Asserts that item is of type tp.
 
         Raises a TypeError if a type does not match.
         """
-        if not isinstance(item, tp):
-            log(f'Unexpected type: {item} did not match the type {tp}.', logging.ERROR)
+        value = settings.get('key', default)
+        if not isinstance(value, tp):
+            log(f'Unexpected type {type(value)}: {key} did not match the type {tp}.', logging.ERROR)
             raise TypeError
-        return item
+        return value
 
     def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
         """

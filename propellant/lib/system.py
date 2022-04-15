@@ -156,7 +156,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
     def initialize_settings(cls, **key_config):
 
         def assert_cmd(key) -> str:
-            return cls.assert_tp(key_config.get(key), str)
+            return cls.assert_tp(key_config, key, str)
 
         try:
             # superuser

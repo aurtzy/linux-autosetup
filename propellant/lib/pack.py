@@ -61,13 +61,13 @@ class BasicPackModule(PackModule, keys=('basic',)):
     def initialize_settings(cls, **key_config):
 
         # cmd_presets
-        cmd_presets: dict = cls.assert_tp(key_config.get('cmd_presets', {}), dict)
-        for cmd_preset, values in cmd_presets.items():
-            values: dict = cls.assert_tp(values, dict)
+        cmd_presets: dict = cls.assert_tp(key_config, 'cmd_presets', dict, default={})
+        for cmd_preset in cmd_presets.keys():
+            settings: dict = cls.assert_tp(cmd_presets, cmd_preset, dict)
             cls.cmd_presets[cmd_preset] = {
-                'pipe': cls.assert_tp(values.get('pipe', False), str | bool),
-                'install_cmd': cls.assert_tp(values.get('install_cmd', ''), str),
-                'backup_cmd': cls.assert_tp(values.get('backup_cmd', ''), str)
+                'pipe': cls.assert_tp(settings, 'pipe', str | bool, default='pipe'),
+                'install_cmd': cls.assert_tp(settings, 'install_cmd', str, default=''),
+                'backup_cmd': cls.assert_tp(settings, 'backup_cmd', str, default='')
             }
 
     def __init__(self, **module_settings):
@@ -116,10 +116,10 @@ class FilesPackModule(BasicPackModule, keys=('files',)):
         super().initialize_settings(**key_config)
 
         def assert_dirs(dirs) -> dict:
-            dirs: dict = cls.assert_tp(key_config.get(dirs, {}), dict)
+            dirs: dict = cls.assert_tp(key_config, dirs, dict, default={})
             result = {}
             for dir_name, dir_path in dirs.items():
-                result.update({dir_name: system.Path.valid_dir(str(dir_path))})
+                result[dir_name] = system.Path.valid_dir(str(dir_path))
             return result
 
         # backup_dirs
@@ -137,7 +137,7 @@ class FilesPackModule(BasicPackModule, keys=('files',)):
         pass
 
 
-@dataclass
+#@dataclass
 class PacksModule:
     """ TODO: OLD
     Calls install and backup methods from other packs as specified.
@@ -146,7 +146,7 @@ class PacksModule:
         List of packs to call.
     """
 
-    packs: list[str] = field(default_factory=list)
+#    packs: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         super()
@@ -186,7 +186,7 @@ class PacksModule:
                     pack.backup()
 
 
-@dataclass
+#@dataclass
 class FilesModule:
     """ TODO: OLD
     Handles installation and backing up of files.
@@ -266,7 +266,7 @@ class Pack(Settings, keys=('packs',)):
     @classmethod
     def initialize_settings(cls, **key_config):
         # Initialize packs
-        for pack_name, pack_settings in cls.assert_tp(key_config.get('packs', {}), dict):
+        for pack_name, pack_settings in cls.assert_tp(key_config, 'packs', dict, default={}):
             Pack(pack_name, **pack_settings)
 
     @classmethod
