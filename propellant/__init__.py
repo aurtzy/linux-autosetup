@@ -4,13 +4,13 @@ import logging
 import os
 import sys
 
-from propellant.lib.logger import *
+from .lib.logger import *
 from .lib.cli import *
 from .lib.system import *
 from .lib.configparser import *
 from .lib.pack import *
 
-__version__ = '0.0.0-dev'
+__version__ = '3.0.0-dev'
 
 
 def parse_args(*args) -> argparse.Namespace:
@@ -50,7 +50,7 @@ arguments = parse_args()
 
 def get_config_path(config_path: str) -> str:
     """
-    Gets the config file path to load settings from.
+    Validates and gets the config file path to load settings from.
 
     If the path given is a directory, show all .yaml files in that directory as options to choose.
     An additional option also lets the user manually input a config path.
