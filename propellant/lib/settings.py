@@ -37,10 +37,18 @@ class Settings(abc.ABC):
 
         Raises a TypeError if a type does not match.
         """
-        value = settings.get(key, default)
-        if not isinstance(value, tp):
+        def raise_error():
             log(f'Unexpected type {type(value)}: {key} did not match the type {tp}.', logging.ERROR)
             raise TypeError
+        value = settings.get(key, default)
+        if typing.get_origin(tp) is typing.Union:
+            if not isinstance(value, typing.get_args(tp)):
+                raise_error()
+        elif typing.get_origin(tp) is None:
+            if not isinstance(value, tp):
+                raise_error()
+        else:
+            raise NotImplementedError(f'Unexpected type {tp} given - could not interpret.')
         return value
 
     def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
