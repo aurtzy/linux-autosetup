@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-from .lib.logger import *
+from propellant.lib.logger import *
 from .lib.cli import *
 from .lib.system import *
 from .lib.configparser import *
@@ -31,7 +31,7 @@ def parse_args(*args) -> argparse.Namespace:
                         help='Change the directory. By default, this is set to the script directory path.')
 
     autosetup_options = parser.add_argument_group('autosetup options')
-    autosetup_options.add_argument('-c', '--config', metavar='CONFIG_PATH', type=str,
+    autosetup_options.add_argument('-c', '--config', metavar='CONFIG_PATH', type=str, default='.',
                                    help='Configuration file to use.')
     autosetup_options.add_argument('-m', '--mode', choices=['install', 'backup'],
                                    help='Autosetup mode to run.')
@@ -48,7 +48,7 @@ def parse_args(*args) -> argparse.Namespace:
 arguments = parse_args()
 
 
-def get_config_path(config_path: str = None) -> str:
+def get_config_path(config_path: str) -> str:
     """
     Gets the config file path to load settings from.
 
@@ -56,9 +56,6 @@ def get_config_path(config_path: str = None) -> str:
     An additional option also lets the user manually input a config path.
     """
     log('Getting config path for autosetup...', logging.DEBUG)
-    if not config_path:
-        # Default to current directory
-        config_path = '.'
 
     config_path = os.path.abspath(config_path)
     if not os.path.isfile(config_path):
@@ -148,8 +145,6 @@ def run_autosetup():
     Prompt for missing arguments as needed. If noconfirm is True with needed but missing arguments,
     an error will be raised.
     """
-    print(sys.path)
-    print(os.path.abspath('.'))
     # Change working directory
     os.chdir(arguments.directory)
 
