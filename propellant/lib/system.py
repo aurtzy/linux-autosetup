@@ -2,6 +2,7 @@ import logging
 import subprocess
 import threading
 import time
+import typing
 from os import PathLike, fspath, environ
 
 from .settings import Settings
@@ -9,7 +10,7 @@ from .logger import log
 from .cli import get_option_i
 
 
-def run(cmd: list | str, pipe: list | str = None):
+def run(cmd: typing.Union[list, str], pipe: typing.Union[list, str] = None):
     """
     Run the given command cmd.
 
@@ -138,7 +139,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
     check_dir: str
 
     @staticmethod
-    def files_need_perms(mode: str = 'r', *paths: str | PathLike):
+    def files_need_perms(mode: str = 'r', *paths: typing.Union[str, PathLike]):
         """Tests passed paths for a PermissionError when trying to open."""
         for path in paths:
             try:
@@ -181,7 +182,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
             raise
 
     @classmethod
-    def copy(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
+    def copy(cls, dest: typing.Union[str, PathLike], *args: typing.Union[str, PathLike]) -> bool:
         """
         Copies files from the given path(s) args to dest.
 
@@ -194,7 +195,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         return not bool(exit_code)
 
     @classmethod
-    def move(cls, dest: str | PathLike, *args: str | PathLike) -> bool:
+    def move(cls, dest: typing.Union[str, PathLike], *args: typing.Union[str, PathLike]) -> bool:
         """
         Moves files from the given path(s) args to dest.
 
@@ -207,7 +208,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         return not bool(exit_code)
 
     @classmethod
-    def mkdir(cls, path: str | PathLike) -> bool:
+    def mkdir(cls, path: typing.Union[str, PathLike]) -> bool:
         """
         Creates directory if it doesn't exist at the specified path.
 
@@ -220,7 +221,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         return not bool(exit_code)
 
     @classmethod
-    def valid_dir(cls, path: str | PathLike):
+    def valid_dir(cls, path: typing.Union[str, PathLike]):
         """
         Validates the given directory path. Unlike path_exists, this method allows the given directory path
         to be created if it is not found.
@@ -244,20 +245,19 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
                                  ('Abort this script',),
                                  prompt=f'The directory "{path} could not be found.\n'
                                         f'Please choose how this should be handled')
-                match i:
-                    case 0:
-                        log('Attempting to find directory again.', logging.INFO)
-                        continue
-                    case 1:
-                        log(f'Creating new directory.', logging.INFO)
-                        cls.mkdir(path)
-                        return cls(path)
-                    case 2:
-                        log(f'Ignoring this path for the session.', logging.INFO)
-                        return None
-                    case _:
-                        log('Aborting.', logging.INFO)
-                        exit(1)
+                if i == 0:
+                    log('Attempting to find directory again.', logging.INFO)
+                    continue
+                elif i == 1:
+                    log(f'Creating new directory.', logging.INFO)
+                    cls.mkdir(path)
+                    return cls(path)
+                elif i == 2:
+                    log(f'Ignoring this path for the session.', logging.INFO)
+                    return None
+                else:
+                    log('Aborting.', logging.INFO)
+                    exit(1)
 
     def __init__(self, path: str):
         self.path = path

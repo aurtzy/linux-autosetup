@@ -1,5 +1,6 @@
 import logging
-from os import PathLike, environ
+import typing
+from os import PathLike
 
 from ruamel.yaml import YAML, YAMLError
 
@@ -8,7 +9,7 @@ from .logger import log
 
 class ConfigParser:
 
-    def __init__(self, config_path: PathLike | str):
+    def __init__(self, config_path: typing.Union[str, PathLike]):
         self.config_path = config_path
 
     def load(self) -> dict:

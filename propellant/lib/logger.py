@@ -1,4 +1,5 @@
 import logging
+import typing
 from os import PathLike
 
 logger = logging.getLogger('linux-autosetup')
@@ -13,7 +14,7 @@ def init_stream(debug: bool):
         log('Enabled debug log.', logging.INFO)
 
 
-def init_file(path: str | PathLike):
+def init_file(path: typing.Union[str, PathLike]):
     file_handler = logging.FileHandler(path)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter('[%(levelname)s]: %(message)s'))

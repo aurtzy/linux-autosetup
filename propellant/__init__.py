@@ -27,7 +27,7 @@ def parse_args(*args) -> argparse.Namespace:
                                 f'License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n'
                                 f'This is free software: you are free to change and redistribute it.\n'
                                 f'There is NO WARRANTY, to the extent permitted by law.')
-    parser.add_argument('-C', '--directory', metavar='DIRECTORY', type=str, default=sys.path[0],
+    parser.add_argument('-C', '--directory', metavar='DIRECTORY', type=str, default='.',
                         help='Change the directory. By default, this is set to the script directory path.')
 
     autosetup_options = parser.add_argument_group('autosetup options')
@@ -71,32 +71,33 @@ def get_config_path(config_path: str = None) -> str:
                 log(f'Encountered an error trying to read {config_path}.', logging.ERROR)
                 config_path = get_input('Please input a valid directory/file to read config from.\n: ')
             if os.path.isdir(config_path):
-                config_paths = glob.glob('*.yaml', root_dir=config_path)
+                config_paths = list(map(lambda path: os.path.basename(path),
+                                        glob.glob(os.path.join(config_path, '*.yaml'))))
                 i = get_option_i(
                     ('manual', 'Manually input a path'),
                     *((path.removesuffix('.yaml'), path) for path in config_paths),
                     prompt='Select a config path option: '
                 )
-                match i:
-                    case 0:
-                        print('Entering file system navigator.\n'
-                              'An empty input will print all files in the current directory.')
-                        while not os.path.isfile(config_path):
-                            new_path = get_input(f'[{config_path}] ')
-                            if not new_path:
-                                for path in glob.iglob('*', root_dir=config_path):
-                                    print(path)
+                if i == 0:
+                    print('Entering file system navigator.\n'
+                          'An empty input will print all files in the current directory.')
+                    while not os.path.isfile(config_path):
+                        new_path = get_input(f'[{config_path}] ')
+                        if not new_path:
+                            for path in map(lambda path: os.path.basename(path),
+                                            glob.iglob(os.path.join(config_path, '*'))):
+                                print(path)
+                        else:
+                            new_path = os.path.join(config_path, new_path)
+                            if os.path.isfile(new_path):
+                                config_path = new_path
+                                break
+                            elif os.path.exists(new_path):
+                                config_path = os.path.abspath(new_path)
                             else:
-                                new_path = os.path.join(config_path, new_path)
-                                if os.path.isfile(new_path):
-                                    config_path = new_path
-                                    break
-                                elif os.path.exists(new_path):
-                                    config_path = os.path.abspath(new_path)
-                                else:
-                                    log(f'Invalid path: {new_path}', logging.ERROR)
-                    case _:
-                        config_path = os.path.join(config_path, config_paths[i - 1])
+                                log(f'Invalid path: {new_path}', logging.ERROR)
+                else:
+                    config_path = os.path.join(config_path, config_paths[i - 1])
 
     log(config_path, logging.DEBUG)
     return config_path
@@ -106,13 +107,13 @@ def get_autosetup_mode(mode: str = None) -> str:
     """Gets the autosetup mode."""
     log('Getting autosetup mode...', logging.DEBUG)
     if not mode:
-        match get_option_i(('install', 'Run the autosetup in installer mode'),
-                           ('backup', 'Run the autosetup in backup mode'),
-                           prompt='Choose an autosetup mode: '):
-            case 0:
-                mode = 'install'
-            case 1:
-                mode = 'backup'
+        i = get_option_i(('install', 'Run the autosetup in installer mode'),
+                         ('backup', 'Run the autosetup in backup mode'),
+                         prompt='Choose an autosetup mode: ')
+        if i == 0:
+            mode = 'install'
+        elif i == 1:
+            mode = 'backup'
     elif mode not in {'install', 'backup'}:
         log(f'Could not match "{mode}" with any known autosetup option.', logging.ERROR)
         raise LookupError
@@ -147,6 +148,8 @@ def run_autosetup():
     Prompt for missing arguments as needed. If noconfirm is True with needed but missing arguments,
     an error will be raised.
     """
+    print(sys.path)
+    print(os.path.abspath('.'))
     # Change working directory
     os.chdir(arguments.directory)
 
@@ -165,34 +168,32 @@ def run_autosetup():
     # todo: Run sudoloop
 
     # Run autosetup!
-    match mode:
-        case 'install':
-            for p in packs:
-                p.install()
-            # Check for bad installs
+    if mode == 'install':
+        for p in packs:
+            p.install()
+        # Check for bad installs
 
-            all_success = True
-            for p in Pack.packs:
-                if not p.install_success:
-                    if all_success:
-                        all_success = False
-                        log('The following pack(s) failed to install:', logging.ERROR)
-                    log(p.name, logging.ERROR)
-        case 'backup':
-            for p in packs:
-                p.backup()
+        all_success = True
+        for p in Pack.packs:
+            if not p.install_success:
+                if all_success:
+                    all_success = False
+                    log('The following pack(s) failed to install:', logging.ERROR)
+                log(p.name, logging.ERROR)
+    elif mode == 'backup':
+        for p in packs:
+            p.backup()
 
-            all_success = True
-            for p in Pack.packs:
-                if not p.install_success:
-                    if all_success:
-                        all_success = False
-                        log('The following pack(s) failed to be backed up:', logging.ERROR)
-                    log(p.name, logging.ERROR)
+        all_success = True
+        for p in Pack.packs:
+            if not p.install_success:
+                if all_success:
+                    all_success = False
+                    log('The following pack(s) failed to be backed up:', logging.ERROR)
+                log(p.name, logging.ERROR)
 
 
-def run():
-    """Entry point."""
+def run_module():
 
     # Set up logger
     init_stream(arguments.debug)

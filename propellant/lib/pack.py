@@ -65,7 +65,7 @@ class BasicPackModule(PackModule, keys=('basic',)):
         for cmd_preset in cmd_presets.keys():
             settings: dict = cls.assert_tp(cmd_presets, cmd_preset, dict)
             cls.cmd_presets[cmd_preset] = {
-                'pipe': cls.assert_tp(settings, 'pipe', str | bool, default='pipe'),
+                'pipe': cls.assert_tp(settings, 'pipe', typing.Union[str, bool], default='pipe'),
                 'install_cmd': cls.assert_tp(settings, 'install_cmd', str, default=''),
                 'backup_cmd': cls.assert_tp(settings, 'backup_cmd', str, default='')
             }
@@ -305,10 +305,10 @@ class Pack(Settings, keys=('packs',)):
             log(f'Modules list for {self.name} is empty. Is this intentional?', logging.WARNING)
 
         # install_success - indicates success of install; None means install has not been run.
-        self.install_success: bool | None = None
+        self.install_success: typing.Union[bool, None] = None
 
         # backup_success - indicates success of backup; None means backup has not been run.
-        self.backup_success: bool | None = None
+        self.backup_success: typing.Union[bool, None] = None
 
         self.packs.append(self)
         log(f'{self}', logging.DEBUG)
