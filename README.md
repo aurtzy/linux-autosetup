@@ -1,5 +1,14 @@
-# Propellant, an autosetup script
-Propellant.
+# Propellant, an autosetup script...?
+Propellant aims to bridge the gap that traditional autosetup scripts have with backups
+and fit that within its own pseudo package manager.
+
+/** insert cool gif or something here **/
+
+# Using the script
+/** todo **/
+
+# Developing Propellant
+/** todo **/
 
 ## Dependencies
 Propellant is currently developed on the following:
