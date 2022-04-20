@@ -6,6 +6,7 @@ import sys
 
 from .lib.logger import *
 from .lib.cli import *
+from .lib.settings import *
 from .lib.system import *
 from .lib.configparser import *
 from .lib.pack import *

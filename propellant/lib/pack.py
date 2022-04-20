@@ -1,11 +1,21 @@
 import logging
+import typing
 
 from . import system
-from .settings import *
+from .settings import Settings
 from .logger import log
 
 
 class PackModule(Settings, keys=('pack_modules',)):
+    """
+    Base class for creating pack modules.
+
+    Provides:
+        - an automatic hook that sets the pack module name
+        based off the last string in the keys parameter.
+        - various implementable methods that will be called
+        when appropriate during an autosetup.
+    """
 
     pack_modules: dict = {}
 
