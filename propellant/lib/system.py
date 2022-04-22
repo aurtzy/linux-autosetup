@@ -154,7 +154,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
             return False
 
     @classmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
 
         def assert_cmd(key) -> str:
             return cls.assert_tp(key_config, key, str)

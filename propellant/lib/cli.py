@@ -17,7 +17,7 @@ class CLI(Settings):
     noconfirm: bool = False
 
     @classmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
 
         # noconfirm
         if not cls.noconfirm:

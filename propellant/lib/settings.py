@@ -80,7 +80,7 @@ class Settings(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
         """
         Run during the settings initialization period.
 
@@ -90,9 +90,9 @@ class Settings(abc.ABC):
         pass
 
 
-def initialize_settings(new_config: dict):
+def init_settings(new_config: dict):
     """
     Initializes all settings for the subclasses that have hooks in the Settings class.
     """
     for hook in Settings.hooks:
-        hook.initialize_settings(**hook.get_key_config(new_config))
+        hook.init_settings(**hook.get_key_config(new_config))

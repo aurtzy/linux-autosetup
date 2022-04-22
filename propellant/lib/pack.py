@@ -24,7 +24,7 @@ class PackModule(Settings, keys=('pack_modules',)):
         cls.pack_modules.update({keys[-1]: cls})
 
     @classmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
         pass
 
     def __init__(self, **module_settings):
@@ -68,7 +68,7 @@ class BasicPackModule(PackModule, keys=('basic',)):
     cmd_presets: dict = {}
 
     @classmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
 
         # cmd_presets
         cmd_presets: dict = cls.assert_tp(key_config, 'cmd_presets', dict, default={})
@@ -123,7 +123,7 @@ class FilesPackModule(BasicPackModule, keys=('files',)):
 
     @classmethod
     def initialize_settings(cls, **key_config):
-        super().initialize_settings(**key_config)
+        super().init_settings(**key_config)
 
         def assert_dirs(dirs) -> dict:
             dirs: dict = cls.assert_tp(key_config, dirs, dict, default={})
@@ -274,7 +274,7 @@ class Pack(Settings, keys=('packs',)):
     packs: list['Pack'] = []
 
     @classmethod
-    def initialize_settings(cls, **key_config):
+    def init_settings(cls, **key_config):
         # Initialize packs
         for pack_name, pack_settings in cls.assert_tp(key_config, 'packs', dict, default={}):
             Pack(pack_name, **pack_settings)
