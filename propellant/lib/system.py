@@ -10,6 +10,33 @@ from .logger import log
 from .cli import get_option_i
 
 
+class Cmd(Settings, keys=('system_cmds',)):
+    """
+
+    Settings:
+        su: str
+            Command used for elevating commands when appropriate (e.g. "sudo").
+    """
+
+    su: str
+
+    @classmethod
+    def init_settings(cls, **key_config):
+        def assert_cmd(key) -> str:
+            return cls.assert_tp(key_config, key, str)
+
+        try:
+            # superuser
+            cls.su = assert_cmd('su')
+        except TypeError:
+            log('Values must be specified for system commands in the config to avoid ambiguity.', logging.ERROR)
+            raise
+
+    def __init__(self, cmd: list[str], as_su: bool = False):
+        self.cmd = cmd
+        self.as_su = as_su
+
+
 def run(cmd: typing.Union[list, str], pipe: typing.Union[list, str] = None):
     """
     Run the given command cmd.
@@ -110,8 +137,6 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
     File manipulation commands will be elevated with permissions as necessary.
 
     Settings:
-        superuser: str
-            Command used for elevating commands when appropriate (e.g. "sudo").
         cp: str
             Used to copy files from one path to another.
             Expects: $1 = target directory; ${@:2} = files to move to target directory
@@ -128,10 +153,20 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
             Used to confirm if a path exists to some directory.
             Excepts: $1 = Path to check
     """
-
+    # todo?
+    #   init_dir instead of valid_dir; can be initialized any
+    #   time making initialization of a Path more lazy (good),
+    #   so only paths that are to be used are initialized at pre_install/backup
+    #  fields: is/needs_root, exists
+    #   question of how root field works - is read/write important to consider?
+    #    currently thinking yes. split "is_root" into maybe "root_read" and "root_write"?
+    #    or no... files without read permission fall in a weird place. actually,
+    #    it's everything that's in a weird place.
+    #    how to get correct permissions for files? is pushing 'sudo' to command list
+    #    enough to satisfy cases? if it is enough, then is having a single 'root'
+    #    field also enough?
     environ.update({'DOLLARSIGN': '$'})
 
-    superuser: str
     cp: str
     mv: str
     mkdir: str
@@ -160,9 +195,6 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
             return cls.assert_tp(key_config, key, str)
 
         try:
-            # superuser
-            cls.superuser = assert_cmd('superuser')
-
             # cp
             cls.cp = assert_cmd('cp')
 
@@ -190,7 +222,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         """
         cmd = cls.cp
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
-            cmd = f'{cls.superuser} {cmd}'
+            cmd = f'{Cmd.su} {cmd}'
         exit_code = shell_run(cmd, dest, *map(fspath, args))
         return not bool(exit_code)
 
@@ -203,7 +235,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         """
         cmd = cls.mv
         if cls.files_need_perms('r', dest) or cls.files_need_perms('w', *args):
-            cmd = f'{cls.superuser} {cmd}'
+            cmd = f'{Cmd.su} {cmd}'
         exit_code = shell_run(cmd, dest, *map(fspath, args))
         return not bool(exit_code)
 
@@ -216,7 +248,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         """
         cmd = cls.mkdir
         if cls.files_need_perms('w', path):
-            cmd = f'{cls.superuser} {cmd}'
+            cmd = f'{Cmd.su} {cmd}'
         exit_code = shell_run(cmd, *map(fspath, path))
         return not bool(exit_code)
 
@@ -234,7 +266,7 @@ class Path(PathLike, Settings, keys=('system_cmds',)):
         """
         while True:
             log(f'Checking if "{path}" is an existing directory...', logging.DEBUG)
-            if shell_run(f'{cls.superuser} {cls.check_dir}', path) == 0:
+            if shell_run(f'{Cmd.su} {cls.check_dir}', path) == 0:
                 log(f'Found.', logging.DEBUG)
                 return cls(path)
             else:

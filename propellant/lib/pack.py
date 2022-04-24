@@ -47,20 +47,30 @@ class PackModule(Settings, keys=('pack_modules',)):
         pass
 
 
-class BasicPackModule(PackModule, keys=('basic',)):
+class CmdPackModule(PackModule, keys=('cmd',)):
     """
+    Pack module for running a command, optionally
+    with the addition of a pipe.
+
+    A command is indicated by a list of tokens. For example,
+    "yay -S some_package" would look like ['yay', '-S', 'some_package'].
+
+    Arguments from e.g. install_args are also indicated by a list, in
+    which each token will replace any None elements in the command list
+    before being appended to the end.
 
     Settings:
         cmd_presets: dict
-            Presets of shell commands.
+            Presets of commands.
 
-            pipe: str | bool
-                Indicates whether data should be piped into the shell.
-                If pipe is a str, then this string will always be piped into the commands.
-                If True, then the user will be prompted for what will be piped. Otherwise, pipe is ignored.
-            install_cmd: str
-                Commands to run during pack installs.
-            backup_cmd: str
+            pipe_cmd: list[str]
+                Indicates a pipe cmd to use.
+                Otherwise, pipe is ignored.
+            pipe_input: str | bool
+                Indicates whether to pipe
+            install_cmd: list[str]
+                Command to run during pack installs.
+            backup_cmd: list[str]
                 Commands to run during pack backups.
     
     """
@@ -75,13 +85,17 @@ class BasicPackModule(PackModule, keys=('basic',)):
         for cmd_preset in cmd_presets.keys():
             settings: dict = cls.assert_tp(cmd_presets, cmd_preset, dict)
             cls.cmd_presets[cmd_preset] = {
-                'pipe': cls.assert_tp(settings, 'pipe', typing.Union[str, bool], default='pipe'),
+                'pipe': cls.assert_tp(settings, 'pipe', typing.Union[str, bool], default=False),
                 'install_cmd': cls.assert_tp(settings, 'install_cmd', str, default=''),
                 'backup_cmd': cls.assert_tp(settings, 'backup_cmd', str, default='')
             }
 
     def __init__(self, **module_settings):
         super().__init__(**module_settings)
+
+        #todo
+        #
+
         # cmd_preset
 
         # pipe
@@ -103,9 +117,9 @@ class BasicPackModule(PackModule, keys=('basic',)):
         # backup_args: list[str] = field(default_factory=list)
 
 
-class FilesPackModule(BasicPackModule, keys=('files',)):
+class FilesPackModule(CmdPackModule, keys=('files',)):
     """
-
+        todo: unintended behavior - _keys = (pack_modules, cmd, files) instead of (pack_modules, files)
     Settings:
         cmd_presets: dict
             See BasicPackModule.
