@@ -2,7 +2,7 @@ import logging
 import typing
 from os import PathLike
 
-logger = logging.getLogger('linux-autosetup')
+logger = logging.getLogger('propellant')
 logger.setLevel(logging.DEBUG)
 
 
