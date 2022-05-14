@@ -47,7 +47,7 @@ class PackModule(Settings, keys=('pack_modules',)):
         pass
 
 
-class CmdPackModule(PackModule, keys=('cmd',)):
+class CmdPackModule(PackModule, keys=('cmd',), local_keys=True):
     """
     Pack module for running a command, optionally
     with the addition of a pipe.
@@ -117,7 +117,7 @@ class CmdPackModule(PackModule, keys=('cmd',)):
         # backup_args: list[str] = field(default_factory=list)
 
 
-class FilesPackModule(CmdPackModule, keys=('files',)):
+class FilesPackModule(CmdPackModule, keys=('files',), local_keys=True):
     """
         todo: unintended behavior - _keys = (pack_modules, cmd, files) instead of (pack_modules, files)
     Settings:

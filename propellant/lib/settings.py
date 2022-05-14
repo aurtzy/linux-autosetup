@@ -26,7 +26,8 @@ class Settings(abc.ABC):
         - Miscellaneous helper methods for parsing settings from the given user config.
     """
 
-    _keys: tuple[str] = ()
+    _category: tuple = ()
+    _keys: tuple = ()
 
     hooks: list[typing.Type["Settings"]] = []
 
@@ -51,17 +52,24 @@ class Settings(abc.ABC):
             raise NotImplementedError(f'Unexpected type {tp} given - could not interpret.')
         return value
 
-    def __init_subclass__(cls, keys: tuple[str] = (), **kwargs):
+    def __init_subclass__(cls, keys: tuple[str] = (), local_keys: bool = False, **kwargs):
         """
         Assigns keys to the subclass of Settings
         and adds a hook to the list of hooks in Settings.
+
+        If local_keys is True, only keys from the parent class will be inherited. All keys for
+        this class will be local.
         """
         super().__init_subclass__(**kwargs)
         for hook in cls.hooks:
             if keys == hook._keys[0:len(keys)]:
                 log(f'{hook.__name__} has an overlap with existing keys {keys}! Is this intentional?', logging.DEBUG)
                 break
-        cls._keys = cls._keys + keys
+        if local_keys:
+            cls._keys = keys
+        else:
+            cls._category = cls._category + keys
+            cls._keys = ()
         cls.hooks.append(cls)
 
     @classmethod
@@ -70,7 +78,7 @@ class Settings(abc.ABC):
         Gets the relevant key config from a given dictionary of settings.
         :return: A dict obtained from parsing through _keys levels of settings.
         """
-        for key in cls._keys:
+        for key in cls._category + cls._keys:
             settings = settings.get(key, {})
             if not isinstance(settings, dict):
                 log(f'Expected a dict while retrieving the key {key} value from given settings.\n'
