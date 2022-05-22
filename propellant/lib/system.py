@@ -1,29 +1,62 @@
 import logging
+import os
 import subprocess
 import threading
 import time
 import typing
 from os import PathLike, fspath, environ
+from string import Template
 
 from .settings import Settings
 from .logger import log
 from .cli import get_option_i
 
 
-class Cmd(Settings, keys=('system_cmds',)):
+class Cmd(Settings, keys=('cmds',)):
     """
+    Holds a single command.
 
     Settings:
         su: str
-            Command used for elevating commands when appropriate (e.g. "sudo").
+            Command used for elevating commands when appropriate (e.g. 'sudo' or 'sudo -u USERNAME').
+        cmds: list[str]
     """
 
+    class CmdTemplate(Template):
+        """
+        Used for arguments and environment variables for a command.
+
+        Will substitute positional arguments first - denoted by '%' - before substituting
+        environment variables from os.environ - denoted by '$'.
+        """
+        # todo: figure out how to implement this to work with a list[str] instead.
+        delimiter = '%'
+        idpattern = r'(?a:su|[1-9][0-9]*)'
+
+        environ = os.environ.copy()
+
+        def substitute(self, *args: typing.Optional[str], as_su: bool = False) -> str:
+            """Only accepts positional arguments."""
+            print(self.template)
+            result = super().substitute({**{str(i + 1): arg if arg else '' for i, arg in enumerate(args)},
+                                         'su': Cmd.su if as_su else ''})
+            while True:
+                try:
+                    return Template(result).substitute(self.environ)
+                except KeyError as key:
+                    self.environ[str(key).strip('\"\'')] = ''
+
+        def safe_substitute(self, *args) -> str:
+            """Not implemented - do not use."""
+            raise NotImplementedError(f'method not meant for use in class {self.__class__.__name__}')
+
     su: str
+    cmds: dict[str, CmdTemplate]
 
     @classmethod
     def init_settings(cls, **key_config):
-        def assert_cmd(key) -> str:
-            return cls.assert_tp(key_config, key, str)
+        def assert_cmd(key) -> list:
+            return list(map(str, cls.assert_tp(key_config, key, list)))
 
         try:
             # superuser
@@ -32,9 +65,17 @@ class Cmd(Settings, keys=('system_cmds',)):
             log('Values must be specified for system commands in the config to avoid ambiguity.', logging.ERROR)
             raise
 
-    def __init__(self, cmd: list[str], as_su: bool = False):
-        self.cmd = cmd
-        self.as_su = as_su
+    @classmethod
+    def expand_vars(cls, *args: str, as_su: bool):
+
+    def __init__(self, cmd: str, *args: str, as_su: bool = False):
+        self.cmd = []
+        for cmd_part, part_as_su in zip(cmd, as_su):
+            if part_as_su:
+                self.cmd.append(self.su + cmd_part)
+
+    def run(self):
+        pass
 
 
 def run(cmd: typing.Union[list, str], pipe: typing.Union[list, str] = None):
