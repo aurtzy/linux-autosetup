@@ -1,0 +1,2 @@
+# this config is what scriptman looks for to detect the main directory to start from.
+# scriptman will not run anything if this does not exist, even if it is empty.
