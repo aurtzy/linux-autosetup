@@ -9,12 +9,9 @@ from .lib.logger import *
 
 __version__ = '4.0.0-dev'
 
-# Generic runtypes. Can be anything as long as
-RUNTYPES = {
-    'install': 'Executes install scripts for modules',
-    'backup': 'Executes backup scripts for modules',
-    'run': 'Executes run scripts for modules'
-}
+# Generic runtypes. Any name can be used without breakage as long as they don't overlap with
+# other operation names (or module-specific filenames like mod.yaml).
+RUNTYPES = ['install', 'backup', 'run']
 UNASSIGNED = object()  # For indicating unassigned args that require post-parse processing
 UNASSIGNED_DEFAULTS = {}  # Dynamically set defaults for potentially unassigned arguments
 
@@ -67,12 +64,15 @@ def define_args():
     build_config_flags(runtype_opts, 'deps', True,
                        flag_help='Include running module dependencies',
                        noflag_help='Only run modules that are specified')
-    build_config_flags(runtype_opts, 'confirm', True,
-                       flag_help='Prompt the user for confirmations',
-                       noflag_help='Skip confirmation prompts')
     build_config_flags(runtype_opts, 'sudoloop', (True if platform.system() in ['Linux', 'Darwin'] else False),
                        flag_help='Loop sudo in the background to prevent authentication timeout',
                        noflag_help='Disable looping sudo in the background')
+    build_config_flags(runtype_opts, 'confirm', True,
+                       flag_help='Prompt the user for confirmations',
+                       noflag_help='Skip confirmation prompts')
+    build_config_flags(runtype_opts, 'strict', True,
+                       flag_help='When noconfirm is enabled, exit script with an error if any errors are encountered',
+                       noflag_help='When noconfirm is enabled, ignore errors where possible')
 
     # Operations
     operations = parser.add_subparsers(title='operations', required=True, dest='op')
@@ -81,8 +81,8 @@ def define_args():
         parents=[universal, *parents], usage=f'{prog} {opcmd} [options] [module(s)]', help=ophelp
     ))
     build_op('query', [query_opts], 'Query for information on modules')
-    for runtype, helpdesc in RUNTYPES.items():
-        build_op(runtype, [runtype_opts], helpdesc)
+    for runtype in RUNTYPES:
+        build_op(runtype, [runtype_opts], f'Executes {runtype} scripts for modules')
 
 
 def parse_config(config: dict):
@@ -115,11 +115,8 @@ def parse_config(config: dict):
 def post_parse_args():
     """Process arguments that may require assignments after the config is parsed."""
     for flag, default in UNASSIGNED_DEFAULTS.items():
-        try:
-            if getattr(args, flag) == UNASSIGNED:
-                setattr(args, flag, default)
-        except AttributeError:
-            pass
+        if getattr(args, flag, None) is UNASSIGNED:
+            setattr(args, flag, default)
 
 
 def initialize_logger():
@@ -141,7 +138,7 @@ def initialize_logger():
         log(logging.DEBUG, 'Enabled debug log!')
 
 
-def main():
+def run_module():
     # Fixes https://github.com/indygreg/PyOxidizer/issues/307
     if getattr(sys, 'oxidized', False):
         sys.argv[0] = sys.executable

@@ -1,4 +1,4 @@
 import scriptman
 
 if __name__ == '__main__':
-    scriptman.main()
+    scriptman.run_module()
