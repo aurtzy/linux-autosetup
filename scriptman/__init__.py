@@ -1,10 +1,10 @@
 import argparse
-import os
 import platform
 import sys
 
 from .lib.configparser import *
 from .lib.logger import *
+from .lib.module import *
 
 
 __version__ = '4.0.0-dev'
@@ -45,12 +45,12 @@ def define_args():
     universal.add_argument('--help', '-h', action='help', help=argparse.SUPPRESS)
     universal.add_argument('--debug', action='store_true',
                            help='Enable the debug log in the terminal')
-    universal.add_argument('--logfile', action='store', type=pathlib.Path, metavar='<path>',
+    universal.add_argument('--logfile', action='store', metavar='<path>',
                            help='Enable logging to a specified filepath')
 
     # Modules
     modules = argparse.ArgumentParser(add_help=False)
-    modules.add_argument('--dir', action='store', type=pathlib.Path, default='.',
+    modules.add_argument('--dir', action='store', default='.',
                          help='Directory to search for scriptman config', metavar='<path>')
     modules.add_argument('modules', action='store', nargs='*',
                          help='List modules for operation\n'
@@ -62,16 +62,21 @@ def define_args():
     # Runtype options
     runtype_opts = argparse.ArgumentParser(parents=[modules], add_help=False)
     build_config_flags(runtype_opts, 'deps', True,
-                       flag_help='Include running module dependencies',
+                       flag_help='Include running module dependencies\n'
+                                 'Enabled by default',
                        noflag_help='Only run modules that are specified')
     build_config_flags(runtype_opts, 'sudoloop', (True if platform.system() in ['Linux', 'Darwin'] else False),
-                       flag_help='Loop sudo in the background to prevent authentication timeout',
+                       flag_help='Loop sudo in the background to prevent authentication timeout\n'
+                                 'Enabled by default on Linux systems',
                        noflag_help='Disable looping sudo in the background')
     build_config_flags(runtype_opts, 'confirm', True,
-                       flag_help='Prompt the user for confirmations',
+                       flag_help='Prompt the user for confirmations\n'
+                                 'Enabled by default',
                        noflag_help='Skip confirmation prompts')
     build_config_flags(runtype_opts, 'strict', True,
-                       flag_help='When noconfirm is enabled, exit script with an error if any errors are encountered',
+                       flag_help='Skips prompts to handle errors when noconfirm is enabled\n'
+                                 'This and nostrict flags do not have any effect when confirm is enabled\n'
+                                 'Enabled by default',
                        noflag_help='When noconfirm is enabled, ignore errors where possible')
 
     # Operations
@@ -138,6 +143,17 @@ def initialize_logger():
         log(logging.DEBUG, 'Enabled debug log!')
 
 
+def do_operation():
+    if args.op == 'query':
+        coll = ModuleCollection()
+        modules = list(map(coll.get, args.modules))
+        for module in modules:
+            print(module.info(verbose=True))
+    elif args.op in RUNTYPES:
+        #get ModuleRunner, pre_run(), then run()
+        pass
+
+
 def run_module():
     # Fixes https://github.com/indygreg/PyOxidizer/issues/307
     if getattr(sys, 'oxidized', False):
@@ -149,13 +165,13 @@ def run_module():
         exit(0)
     parser.parse_args(namespace=args)
 
+    os.chdir(args.dir)
+
     initialize_logger()
 
-    parse_config(ConfigParser.load(args.dir.joinpath(ConfigParser.MAIN)))
+    parse_config(ConfigParser.load(ConfigParser.MAIN_CFG))
 
     post_parse_args()
     log(logging.DEBUG, f'args: {args}')
 
-    # todo initialization of stuff like module registration can happen here
-
-    # todo run operation here
+    do_operation()

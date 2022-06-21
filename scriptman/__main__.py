@@ -1,4 +1,9 @@
 import scriptman
 
 if __name__ == '__main__':
-    scriptman.run_module()
+    try:
+        scriptman.run_module()
+    except BaseException:
+        if getattr(scriptman.args, 'debug', False):
+            raise
+    exit()

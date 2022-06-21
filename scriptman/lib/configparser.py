@@ -10,13 +10,13 @@ class ConfigParser:
     """
     Does config parsing.
 
-    Class format makes it hopefully easy to swap out parsers for different config types for those who want to do so.
+    Class format hopefully makes it easy for those looking to swap out parsers for different config types.
     """
 
     parse = YAML(typ='safe').load
 
-    MAIN = 'scriptman.yaml'
-    MODULE = 'mod.yaml'
+    MAIN_CFG = 'scriptman.yaml'
+    MODULE_CFG = 'mod.yaml'
 
     @classmethod
     def load(cls, config_path) -> dict:
