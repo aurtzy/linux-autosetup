@@ -6,7 +6,7 @@ from .configparser import ConfigParser
 from .logger import log
 
 
-class ModuleID:
+class ModuleID(os.PathLike):
     """Wrapper class for module ID strings."""
 
     def __init__(self, path: str | os.PathLike):
@@ -33,11 +33,14 @@ class ModuleID:
     def __str__(self):
         return str(self.id)
 
+    def __fspath__(self):
+        return str(self.id)
+
 
 class Module:
     """Stores information about a module."""
 
-    def __init__(self, modid: ModuleID):
+    def __init__(self, mod_id: ModuleID):
 
         def assert_tp(mapping: dict, key: str, tp, default=None):
             if default is None:
@@ -50,23 +53,23 @@ class Module:
                 raise
             return val
 
-        self.modid = modid
+        self.mod_id = mod_id
 
-        settings = ConfigParser.load(modid.joinpath(ConfigParser.MODULE_CFG))
+        settings = ConfigParser.load(mod_id.joinpath(ConfigParser.MODULE_CFG))
         deps = assert_tp(settings, 'deps', dict)
-        log(logging.DEBUG, f'{modid} settings: {settings}')
+        log(logging.DEBUG, f'{mod_id} settings: {settings}')
         try:
             self.desc = assert_tp(settings, 'desc', str, default='No description provided')
             self.deps_req = list(map(ModuleID, assert_tp(deps, 'req', list)))
             self.deps_opt = list(map(ModuleID, assert_tp(deps, 'opt', list)))
             self.secrets = list(map(str, assert_tp(settings, 'secrets', list)))
         except Exception:
-            log(logging.ERROR, f'Error discovered in the {modid} config.')
+            log(logging.ERROR, f'Error discovered in the {mod_id} config.')
             raise
 
     def info(self, verbose: bool):
         """Returns information about the module."""
-        info = '\n\t'.join([f'{self.modid}',
+        info = '\n\t'.join([f'{self.mod_id}',
                             f'{self.desc}'])
         if verbose:
             info = '\n\t'.join([info,
@@ -77,12 +80,12 @@ class Module:
 
     def __eq__(self, other):
         if isinstance(other, Module):
-            return self.modid == other.modid
+            return self.mod_id == other.mod_id
         else:
             raise NotImplementedError
 
     def __hash__(self):
-        return hash(self.modid)
+        return hash(self.mod_id)
 
 
 class ModuleCollection:
@@ -91,44 +94,55 @@ class ModuleCollection:
     _UNINITIALIZED = object()
 
     def __init__(self):
-        self._modules: dict[ModuleID, Module] = {}
+        self._modules: dict[ModuleID, Module | object] = {}
 
-    def add(self, path):
+    def add(self, path: str | os.PathLike):
         """
         Initializes and adds module corresponding to the given path if it does not exist.
 
-        Raises an error if the path is not a valid module.
+        Raises a FileNotFoundError if the path is not a valid module. A module is valid if the given path's parent
+        directories as well as itself contains a module config, not including the root modules directory.
         """
-        modid = (ModuleID(path) if not isinstance(path, ModuleID) else path)
+        mod_id = (ModuleID(path) if not isinstance(path, ModuleID) else path)
+        if isinstance(self._modules.get(mod_id), Module):
+            log(logging.DEBUG, f'Module "{mod_id}" already exists.')
+            return
+        log(logging.DEBUG, f'Adding Module "{mod_id}" to collection.')
 
+        # Walk parent directories to modules root to check validity.
+        for parent_id in map(ModuleID, mod_id.id.parents[:-1]):
+            if parent_id in self._modules:
+                break
+            elif (cfg_path := parent_id.joinpath(ConfigParser.MODULE_CFG)).exists():
+                self._modules[parent_id] = self._UNINITIALIZED
+                continue
+            else:
+                log(logging.ERROR, f'Tried to add module "{parent_id}", but could not find module config {cfg_path}')
+                for fix_id in map(ModuleID, mod_id.id.parents[:-1]):
+                    # Preserves validity of modules in _modules, although I'm not sure when this will ever be useful.
+                    self._modules.pop(fix_id)
+                    if fix_id == parent_id:
+                        break
+                raise FileNotFoundError(cfg_path)
 
-        # todo: placeholder thing
-        def is_valid_module(modid: ModuleID):
-            for parent in modid.id.parents[:-1]:
-                # if there is existing entry (which would indicate it's been explored already and is valid); return true
-                # else if module config is not present; return false
-                # else; continue
-                pass
+        self._modules[mod_id] = Module(mod_id)
 
-    def get(self, path):
+    def get(self, path: str | os.PathLike):
         """
         Gets module corresponding to the given path.
 
         If it does not exist, module will be added before returning it.
         """
-        modid = ModuleID(path)
-        if isinstance(module := self._modules.get(modid), Module):
-            return module
-        elif module == self._UNINITIALIZED:
-            self._modules[modid] = Module(modid)
-        else:
-            self.add(modid)
+        mod_id = (ModuleID(path) if not isinstance(path, ModuleID) else path)
+        if not isinstance(self._modules.get(mod_id), Module):
+            self.add(mod_id)
+        return self._modules[mod_id]
 
 
 class ModulesRunner:
     """Stores modules to execute on a specific runtype."""
 
-    def __init__(self, coll: ModuleCollection, runtype: str, *modids: ModuleID, withdeps: bool = True,
+    def __init__(self, coll: ModuleCollection, runtype: str, *mod_ids: ModuleID, withdeps: bool = True,
                  confirm: bool = True, added: set[ModuleID] = None, dependents: set[ModuleID] = None):
         if added is None:
             added = set()
@@ -139,27 +153,27 @@ class ModulesRunner:
         self.modules: list[ModuleID] = []
         self.deps: list[ModulesRunner] = []
 
-        for modid in modids:
-            if modid not in added:
-                self.modules.append(modid)
-                added.add(modid)
+        for mod_id in mod_ids:
+            if mod_id not in added:
+                self.modules.append(mod_id)
+                added.add(mod_id)
                 if withdeps:
                     deps = []
-                    if req := coll.get(modid).deps_req:
+                    if req := coll.get(mod_id).deps_req:
                         deps += req
                     # If confirm is disabled, don't run any optional dependencies. Forcing optionals to be run
                     # makes it more difficult to install only required packages. If they are ignored by
                     # default, users can just explicitly include them in arguments.
-                    if opt := coll.get(modid).deps_opt and confirm:
+                    if opt := coll.get(mod_id).deps_opt and confirm:
                         # todo
                         pass
                     if deps:
                         if dep_loop := dependents.intersection(deps):
-                            log(logging.CRITICAL, f'Discovered infinite dependency loop! {modid}'
+                            log(logging.CRITICAL, f'Discovered infinite dependency loop! {mod_id}'
                                                   f'depends on and is a dependency of: {dep_loop}')
                             raise RecursionError
                         self.deps.append(ModulesRunner(coll, runtype, *deps, withdeps=withdeps, confirm=confirm,
-                                                       added=added, dependents=dependents.union({modid})))
+                                                       added=added, dependents=dependents.union({mod_id})))
 
     def pre_run(self):
         """This method serves as a preliminary setup method before running modules, particularly for prompts."""
