@@ -46,14 +46,13 @@ class Module:
             if default is None:
                 default = tp()
             try:
-
                 assert isinstance(val := mapping.get(key, default), tp), f'{key} should be a {tp}'
             except AssertionError as error:
                 log(logging.ERROR, f'Unexpected type given for dependency settings: {error}')
                 raise
             return val
 
-        self.mod_id = mod_id
+        self.id = mod_id
 
         settings = ConfigParser.load(mod_id.joinpath(ConfigParser.MODULE_CFG))
         deps = assert_tp(settings, 'deps', dict)
@@ -69,7 +68,7 @@ class Module:
 
     def info(self, verbose: bool):
         """Returns information about the module."""
-        info = '\n\t'.join([f'{self.mod_id}',
+        info = '\n\t'.join([f'{self.id}',
                             f'{self.desc}'])
         if verbose:
             info = '\n\t'.join([info,
@@ -80,21 +79,19 @@ class Module:
 
     def __eq__(self, other):
         if isinstance(other, Module):
-            return self.mod_id == other.mod_id
+            return self.id == other.id
         else:
             raise NotImplementedError
 
     def __hash__(self):
-        return hash(self.mod_id)
+        return hash(self.id)
 
 
 class ModuleCollection:
     """Stores a collection of modules that can be accessed."""
 
-    _UNINITIALIZED = object()
-
     def __init__(self):
-        self._modules: dict[ModuleID, Module | object] = {}
+        self._modules: dict[ModuleID, Module] = {}
 
     def add(self, path: str | os.PathLike):
         """
@@ -105,7 +102,7 @@ class ModuleCollection:
         """
         mod_id = (ModuleID(path) if not isinstance(path, ModuleID) else path)
         if isinstance(self._modules.get(mod_id), Module):
-            log(logging.DEBUG, f'Module "{mod_id}" already exists.')
+            log(logging.DEBUG, f'Module "{mod_id}" already exists - no need to add.')
             return
         log(logging.DEBUG, f'Adding Module "{mod_id}" to collection.')
 
@@ -114,10 +111,10 @@ class ModuleCollection:
             if parent_id in self._modules:
                 break
             elif (cfg_path := parent_id.joinpath(ConfigParser.MODULE_CFG)).exists():
-                self._modules[parent_id] = self._UNINITIALIZED
+                self._modules[parent_id] = ...
                 continue
             else:
-                log(logging.ERROR, f'Tried to add module "{parent_id}", but could not find module config {cfg_path}')
+                log(logging.ERROR, f'Tried to add module "{parent_id}", but could not find module config: {cfg_path}')
                 for fix_id in map(ModuleID, mod_id.id.parents[:-1]):
                     # Preserves validity of modules in _modules, although I'm not sure when this will ever be useful.
                     self._modules.pop(fix_id)
