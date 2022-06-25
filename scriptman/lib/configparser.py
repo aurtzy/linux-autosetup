@@ -29,11 +29,8 @@ class ConfigParser:
             config_path = pathlib.Path(config_path).absolute()
             with open(config_path, 'r') as file:
                 config = cls.parse(file)
-        except FileNotFoundError:
-            log(logging.CRITICAL, f'No such file could be found: {config_path}')
-            raise
-        except Exception as error:
-            log(logging.CRITICAL, f'Encountered an error while trying to read config:\n{error}')
+        except Exception:
+            log(logging.ERROR, f'Encountered an error while trying to read config!')
             raise
 
         if not isinstance(config, dict):

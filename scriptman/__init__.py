@@ -9,9 +9,6 @@ from .lib.module import *
 
 __version__ = '4.0.0-dev'
 
-# Generic runtypes. Any name can be used without breakage as long as they don't overlap with
-# other operation names (or module-specific filenames like mod.yaml).
-RUNTYPES = ['install', 'backup', 'run']
 UNASSIGNED = object()  # For indicating unassigned args that require post-parse processing
 UNASSIGNED_DEFAULTS = {}  # Dynamically set defaults for potentially unassigned arguments
 
@@ -56,8 +53,8 @@ def define_args():
                          help='List modules for operation\n'
                               'Trailing slashes are ignored')
 
-    # Query options
-    query_opts = argparse.ArgumentParser(parents=[modules], add_help=False)
+    # Info options
+    info_opts = argparse.ArgumentParser(parents=[modules], add_help=False)
 
     # Runtype options
     runtype_opts = argparse.ArgumentParser(parents=[modules], add_help=False)
@@ -85,8 +82,8 @@ def define_args():
         opcmd, formatter_class=argparse.RawTextHelpFormatter, add_help=False,
         parents=[universal, *parents], usage=f'{prog} {opcmd} [options] [module(s)]', help=ophelp
     ))
-    build_op('query', [query_opts], 'Query for information on modules')
-    for runtype in RUNTYPES:
+    build_op('info', [info_opts], 'Query for information on modules')
+    for runtype in Module.RUNTYPES:
         build_op(runtype, [runtype_opts], f'Executes {runtype} scripts for modules')
 
 
@@ -144,14 +141,16 @@ def initialize_logger():
 
 
 def do_operation():
-    if args.op == 'query':
+    if args.op == 'info':
         coll = ModuleCollection()
-        modules = list(map(coll.get, args.modules))
-        for module in modules:
-            print(module.info(verbose=True))
-    elif args.op in RUNTYPES:
-        #get ModuleRunner, pre_run(), then run()
-        pass
+        for module in map(coll.get, args.modules):
+            print(module.info(verbose=True), '\n')
+    elif args.op in Module.RUNTYPES:
+        runner = ModuleRunner(ModuleCollection(), args.op, *map(ModuleID, args.modules),
+                              confirm=args.confirm, withdeps=args.deps)
+        runner.run()
+    else:
+        raise NotImplementedError(f'Unrecognized operation {args.op}.')
 
 
 def run_module():
@@ -169,9 +168,13 @@ def run_module():
 
     initialize_logger()
 
-    parse_config(ConfigParser.load(ConfigParser.MAIN_CFG))
+    try:
+        parse_config(ConfigParser.load(ConfigParser.MAIN_CFG))
+    except FileNotFoundError:
+        log(logging.ERROR, 'Main config is missing!')
+        raise
 
     post_parse_args()
-    log(logging.DEBUG, f'args: {args}')
+    log(logging.DEBUG, f'Script settings: {args}')
 
     do_operation()
