@@ -1,3 +1,5 @@
+*This version is abandoned with development starting over on v4 due to poor planning and design choices.*
+
 # Propellant, an autosetup script...?
 Propellant aims to bridge the gap that traditional autosetup scripts have with backups
 and fit that within its own pseudo package manager.
@@ -21,3 +23,4 @@ Propellant uses PyOxidizer to build its standalone executables.
 To build an executable, navigate to the directory where `pyoxidizer.bzl` is located and run:
 
 ```pyoxidizer build exe```
+
