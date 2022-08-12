@@ -1,0 +1,25 @@
+.:
+    restic: ./restic
+    src: $HOME
+    hooks:
+        backup:
+            option: true/str/list[str]
+        restore:
+            option: true/str/list[str]
+configs/:
+    main:
+    kde-desktop:
+    gnome-laptop:
+    updater:
+games/:
+    minecraft:
+    terraria:
+very-important/:
+    .:
+        encrypted: true
+    keepass:
+    firefox-profile1:
+    firefox-profile2:
+    thunderbird-profile:
+    some-random-encrypted-thing:
+        encrypted: true
