@@ -1,0 +1,5 @@
+desc: This is the "helloworld" module!
+
+deps:
+    run:
+        req: [helloworld-dep]

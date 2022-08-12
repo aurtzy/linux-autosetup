@@ -16,6 +16,7 @@ args = argparse.Namespace()
 parser = argparse.ArgumentParser(description='Run <operation> --help to see more information about an operation.',
                                  formatter_class=argparse.RawTextHelpFormatter,
                                  add_help=False, usage='%(prog)s <operation> [...]')
+extensions = {}
 
 
 def define_args():
@@ -83,42 +84,8 @@ def define_args():
         parents=[universal, *parents], usage=f'{prog} {opcmd} [options] [module(s)]', help=ophelp
     ))
     build_op('info', [info_opts], 'Query for information on modules')
-    for runtype in Module.RUNTYPES:
+    for runtype in runtypes:
         build_op(runtype, [runtype_opts], f'Executes {runtype} scripts for modules')
-
-
-def parse_config(config: dict):
-    """Parse the given config."""
-    def check_is(key, typ):
-        val = config.get(key, None)
-        if isinstance(val, typ):
-            return val
-        elif val is not None:
-            log(logging.WARNING, f'Expected "{key}" config value to be [{typ}], but it was '
-                                 f'[{typ.__name__}]')
-        return None
-
-    # Parse flags
-    if new_defaults := check_is('flags', list):
-        new_defaults: list
-        for flag in UNASSIGNED_DEFAULTS.keys():
-            if flag in new_defaults:
-                UNASSIGNED_DEFAULTS[flag] = True
-            elif f'no{flag}' in new_defaults:
-                UNASSIGNED_DEFAULTS[flag] = False
-    # Parse environment variables
-    # note: there's no support for substituting environment variables with the reason being it would be redundant
-    # for the complexity needed to implement since module scripts will have access to them regardless.
-    if env_vars := check_is('env', dict):
-        env_vars: dict
-        os.environ.update(env_vars)
-
-
-def post_parse_args():
-    """Process arguments that may require assignments after the config is parsed."""
-    for flag, default in UNASSIGNED_DEFAULTS.items():
-        if getattr(args, flag, None) is UNASSIGNED:
-            setattr(args, flag, default)
 
 
 def initialize_logger():
@@ -140,13 +107,49 @@ def initialize_logger():
         log(logging.DEBUG, 'Enabled debug log!')
 
 
+def parse_config():
+    """Parse the main config."""
+    try:
+        config = ConfigParser.load(ConfigParser.MAIN_CFG)
+    except FileNotFoundError:
+        log(logging.ERROR, 'Main config is missing!')
+        raise
+
+    # Parse flags
+    if new_defaults := ConfigParser.assert_tp(config, 'flags', list):
+        for flag in UNASSIGNED_DEFAULTS.keys():
+            if flag in new_defaults:
+                UNASSIGNED_DEFAULTS[flag] = True
+            elif f'no{flag}' in new_defaults:
+                UNASSIGNED_DEFAULTS[flag] = False
+    # Parse environment variables
+    # note: there's no support for substituting environment variables with the reason being it would be redundant
+    # for the complexity needed to implement since module scripts will have access to them regardless.
+    if env_vars := ConfigParser.assert_tp(config, 'env', dict):
+        os.environ.update(env_vars)
+    # Parse extensions
+    if extns := ConfigParser.assert_tp(config, 'ext', dict):
+        extensions.update({ext: list(map(str, ConfigParser.assert_tp(extns, ext, list)))
+                           for ext in extns.keys()})
+    else:
+        log(logging.WARNING, 'No extension configurations were detected. '
+                             'Script modules will not be able to run in this state.')
+
+
+def post_parse_args():
+    """Process arguments that may require assignments after the config is parsed."""
+    for flag, default in UNASSIGNED_DEFAULTS.items():
+        if getattr(args, flag, None) is UNASSIGNED:
+            setattr(args, flag, default)
+
+
 def do_operation():
     if args.op == 'info':
         coll = ModuleCollection()
         for module in map(coll.get, args.modules):
             print(module.info(verbose=True), '\n')
-    elif args.op in Module.RUNTYPES:
-        runner = ModuleRunner(ModuleCollection(), args.op, *map(ModuleID, args.modules),
+    elif args.op in runtypes:
+        runner = ModuleRunner(ModuleCollection(), args.op, extensions, *map(ModuleID, args.modules),
                               confirm=args.confirm, withdeps=args.deps)
         runner.run()
     else:
@@ -168,11 +171,7 @@ def run_module():
 
     initialize_logger()
 
-    try:
-        parse_config(ConfigParser.load(ConfigParser.MAIN_CFG))
-    except FileNotFoundError:
-        log(logging.ERROR, 'Main config is missing!')
-        raise
+    parse_config()
 
     post_parse_args()
     log(logging.DEBUG, f'Script settings: {args}')
