@@ -1,3 +1,9 @@
+This repository is **no longer active**, and has been superseded by the following projects at the time of writing:
+- [git-annex-configure](https://github.com/aurtzy/git-annex-configure), a Guile program that assists with declaratively managing git-annex repositories. This - along with git-annex itself - handles what linux-autosetup attempts to accomplish with backups.
+- My [guix-config](https://github.com/aurtzy/guix-config), which utilizes GNU Guix to build a modular configuration system. This project covers the installation aspects of linux-autosetup.
+
+---
+
 # Linux-autosetup
 Linux-autosetup is a Bash script that attempts to alleviate and ease installation and backup processes through the use of config files, reducing downtime from pains like forgetting to install apps and backups on fresh installs or backing up files by following crude text documents. It aims to be as configurable as possible so that users can customize how and what they want to back up or install.
 
